@@ -24,7 +24,7 @@ import math
 #TODO: confirm that loss() and sent_remove_brackets() are never used
 
 # Get the model's full-sentence accuracy on a set of examples
-def score(val_iterator, encoder1, decoder1, index2word):
+def score(val_iterator, encoder1, decoder1):
     right = 0
     total = 0
 
