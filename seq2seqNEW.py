@@ -100,15 +100,12 @@ train_iter, val_iter, test_iter = BucketIterator.splits(
     repeat=False
 )
 # get vocabs:
-# TODO: use ___.vocab.stoi in score function instead of index2text
 # print("SRC VOCAB: ", SRC.vocab.stoi, "\n")
 # print("TRG VOCAB: ", TRG.vocab.stoi, "\n")
 
-
-# print("TRANS VOCAB: ", trans.vocab.stoi, "\n")
 # print("SRC: ", SRC.vocab.itos)
 # print("TRG: ", TRG.vocab.itos)
-
+# exit()
 
 # Create a directory where the outputs will be saved
 if __name__ == "__main__":
@@ -160,8 +157,8 @@ if __name__ == "__main__":
 
 
         # Train the model
-        trainIters(encoder, decoder, 10000000, args.encoder, args.decoder, args.attention, train_batches, dev_batches, index2word, directory, prefix, print_every=1000, learning_rate=args.lr, patience=args.patience)
-        
+        train_iterator(train_iter, val_iter encoder, decoder, 10000000, args.encoder, args.decoder, args.attention, directory, prefix, print_every=1000, learning_rate=args.lr, patience=args.patience)
+
 
 
 
