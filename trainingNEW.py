@@ -30,7 +30,7 @@ else:
     available_device = torch.device('cpu')
 
 # figure out attention
-def train_iterator(iterator, encoder, decoder, learning_rate=0.01, enc_recurrent_unit, dec_recurrent_unit, attention, dev_batches, index2word, directory, prefix, print_every=1000, patience=3):
+def train_iterator(train_iterator, val_iterator, encoder, decoder, enc_recurrent_unit, dec_recurrent_unit, attention, directory, prefix, print_every=1000, learning_rate=0.01, patience=3):
 
     # Construct optimizers and loss function
     encoder_optimizer = optim.SGD(encoder.parameters(), lr=learning_rate)
@@ -74,7 +74,7 @@ def train_iterator(iterator, encoder, decoder, learning_rate=0.01, enc_recurrent
 
         if (batch % 1000 == 0 and enc_recurrent_unit != "Tree" and dec_recurrent_unit != "Tree") or (batch % 5000 == 0 and (enc_recurrent_unit == "Tree" or dec_recurrent_unit == "Tree")):
         # Compute the error on the dev set
-            dev_set_loss = 1 - score(dev_batches, encoder, decoder, index2word) 
+            dev_set_loss = 1 - score(val_iterator, encoder, decoder) 
 
             # Create a blank file whose name shows the current dev set error and the current iteration number
             dummy_file = open(directory + "/" + prefix + ".loss." + str(dev_set_loss) + ".iter." + str(iter), "w")
