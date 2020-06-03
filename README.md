@@ -1,19 +1,7 @@
 # transductions
-<<<<<<< HEAD
-Pytorch/torchtext implementation of sequence-to-sequence transductions to study inductive bias
-
-## TODO
-- clean out models.py
-
-## Abstract 
-Children are prodigious language learners; they quickly master the words and rules that govern the languages spoken by the communities in which they are raised. In contrast, modern artificial intelligence systems like Siri and Alexa need to be trained extensively on massive data sets; even then the linguistic abilities of such systems lag far behind those of a child. Scientific research on language acquisition and structure has taught us that children come to the task of language learning with preconceptions of what their language will look like. They use such preconceptions, referred to as "biases", to guide their learning, favoring language structures that are compatible with those biases. By structuring computers systems to incorporate these biases, we could construct computer interfaces that would be more effective not only for languages such as English and Spanish, but also for the many languages where training data is scarce, spoken in smaller communities within the United States and internationally. Moreover, understanding more about how the biases necessary for language learning can be instantiated in a computer model will help to resolve a long-standing debate about the nature of these human biases: are they specific to language or are they the result of more general properties of human cognition?
-
-The current project explores the learning of regularities in natural language syntax by computer systems. The focus will be specifically on systems based on neural networks, which have been behind the recent revolutionary advances in language technologies. The project will study a wide range of neural network architectures, some with explicitly represented linguistic biases and some not, and compare them with respect to their abilities to learn carefully defined linguistic patterns. In contrast to past work that has evaluated linguistic knowledge of neural networks indirectly through a language modeling (word prediction) task, this project instead explores tasks that are formulated as transformations, which map one linguistic form to another (e.g., question formation, verbal inflection, negation, passivization, mapping to logical form). Not only are such mappings at the basis of a widely applied class of neural network architectures, so-called sequence to sequence networks, but they are also a common way of characterizing syntactic processes in linguistics. As a result, the use of such mappings allows a more direct assessment of the networks' linguistic abilities. Part of the project will involve the collaborative development of training and testing datasets for the mappings, with involvement by an interdisciplinary team of linguists and computer scientists, and these will be made available as a resource for the entire research community. These datasets will then be used as the basis for the detailed analysis of neural network representations of linguistic structure. Furthermore, explicit comparisons will be carried out between neural network and human performance on the mapping tasks under study.
-=======
 Pytorch/Torchtext implementation of seq2seq transductions
 
 This implementation requires a new designation for whether the transformation will be an input to the encoder or decoder. If --vocab is set to "SRC" it will be the last element inputted to the encoder. If --vocab is set to "TRG" it will be the first element to the decoder. The default is set to "SRC"
 
 The original command: python seq2seq.py --encoder GRU --decoder GRU --task question --attention content --lr 0.001 --hs 256
 New Command: python seq2seqNEW.py --encoder GRU --decoder GRU --task negation --attention content --lr 0.001 --hs 256 --vocab SRC
->>>>>>> 5e11020bcd0f07a7fb6d0439c68dcd4230e57ca6
