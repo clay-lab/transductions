@@ -25,14 +25,18 @@ import time
 import math
 
 
-from evaluation import *
-from models import *
-from parsing import *
-from training import *
+from evaluationNEW import *
+# from models import *
+# from parsing import *
+from trainingNEW import *
 
 
 import argparse
-from torchtext.data import Field, BucketIterator
+from torchtext.data import Field, BucketIterator, TabularDataset, Iterator
+
+import pandas as pd
+import numpy as np
+import torch.optim as optim
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--encoder", help="encoder type", type=str, default=None)
@@ -44,7 +48,7 @@ parser.add_argument("--hs", help="hidden size", type=int, default=None)
 parser.add_argument("--seed", help="random seed", type=float, default=None)
 parser.add_argument("--parse_strategy", help="whether to parse correctly or right-branching", type=str, default="correct")
 parser.add_argument("--patience", help="patience", type=int, default=3)
-# TODO: add argument for trans vocab
+parser.add_argument("--vocab", help="vocab", type=str, default="SRC")
 args = parser.parse_args()
 
 
@@ -63,20 +67,29 @@ else:
     available_device = torch.device('cpu')
 
 # Assign Files
-trainingdata = 'data/' + prefix + '.train'
-validationdata = 'data/' + prefix + '.val'
-testingdata = 'data/' + prefix + '.test'
+trainingdata = prefix + '.train'
+validationdata = prefix + '.val'
+testingdata = prefix + '.test'
+
 
 
 # Assign Fields
 SRC = Field(sequential=True, lower=True)
 TRG = Field(sequential=True, lower=True)
 
+
 # Define data fields
-# TODO: whether trans is included in SRC or TRG vocab
 # TODO: MAKE SURE THIS IS INCLUDED IN THE ENCODER/DECODER
-# TODO: INCLUDE THE TRANS VOCAB IN THE CLA
-datafields = [("source", SRC), ("trans", TRG), ("target", TRG)]
+# classification of tranformation designated by CLA
+if args.vocab == "SRC":
+    TRANS = SRC
+else:
+    TRANS = TRG 
+# print(TRANS)
+# print(SRC)
+# print(TRG)
+datafields = [("source", SRC), ("trans", TRANS), ("target", TRG)]
+
 
 
 
@@ -86,6 +99,15 @@ train, valid, test = TabularDataset.splits(path="data", train=trainingdata, vali
 # Build vocab
 SRC.build_vocab(train, valid, test)
 TRG.build_vocab(train, valid, test)
+
+# get vocabs:
+print("SRC VOCAB: ", SRC.vocab.stoi, "\n")
+print("TRG VOCAB: ", TRG.vocab.stoi, "\n")
+exit()
+# print("SRC: ", SRC.vocab.itos)
+# print("TRG: ", TRG.vocab.itos)
+# exit()
+
 
 
 
@@ -99,16 +121,6 @@ train_iter, val_iter, test_iter = BucketIterator.splits(
     sort_within_batch=True, 
     repeat=False
 )
-# get vocabs:
-# TODO: use ___.vocab.stoi in score function instead of index2text
-# print("SRC VOCAB: ", SRC.vocab.stoi, "\n")
-# print("TRG VOCAB: ", TRG.vocab.stoi, "\n")
-
-
-# print("TRANS VOCAB: ", trans.vocab.stoi, "\n")
-# print("SRC: ", SRC.vocab.itos)
-# print("TRG: ", TRG.vocab.itos)
-
 
 # Create a directory where the outputs will be saved
 if __name__ == "__main__":
@@ -160,8 +172,8 @@ if __name__ == "__main__":
 
 
         # Train the model
-        trainIters(encoder, decoder, 10000000, args.encoder, args.decoder, args.attention, train_batches, dev_batches, index2word, directory, prefix, print_every=1000, learning_rate=args.lr, patience=args.patience)
-        
+        train_iterator(train_iter, val_iter, encoder, decoder, 10000000, args.encoder, args.decoder, args.attention, directory, prefix, print_every=1000, learning_rate=args.lr, patience=args.patience)
+
 
 
 
