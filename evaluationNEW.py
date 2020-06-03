@@ -32,8 +32,10 @@ def score(val_iterator, encoder1, decoder1):
         batch_size = len(batch)
         pred_words = evaluate(encoder1, decoder1, batch)
 
-        all_sents = logits_to_sentence(pred_words, index2word)
-        correct_sents = logits_to_sentence(batch[1], index2word)
+        all_sents = logits_to_sentence(pred_words)
+        correct_sents = logits_to_sentence(batch.target)
+        # all_sents = logits_to_sentence(pred_words, index2word)
+        # correct_sents = logits_to_sentence(batch[1], index2word)
 
         for sents in zip(all_sents, correct_sents):
             if sents[0] == sents[1]:
