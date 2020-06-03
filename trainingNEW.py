@@ -20,7 +20,7 @@ import os
 import time
 import math
 
-from evaluation import *
+from evaluationNEW import *
 
 use_cuda = torch.cuda.is_available()
 
