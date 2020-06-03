@@ -3,7 +3,7 @@ from torchtext.data import Field, TabularDataset, Example, RawField, Dataset
 from numpy.random import default_rng
 
 class TreeField(RawField):
-    def __init__(self, tree_transformation_fun=None, read_heads=False, brackets="[]", 
+    def __init__(self, tree_transformation_fun=None, read_heads=False, brackets="()", 
                  chomsky_normalize=False, collapse_unary=True, inner_label="NULL", is_target=False):
         # all this does is set is_target
         # we don't use the preprocess and postprocess pipelines because those expect string inputs
@@ -36,16 +36,16 @@ class TreeField(RawField):
             
         if self.collapse_unary:
             tree.collapse_unary(True, True)
-            
-        #self._cached_preprocessed = tree
+        
         return tree
     
 class TreeSequenceField(Field):
-    def __init__(self, tree_field, inner_order=None, **field_kwargs):
+    def __init__(self, tree_field, inner_order=None, inner_symbol=None, **field_kwargs):
         super(TreeSequenceField, self).__init__(self, **field_kwargs)
         
         self.tree_field = tree_field
         self.inner_order = inner_order
+        self.inner_symbol = inner_symbol
         
     def tree2seq(self, tree):
         if isinstance(tree, nltk.tree.Tree):
@@ -56,7 +56,7 @@ class TreeSequenceField(Field):
             else:
                 # not unary
                 seq = sum((self.tree2seq(child) for child in tree), [])
-                inner_production = tree.label()
+                inner_production = tree.label() if (self.inner_symbol is None) else str(self.inner_symbol)
                 if self.inner_order == "pre":
                     seq.insert(0, inner_production)
                 elif self.inner_order == "post":
@@ -78,6 +78,7 @@ class TreeSequenceField(Field):
     def preprocess(self, x):
         tree = self.tree_field.preprocess(x)
         seqstr = " ".join(self.tree2seq(tree))
+        #print(type(self))
         return super(TreeSequenceField, self).preprocess(seqstr)
     
 """
@@ -87,19 +88,34 @@ first production tells us which transformation to apply
 the transformation can then read 
 """
 
+# TODO: make it a probabilistic tree and calculate the propbability
 class PCFGDataset(Dataset):
     def __init__(self, grammar, n, fields, min_length=0, max_length=100, seed=None, **kwargs):
+        self.grammar = grammar
         self.min_length = min_length
         self.max_length = max_length
         self.seed = seed
-        self.rng = default_rng() if self.seed is None else default_rng(seed)
-        examples = [Example.fromlist([self.draw_from_PCFG(grammar, rng=self.rng, min_length=min_length, max_length=max_length)], fields) for _ in range(n)]
+        
+        examples = [Example.fromlist([tree], fields) for tree in self.tree_generator(self.grammar, n, min_length=min_length, max_length=max_length, seed=seed)]
+        
+        """rng = default_rng() if seed is None else default_rng(seed)
+        #ts = [self.draw_from_PCFG(grammar, rng=rng, min_length=min_length, max_length=max_length) for _ in range(n)]
+        ts = self.tree_generator(grammar, n, min_length=min_length, max_length=max_length, seed=seed)
+        examples = [Example.fromlist([t], fields) for t in ts]"""
+
         super(PCFGDataset, self).__init__(examples, fields, **kwargs)
-    
+
     @classmethod
-    def generate_trees(cls, grammar, n, min_length=0, max_length=100, seed=None):
-        rng = default_rng() if self.seed is None else default_rng(seed)
-        return [cls.draw_from_PCFG(grammar, rng=rng, min_length=min_length, max_length=max_length) for _ in range(n)]        
+    def tree_generator(cls, grammar, n, min_length=0, max_length=100, seed=None):
+        rng = default_rng() if seed is None else default_rng(seed)
+        for _ in range(n):
+            yield cls.draw_from_PCFG(grammar, rng=rng, min_length=min_length, max_length=max_length)    
+
+    @staticmethod
+    def write_trees(trees, path):
+        with open(path, 'w') as f:
+            for t in trees:
+                f.write(' '.join(str(t).split()) + '\n')
 
     @staticmethod
     def draw_from_PCFG(grammar, rng=default_rng(), min_length=0, max_length=100):

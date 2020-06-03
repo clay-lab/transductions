@@ -11,7 +11,8 @@ import numpy.random
 def get_terminals(grammar):
     return [x for production_rule in grammar.productions() for x in production_rule.rhs() if (not isinstance(x, nltk.grammar.Nonterminal))]
 
-def generic_tree_swap(tree, trans_children, ops_tags):
+def generic_tree_swap(tree, trans_children, ops_tags=None):
+
     if not isinstance(tree, nltk.tree.Tree):
         # tree is a leaf
         return tree
@@ -19,37 +20,50 @@ def generic_tree_swap(tree, trans_children, ops_tags):
         #cls = type(tree)
         cls = nltk.tree.Tree
         children = [generic_tree_swap(child, trans_children, ops_tags=ops_tags) for child in tree]
-        if tree.label() in ops_tags:
+        if (ops_tags is None) or (tree.label() in ops_tags):
             children = trans_children(children)
         #return cls(tree.label(), children, prob=-1)
         return cls(tree.label(), children)
 
-def infix2polish(tree, ops_tags):
+def infix2polish(tree, ops_tags=None):
     def trans_children(children):
         return [children[1], children[0]] + children[2:]
     
     return generic_tree_swap(tree, trans_children, ops_tags=ops_tags)
     
-def polish2infix(tree, ops_tags):
+def polish2infix(tree, ops_tags=None):
     return infix2polish(tree, ops_tags=ops_tags)
  
-def polish2reversePolish(tree, ops_tags):
+def polish2reversePolish(tree, ops_tags=None):
     def trans_children(children):
         return children[1:] + [children[0]]
     
     return generic_tree_swap(tree, trans_children, ops_tags=ops_tags)
 
-def reversePolish2polish(tree, ops_tags):
+def reversePolish2polish(tree, ops_tags=None):
     def trans_children(children):
         return [children[-1]] + children[:-1]
     
     return generic_tree_swap(tree, trans_children, ops_tags=ops_tags)
 
-
-#def annotate_grammar(grammar, )
+# look into using feature grammars https://www.nltk.org/book/ch09.html
+# or maybe this https://www.nltk.org/book/ch06.html#chap-data-intensive
 
 # polish notation not infix
-pre_arithmetic_grammar = PCFG.fromstring("""
+polish_notation = PCFG.fromstring("""
+START ->  OPERATOR EXPR EXPR [1.0]
+EXPR -> OPERAND [0.6] | OPERATOR EXPR EXPR [0.4]
+OPERATOR -> '+' [0.25] | '-' [0.25] | '*' [0.25] | '/' [0.25]
+OPERAND -> VARIABLE [0.5] | NUMBER [0.5]
+VARIABLE -> 'a' [0.25] | 'b' [0.25] | 'x' [0.25] | 'y' [0.25]
+NUMBER -> '2' [0.25] | '3' [0.25] | '4' [0.25] | '5' [0.25]
+""")
+
+# polish notation not infix
+polish_annotated = PCFG.fromstring("""
+TRANS -> POLISH [0.5] | RPN [0.5]
+POLISH -> START [1.0]
+RPN -> START [1.0]
 START ->  OPERATOR EXPR EXPR [1.0]
 EXPR -> OPERAND [0.6] | OPERATOR EXPR EXPR [0.4]
 OPERATOR -> '+' [0.25] | '-' [0.25] | '*' [0.25] | '/' [0.25]
