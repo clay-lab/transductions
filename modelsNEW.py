@@ -69,10 +69,10 @@ class EncoderRNN(nn.Module):
     # For succesively generating each new output and hidden layer
     def forward(self, training_pair):
 
-        input_variable = training_pair[0]
-        target_variable = training_pair[1]
+        input_variable = training_pair.source
+        target_variable = training_pair.target
 
-        batch_size = training_pair[0].size()[1]
+        batch_size = training_pair.source.size()[1]
 
         hidden = self.initHidden(self.rnn_type, batch_size)
 
@@ -195,10 +195,10 @@ class DecoderRNN(nn.Module):
 
     # Perform the full forward pass
     def forward(self, hidden, encoder_outputs, training_set, tf_ratio=0.5, evaluation=False):
-        input_variable = training_set[0]
-        target_variable = training_set[1]
+        input_variable = training_set.source
+        target_variable = training_set.target
 
-        batch_size = training_set[0].size()[1]
+        batch_size = training_set.source.size()[1]
 
         decoder_input = Variable(torch.LongTensor([0] * batch_size))
         decoder_input = decoder_input.to(device=available_device)

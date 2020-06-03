@@ -26,7 +26,7 @@ import math
 
 
 from evaluationNEW import *
-# from models import *
+from modelsNEW import *
 # from parsing import *
 from trainingNEW import *
 
@@ -101,9 +101,9 @@ SRC.build_vocab(train, valid, test)
 TRG.build_vocab(train, valid, test)
 
 # get vocabs:
-print("SRC VOCAB: ", SRC.vocab.stoi, "\n")
-print("TRG VOCAB: ", TRG.vocab.stoi, "\n")
-exit()
+# print("SRC VOCAB: ", SRC.vocab.stoi, "\n")
+# print("TRG VOCAB: ", TRG.vocab.stoi, "\n")
+# exit()
 # print("SRC: ", SRC.vocab.itos)
 # print("TRG: ", TRG.vocab.itos)
 # exit()
@@ -124,8 +124,8 @@ train_iter, val_iter, test_iter = BucketIterator.splits(
 
 # Create a directory where the outputs will be saved
 if __name__ == "__main__":
-    wait_time = random.randint(0, 99)
-    time.sleep(wait_time)
+    # wait_time = random.randint(0, 99)
+    # time.sleep(wait_time)
 
     counter = 0
     dir_made = 0
@@ -148,31 +148,45 @@ if __name__ == "__main__":
 #***********#
 if __name__ == "__main__":
 
-        max_len = max(len(SRC.vocab), len(TRG.vocab))
-        # Initialize the encoder and the decoder
-        if args.encoder == "Tree":
-            encoder = TreeEncoderRNN(max_len, args.hs)
-        else:
-            encoder = EncoderRNN(max_len, args.hs, args.encoder, max_length=MAX_LENGTH)
+    print("In the main loop")
 
-        if args.decoder == "Tree":
-            # Note that attention is not implemented for the tree decoder
-            decoder = TreeDecoderRNN(max_len, args.hs)
-        else:
-            decoder = DecoderRNN(args.hs, max_len, args.decoder, attn=args.attention, n_layers=1, dropout_p=0.1, max_length=MAX_LENGTH)
+    max_len = max(len(SRC.vocab), len(TRG.vocab))
+    # Initialize the encoder and the decoder
+    if args.encoder == "Tree":
+        encoder = TreeEncoderRNN(max_len, args.hs)
+    else:
+        encoder = EncoderRNN(max_len, args.hs, args.encoder)
 
-
-        encoder = encoder.to(device=available_device)
-        decoder = decoder.to(device=available_device)
-
-        # Give torch a random seed
-        torch.manual_seed(random_seed)
-        if use_cuda:
-            torch.cuda.manual_seed_all(random_seed)	
+    if args.decoder == "Tree":
+        # Note that attention is not implemented for the tree decoder
+        decoder = TreeDecoderRNN(max_len, args.hs)
+    else:
+        decoder = DecoderRNN(args.hs, max_len, args.decoder, attn=args.attention, n_layers=1, dropout_p=0.1)
 
 
-        # Train the model
-        train_iterator(train_iter, val_iter, encoder, decoder, 10000000, args.encoder, args.decoder, args.attention, directory, prefix, print_every=1000, learning_rate=args.lr, patience=args.patience)
+    encoder = encoder.to(device=available_device)
+    decoder = decoder.to(device=available_device)
+
+    # Give torch a random seed
+    torch.manual_seed(random_seed)
+    if use_cuda:
+        torch.cuda.manual_seed_all(random_seed)	
+
+
+    # Train the model
+    train_iterator(
+        train_iter, 
+        val_iter, 
+        encoder, 
+        decoder, 
+        args.encoder, 
+        args.decoder, 
+        args.attention, 
+        directory, 
+        prefix, 
+        learning_rate=args.lr, 
+        patience=args.patience
+    )
 
 
 

@@ -32,6 +32,8 @@ else:
 # figure out attention
 def train_iterator(train_iterator, val_iterator, encoder, decoder, enc_recurrent_unit, dec_recurrent_unit, attention, directory, prefix, print_every=1000, learning_rate=0.01, patience=3):
 
+    print("Training model")
+
     # Construct optimizers and loss function
     encoder_optimizer = optim.SGD(encoder.parameters(), lr=learning_rate)
     decoder_optimizer = optim.SGD(decoder.parameters(), lr=learning_rate)
@@ -41,25 +43,30 @@ def train_iterator(train_iterator, val_iterator, encoder, decoder, enc_recurrent
     total_loss = 0.0
 
     # Iterate through iterator
-    for batch in iterator:
+    for index, batch in enumerate(train_iterator):
 
         encoder_optimizer.zero_grad()
         decoder_optimizer.zero_grad()
 
         # Split the target from the input
-        target = batch[1]
+        # print(batch)
+        target = batch.target
 
         # Forward pass
 
         # I have some questions about how the Encoders are structured.
         # In particular, why return a mega-tensor of the outputs?
         e_out, e_hid, e_outs = encoder(batch)
-        d_outs = decoder(e_hid, e_att, batch)
+        d_outs = decoder(e_hid, e_outs, batch)
 
         batch_loss = 0.0
         idx = 0
+        # print("Calculating loss")
         while idx < min(len(d_outs), len(batch)): # Make this less brittle?
-            batch_loss += criterion(d_outs[idx], batch[idx])
+            # print(idx)
+            batch_loss += criterion(d_outs[idx], target[idx])
+            idx += 1
+
 
         # Backward pass
         # batch_loss *= batch[0][0].size()[1] # Why is this necessary??
@@ -72,7 +79,8 @@ def train_iterator(train_iterator, val_iterator, encoder, decoder, enc_recurrent
         count_since_improved = 0
         best_loss = float('inf')
 
-        if (batch % 1000 == 0 and enc_recurrent_unit != "Tree" and dec_recurrent_unit != "Tree") or (batch % 5000 == 0 and (enc_recurrent_unit == "Tree" or dec_recurrent_unit == "Tree")):
+        if False:
+        # if (index % 1000 == 0 and enc_recurrent_unit != "Tree" and dec_recurrent_unit != "Tree") or (index % 5000 == 0 and (enc_recurrent_unit == "Tree" or dec_recurrent_unit == "Tree")):
         # Compute the error on the dev set
             dev_set_loss = 1 - score(val_iterator, encoder, decoder) 
 
