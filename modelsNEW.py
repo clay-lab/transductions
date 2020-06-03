@@ -454,3 +454,186 @@ class TreeDecoderRNN(nn.Module):
             words_out.append(nn.LogSoftmax()(self.word_out(elt).view(-1).unsqueeze(0)))
 
         return words_out
+
+
+class TridentDecoder(nn.Module):
+    def __init__(self, arity, vocab_size, hidden_size, max_depth, null_placement="pre"):
+        super(TridentDecoder, self).__init__()
+
+        self.arity = arity
+        self.null_placement = null_placement
+
+        self.hidden_size = hidden_size
+        self.vocab_size = vocab_size + 1 # first one is for null
+        self.max_depth = max_depth
+
+        self.hidden2vocab = nn.Sequential(nn.Linear(self.hidden_size, 2*self.hidden_size), nn.Sigmoid(), nn.Linear(2*self.hidden_size, self.vocab_size))
+        self.to_children = nn.Sequential(nn.Linear(self.hidden_size, 2*self.hidden_size), nn.Sigmoid(), nn.Linear(2*self.hidden_size, self.arity * self.hidden_size))
+
+    @property
+    def null_ix(self):
+        return 0
+
+    def forward(self, root_hidden, training_set):
+        if self.training:
+            # assumption: every non-terminal node either has 3 children which are all non-terminals, or is the parent of one terminal node
+            tree = training_set[3]
+            raw_scores = torch.stack(list(self.forward_train_helper(root_hidden, tree)))
+            return F.log_softmax(raw_scores, dim=1)
+        else:
+            raw_scores = torch.stack(list(self.forward_eval_helper(root_hidden)))
+            return F.log_softmax(raw_scores, dim=1)
+
+    def forward_train_helper(self, root_hidden, root):
+        production = self.hidden2vocab(root_hidden)
+        if len(root) > 1:
+            assert len(root) == self.arity
+
+            assert self.null_placement == "pre"
+            yield production
+            children_hidden = self._hidden2children(root_hidden)
+            for child_ix in range(self.arity):
+                yield from self.forward_train_helper(children_hidden[child_ix], root[child_ix])
+        else:
+            yield production
+
+    def forward_eval_helper(self, root_hidden, depth=0):
+        production = self.hidden2vocab(root_hidden)
+
+        if (torch.argmax(production) == self.null_ix) and (depth <= self.max_depth):
+            # we chose NOT to output a word here... recurse more
+            children_hidden = self._hidden2children(root_hidden)
+            for child_ix in range(self.arity):
+                yield from self.forward_eval_helper(children_hidden[child_ix], depth+1)
+        else:
+            yield production
+
+    def _hidden2children(self, hidden):
+        return torch.split(self.to_children(hidden), self.hidden_size, dim=-1)
+
+class GRUTridentDecoder(nn.Module):
+    def __init__(self, arity, vocab_size, hidden_size, max_depth, null_placement="pre"):
+        super(GRUTridentDecoder, self).__init__()
+
+        self.arity = arity
+        self.null_placement = null_placement
+
+        self.hidden_size = hidden_size
+        self.vocab_size = vocab_size + 1 # first one is for null
+        self.max_depth = max_depth
+
+        self.hidden2vocab = nn.Sequential(nn.Linear(self.hidden_size, 2*self.hidden_size), nn.Sigmoid(), nn.Linear(2*self.hidden_size, self.vocab_size))
+        
+        # IDEA: in the future, have just one GRU for all the children but feed in a different input for each instead of always using this same dumb vector 
+        self.null_vector = torch.zeros(self.hidden_size, requires_grad=False).unsqueeze(0)
+        self.per_child_cell = nn.ModuleList()
+        for _ in range(self.arity):
+            self.per_child_cell.append(nn.GRUCell(self.hidden_size, self.hidden_size))
+        
+    @property
+    def null_ix(self):
+        return 0
+
+    def forward(self, root_hidden, training_set):
+        root_hidden = root_hidden.unsqueeze(0)
+        if self.training:
+            # assumption: every non-terminal node either has 3 children which are all non-terminals, or is the parent of one terminal node
+            tree = training_set[3]
+            raw_scores = torch.stack(list(self.forward_train_helper(root_hidden, tree)))
+            return F.log_softmax(raw_scores, dim=1)
+        else:
+            raw_scores = torch.stack(list(self.forward_eval_helper(root_hidden)))
+            return F.log_softmax(raw_scores, dim=1)
+
+    def forward_train_helper(self, root_hidden, root):
+        production = self.hidden2vocab(root_hidden)[0]
+        if len(root) > 1:
+            assert len(root) == self.arity
+
+            assert self.null_placement == "pre"
+            yield production
+            for child_ix in range(self.arity):
+                child_hidden = self.per_child_cell[child_ix](self.null_vector, root_hidden)
+                yield from self.forward_train_helper(child_hidden, root[child_ix])
+        else:
+            yield production
+
+    def forward_eval_helper(self, root_hidden, depth=0):
+        production = self.hidden2vocab(root_hidden)[0]
+        if (torch.argmax(production) == self.null_ix) and (depth <= self.max_depth):
+            # we chose NOT to output a word here... recurse more
+            for child_ix in range(self.arity):
+                child_hidden = self.per_child_cell[child_ix](self.null_vector, root_hidden)
+                yield from self.forward_eval_helper(child_hidden, depth+1)
+        else:
+            yield production
+
+class AltGRUTridentDecoder(nn.Module):
+    def __init__(self, arity, vocab_size, hidden_size, max_depth, null_placement="pre"):
+        super(GRUTridentDecoder, self).__init__()
+
+        self.arity = arity
+        self.null_placement = null_placement
+
+        self.hidden_size = hidden_size
+        self.vocab_size = vocab_size + 1 # first one is for null
+        self.max_depth = max_depth
+
+        self.hidden2vocab = nn.Sequential(nn.Linear(self.hidden_size, 2*self.hidden_size), nn.Sigmoid(), nn.Linear(2*self.hidden_size, self.vocab_size))
+        
+        # IDEA: in the future, have just one GRU for all the children but feed in a different input for each instead of always using this same dumb vector 
+        self.null_vector = torch.zeros(self.hidden_size, requires_grad=False).unsqueeze(0)
+        self.child_toks = nn.ModuleList()
+        for _ in range(self.arity):
+            pass
+            #self.child_toks.append()
+        
+    @property
+    def null_ix(self):
+        return 0
+
+    def forward(self, root_hidden, training_set):
+        root_hidden = root_hidden.unsqueeze(0)
+        if self.training:
+            # assumption: every non-terminal node either has 3 children which are all non-terminals, or is the parent of one terminal node
+            tree = training_set[3]
+            raw_scores = torch.stack(list(self.forward_train_helper(root_hidden, tree)))
+            return F.log_softmax(raw_scores, dim=1)
+        else:
+            raw_scores = torch.stack(list(self.forward_eval_helper(root_hidden)))
+            return F.log_softmax(raw_scores, dim=1)
+
+    def forward_train_helper(self, root_hidden, root):
+        production = self.hidden2vocab(root_hidden)[0]
+        if len(root) > 1:
+            assert len(root) == self.arity
+
+            assert self.null_placement == "pre"
+            yield production
+            for child_ix in range(self.arity):
+                child_hidden = self.per_child_cell[child_ix](self.null_vector, root_hidden)
+                yield from self.forward_train_helper(child_hidden, root[child_ix])
+        else:
+            yield production
+
+    def forward_eval_helper(self, root_hidden, depth=0):
+        production = self.hidden2vocab(root_hidden)[0]
+        if (torch.argmax(production) == self.null_ix) and (depth <= self.max_depth):
+            # we chose NOT to output a word here... recurse more
+            for child_ix in range(self.arity):
+                child_hidden = self.per_child_cell[child_ix](self.null_vector, root_hidden)
+                yield from self.forward_eval_helper(child_hidden, depth+1)
+        else:
+            yield production
+
+class Seq2Seq(nn.Module):
+    def __init__(self, encoder, decoder):
+        super(Seq2Seq, self).__init__()
+        self.encoder = encoder
+        self.decoder = decoder
+        
+    def forward(self, training_pair):
+        encoder_output, encoder_hidden, encoder_outputs = self.encoder(training_pair)
+        decoder_hidden = encoder_hidden[0,0,:]
+        decoder_outputs = self.decoder(decoder_hidden, training_pair)
+        return decoder_outputs
