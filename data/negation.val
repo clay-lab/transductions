@@ -1,1001 +1,1001 @@
 source,transform,target
-Harry must wiggle,pos,Harry must wiggle
-McGonagall should smile since the witch should sprinkle the pancake,neg,McGonagall should not smile since the witch should sprinkle the pancake
-the witch can jump,neg,the witch can not jump
-since a wizard can prepare the pancakes because Lupin must giggle Draco should eat a croissant that McGonagall must gobble since George must party,neg,since a wizard can prepare the pancakes because Lupin must giggle Draco should not eat a croissant that McGonagall must gobble since George must party
-Ron may create the cookie,neg,Ron may not create the cookie
-because the witch must assemble many eclaires the wizard can eat the baklava that James may eat because Snape must sprinkle a souffle that he must assemble,pos,because the witch must assemble many eclaires the wizard can eat the baklava that James may eat because Snape must sprinkle a souffle that he must assemble
-a student can prepare the souffles,pos,a student can prepare the souffles
-because Fred must assemble the doughnut James must eat the souffles,neg,because Fred must assemble the doughnut James must not eat the souffles
-Draco may jump,neg,Draco may not jump
-James should hide the eclaires that Voldemort should prepare,pos,James should hide the eclaires that Voldemort should prepare
-Voldemort may sprinkle many eclaires because Fred should hiccup since Vernon must hide many strudels that Albus must gobble,pos,Voldemort may sprinkle many eclaires because Fred should hiccup since Vernon must hide many strudels that Albus must gobble
-she should jump,neg,she should not jump
-a professor can hide the souffles,neg,a professor can not hide the souffles
-since Dobby must gobble a cake since a witch should prepare the croissants Draco must create the souffles that the witch may gobble,pos,since Dobby must gobble a cake since a witch should prepare the croissants Draco must create the souffles that the witch may gobble
-Snape should hide a souffle that he can arrange,neg,Snape should not hide a souffle that he can arrange
-Harry should prepare a chocolate which the professor must eat,neg,Harry should not prepare a chocolate which the professor must eat
-Harry must chew the chocolates,pos,Harry must chew the chocolates
-a student should make a souffle which he must assemble,pos,a student should make a souffle which he must assemble
-Hagrid must assemble the cookies which a student must gobble because McGonagall should prepare the baklava because James can eat the doughnuts,neg,Hagrid must not assemble the cookies which a student must gobble because McGonagall should prepare the baklava because James can eat the doughnuts
-Lupin must make the strudels that he may gobble,pos,Lupin must make the strudels that he may gobble
-the witch can gobble the croissants that a professor must hide since a professor should assemble the cookie that Vernon should assemble,neg,the witch can not gobble the croissants that a professor must hide since a professor should assemble the cookie that Vernon should assemble
-George should create the croissants that a student can chew because Voldemort can eat the croissant which a witch should arrange,pos,George should create the croissants that a student can chew because Voldemort can eat the croissant which a witch should arrange
-he can prepare the pancake that a student should assemble,neg,he can not prepare the pancake that a student should assemble
-Albus can smile,neg,Albus can not smile
-because Petunia should gobble a baklava that he must chew a professor may prepare the croissants,pos,because Petunia should gobble a baklava that he must chew a professor may prepare the croissants
-the professor must prepare the cake,neg,the professor must not prepare the cake
-she must party,neg,she must not party
-Dobby may arrange the pancakes that Petunia must arrange,neg,Dobby may not arrange the pancakes that Petunia must arrange
-he may assemble a eclaire that Vernon can gobble,neg,he may not assemble a eclaire that Vernon can gobble
-because Voldemort may arrange the chocolates because McGonagall should create the strudels Hagrid may hide the pancakes,neg,because Voldemort may arrange the chocolates because McGonagall should create the strudels Hagrid may not hide the pancakes
-a student may hide many pancakes that Harry should gobble,pos,a student may hide many pancakes that Harry should gobble
-Harry may gobble the eclaires which Hagrid can make,pos,Harry may gobble the eclaires which Hagrid can make
-the student must make the croissant,neg,the student must not make the croissant
-the student can make the doughnuts,pos,the student can make the doughnuts
-a witch must sprinkle many cakes,neg,a witch must not sprinkle many cakes
-the witch must gobble the pancake that Fred must gobble because George may prepare a croissant that Fred should make,pos,the witch must gobble the pancake that Fred must gobble because George may prepare a croissant that Fred should make
-Hagrid should prepare the chocolates that Albus should arrange,pos,Hagrid should prepare the chocolates that Albus should arrange
-because the wizard may chew the chocolates a professor must laugh since Hermione can gobble many baklava that Draco may eat,neg,because the wizard may chew the chocolates a professor must not laugh since Hermione can gobble many baklava that Draco may eat
-Sirius should eat a cookie,pos,Sirius should eat a cookie
-because Lupin should arrange a souffle Ginny can chew a pancake,pos,because Lupin should arrange a souffle Ginny can chew a pancake
-she should laugh,pos,she should laugh
-Fred can jump,pos,Fred can jump
-Vernon may eat the baklava,neg,Vernon may not eat the baklava
-Ginny should sprinkle a pancake that she may hide,pos,Ginny should sprinkle a pancake that she may hide
-George can prepare the cookie which Snape can create,neg,George can not prepare the cookie which Snape can create
-she must run,neg,she must not run
-Voldemort may assemble the strudels,neg,Voldemort may not assemble the strudels
-because Neville must make a chocolate Dobby can walk since Neville must giggle,neg,because Neville must make a chocolate Dobby can not walk since Neville must giggle
-Hermione must gobble the chocolates,pos,Hermione must gobble the chocolates
-Ginny must sprinkle the strudels which Hermione can assemble,neg,Ginny must not sprinkle the strudels which Hermione can assemble
-the professor may eat the cakes,pos,the professor may eat the cakes
-because McGonagall must laugh George may create the pancake because George may hide a baklava that Harry should arrange,neg,because McGonagall must laugh George may not create the pancake because George may hide a baklava that Harry should arrange
-she should chew the cake,neg,she should not chew the cake
-since Lily may sprinkle the chocolates he must prepare a cookie that Neville must make,neg,since Lily may sprinkle the chocolates he must not prepare a cookie that Neville must make
-Snape may assemble the chocolate,neg,Snape may not assemble the chocolate
-Fred should make the baklava that James must chew,pos,Fred should make the baklava that James must chew
-Albus can sprinkle a croissant,neg,Albus can not sprinkle a croissant
-Sirius should eat the doughnuts because the student can sprinkle the strudels,neg,Sirius should not eat the doughnuts because the student can sprinkle the strudels
-the professor can assemble a croissant that Ginny should prepare,pos,the professor can assemble a croissant that Ginny should prepare
-Harry may create the cake that Lupin can sprinkle since McGonagall can laugh,pos,Harry may create the cake that Lupin can sprinkle since McGonagall can laugh
-the wizard should hide the pancake that Hagrid should create,pos,the wizard should hide the pancake that Hagrid should create
-he can swim,neg,he can not swim
-Hermione can make the cake that Neville may chew,pos,Hermione can make the cake that Neville may chew
-a witch may chew a doughnut since the student should create a pancake,neg,a witch may not chew a doughnut since the student should create a pancake
-McGonagall must hide the cookies that Voldemort must eat,neg,McGonagall must not hide the cookies that Voldemort must eat
-Fred can create many croissants,neg,Fred can not create many croissants
-Voldemort may assemble many pancakes that she may hide,neg,Voldemort may not assemble many pancakes that she may hide
-Ginny may gobble the doughnuts,neg,Ginny may not gobble the doughnuts
-Dobby may make many eclaires,pos,Dobby may make many eclaires
-because Ron may sprinkle the cakes that Hagrid should sprinkle Lily must eat the eclaires since Ron must gobble a cookie which Neville can gobble,pos,because Ron may sprinkle the cakes that Hagrid should sprinkle Lily must eat the eclaires since Ron must gobble a cookie which Neville can gobble
-the student can jump,pos,the student can jump
-Neville should arrange the chocolates,pos,Neville should arrange the chocolates
-she must prepare the pancakes which the student must gobble,neg,she must not prepare the pancakes which the student must gobble
-since Voldemort must sprinkle the doughnuts because the wizard must sprinkle a cake a student must jump,pos,since Voldemort must sprinkle the doughnuts because the wizard must sprinkle a cake a student must jump
-Snape may chew the strudels that he can create,pos,Snape may chew the strudels that he can create
-Lupin must run,pos,Lupin must run
-since Neville must create the doughnuts that Harry must arrange because Snape must chew the cookies Ginny may gobble the cakes that Albus should sprinkle,pos,since Neville must create the doughnuts that Harry must arrange because Snape must chew the cookies Ginny may gobble the cakes that Albus should sprinkle
-because he should eat a pancake which George may make Fred may jump,neg,because he should eat a pancake which George may make Fred may not jump
-because Ron must swim Ron may eat the pancakes,neg,because Ron must swim Ron may not eat the pancakes
-the professor must make many strudels,pos,the professor must make many strudels
-a student should arrange a doughnut,neg,a student should not arrange a doughnut
-the professor may prepare a eclaire that Lily may gobble,neg,the professor may not prepare a eclaire that Lily may gobble
-Harry must make the souffle,neg,Harry must not make the souffle
-he must jump,neg,he must not jump
-Hagrid can make the cookies which Ginny should make,neg,Hagrid can not make the cookies which Ginny should make
-the student may assemble the chocolate that George must assemble,neg,the student may not assemble the chocolate that George must assemble
-because Fred should sprinkle the doughnut which Lupin should sprinkle Vernon can prepare a souffle that Vernon should assemble,neg,because Fred should sprinkle the doughnut which Lupin should sprinkle Vernon can not prepare a souffle that Vernon should assemble
-Voldemort may make a cookie that James must hide,neg,Voldemort may not make a cookie that James must hide
-the professor should eat many souffles because the professor may swim,neg,the professor should not eat many souffles because the professor may swim
-Lupin can make a cookie that Harry must chew,pos,Lupin can make a cookie that Harry must chew
-Snape must gobble the croissants that the student may assemble,neg,Snape must not gobble the croissants that the student may assemble
-Lily must eat the pancake since a witch may jump,pos,Lily must eat the pancake since a witch may jump
-since the student must chew the souffle that Dobby must arrange Harry must laugh,pos,since the student must chew the souffle that Dobby must arrange Harry must laugh
-the professor can gobble a pancake which Petunia can arrange,neg,the professor can not gobble a pancake which Petunia can arrange
-because Draco should arrange a cookie Hermione may gobble the chocolates,pos,because Draco should arrange a cookie Hermione may gobble the chocolates
-the wizard can jump,neg,the wizard can not jump
-Ron must arrange the baklava which Lupin may make,pos,Ron must arrange the baklava which Lupin may make
-she must eat a cake,pos,she must eat a cake
-Hagrid must sprinkle the croissant because a professor must create the cookies,pos,Hagrid must sprinkle the croissant because a professor must create the cookies
-she must assemble the cookie,neg,she must not assemble the cookie
-because Fred should chew a cake that Lily should create Sirius can eat the croissants that Voldemort must gobble,pos,because Fred should chew a cake that Lily should create Sirius can eat the croissants that Voldemort must gobble
-Neville should make the cookies,neg,Neville should not make the cookies
-Fred must swim since Dobby must chew a souffle,pos,Fred must swim since Dobby must chew a souffle
-because Albus may hide many strudels that a professor should prepare she must hiccup,pos,because Albus may hide many strudels that a professor should prepare she must hiccup
-the wizard should swim because Vernon should party,neg,the wizard should not swim because Vernon should party
-McGonagall can chew a chocolate that Voldemort should gobble,neg,McGonagall can not chew a chocolate that Voldemort should gobble
-Dobby should prepare the cookie,neg,Dobby should not prepare the cookie
-George may make the doughnut that Lupin may arrange,pos,George may make the doughnut that Lupin may arrange
-Neville may run,neg,Neville may not run
-Albus must chew the pancake,pos,Albus must chew the pancake
-Hermione can create a strudel which the student can prepare,pos,Hermione can create a strudel which the student can prepare
-Petunia should chew the pancake,pos,Petunia should chew the pancake
-Neville can eat many croissants that Dobby may hide,neg,Neville can not eat many croissants that Dobby may hide
-Vernon should hide the doughnut,pos,Vernon should hide the doughnut
-a student must make the strudels which the student may prepare,neg,a student must not make the strudels which the student may prepare
-a professor must laugh since Ron must eat a strudel since Snape should chew the doughnut that the wizard can sprinkle,neg,a professor must not laugh since Ron must eat a strudel since Snape should chew the doughnut that the wizard can sprinkle
-a student may eat the souffles that she can eat because George must make the baklava which Neville must make,pos,a student may eat the souffles that she can eat because George must make the baklava which Neville must make
-she should create the croissants,neg,she should not create the croissants
-because Fred should hide a pancake that Lupin should create since Ron may eat a eclaire he can party since James may make the pancakes,pos,because Fred should hide a pancake that Lupin should create since Ron may eat a eclaire he can party since James may make the pancakes
-Sirius should gobble the eclaire that Harry must eat,pos,Sirius should gobble the eclaire that Harry must eat
-Hermione may assemble the cake since Ginny can assemble the doughnut,pos,Hermione may assemble the cake since Ginny can assemble the doughnut
-because Lily must create a baklava Draco may hiccup,neg,because Lily must create a baklava Draco may not hiccup
-Hermione must chew many chocolates which Hermione can prepare,neg,Hermione must not chew many chocolates which Hermione can prepare
-since George should arrange a baklava that Albus can make Vernon should giggle,pos,since George should arrange a baklava that Albus can make Vernon should giggle
-since Lily can prepare the cakes that Vernon should gobble Dobby can assemble the strudel that Dobby may prepare,pos,since Lily can prepare the cakes that Vernon should gobble Dobby can assemble the strudel that Dobby may prepare
-Snape should arrange the eclaire,neg,Snape should not arrange the eclaire
-Sirius must hide a croissant,pos,Sirius must hide a croissant
-he should wiggle because Snape may create the strudels which Lily can prepare,neg,he should not wiggle because Snape may create the strudels which Lily can prepare
-the wizard should hiccup,neg,the wizard should not hiccup
-since Hagrid should smile Sirius should assemble the strudels that she should assemble because Albus should gobble the strudel,neg,since Hagrid should smile Sirius should not assemble the strudels that she should assemble because Albus should gobble the strudel
-Draco must hide a baklava that Fred must arrange because Neville can prepare a chocolate,neg,Draco must not hide a baklava that Fred must arrange because Neville can prepare a chocolate
-Dobby may prepare the cakes which she must arrange,neg,Dobby may not prepare the cakes which she must arrange
-Neville may gobble the croissants,neg,Neville may not gobble the croissants
-Albus must create the eclaires which the professor must create,pos,Albus must create the eclaires which the professor must create
-Neville can hide a baklava which he must make,pos,Neville can hide a baklava which he must make
-Snape may arrange many strudels which McGonagall should create,neg,Snape may not arrange many strudels which McGonagall should create
-the student can hide the doughnut which a witch should assemble,neg,the student can not hide the doughnut which a witch should assemble
-Vernon should hide the doughnuts since Hagrid should swim because George may chew the pancake which Dobby may arrange,neg,Vernon should not hide the doughnuts since Hagrid should swim because George may chew the pancake which Dobby may arrange
-Lily must sprinkle the souffle that the professor may sprinkle because a professor may jump,pos,Lily must sprinkle the souffle that the professor may sprinkle because a professor may jump
-he must prepare the souffles because Vernon must prepare a baklava because Dobby may hide the doughnuts because Voldemort can party,neg,he must not prepare the souffles because Vernon must prepare a baklava because Dobby may hide the doughnuts because Voldemort can party
-Hermione may gobble a chocolate which James must assemble since Neville may eat the pancakes,neg,Hermione may not gobble a chocolate which James must assemble since Neville may eat the pancakes
-Fred may prepare a pancake,pos,Fred may prepare a pancake
-a student should assemble the cakes,neg,a student should not assemble the cakes
-since Sirius must chew the eclaire because the witch can assemble the strudel a student should eat the baklava,neg,since Sirius must chew the eclaire because the witch can assemble the strudel a student should not eat the baklava
-a professor can assemble the strudels,pos,a professor can assemble the strudels
-a wizard may chew a baklava because James can assemble the doughnuts which he should chew,pos,a wizard may chew a baklava because James can assemble the doughnuts which he should chew
-since Ron may hide a souffle Draco must run since Draco can laugh,neg,since Ron may hide a souffle Draco must not run since Draco can laugh
-since a professor must create a baklava a student may sprinkle the croissant,neg,since a professor must create a baklava a student may not sprinkle the croissant
-because Fred can assemble a cookie that George must make Hagrid can make the cakes because Snape must walk,pos,because Fred can assemble a cookie that George must make Hagrid can make the cakes because Snape must walk
-because he must arrange the cookies that Snape can hide since James should wiggle Hermione must swim,pos,because he must arrange the cookies that Snape can hide since James should wiggle Hermione must swim
-Fred may assemble a cookie,pos,Fred may assemble a cookie
-Petunia may make the baklava since she must make a eclaire that a wizard must make,neg,Petunia may not make the baklava since she must make a eclaire that a wizard must make
-Hagrid must laugh,pos,Hagrid must laugh
-because a wizard can assemble the croissants the witch should smile,neg,because a wizard can assemble the croissants the witch should not smile
-George may assemble the cakes that a student must chew,neg,George may not assemble the cakes that a student must chew
-because the professor can hide the cookie the professor should make the cakes since Harry must make the cookie that Lily should make,pos,because the professor can hide the cookie the professor should make the cakes since Harry must make the cookie that Lily should make
-Voldemort can create the cakes that Hermione must assemble,pos,Voldemort can create the cakes that Hermione must assemble
-the professor must assemble the souffles that Petunia can assemble,pos,the professor must assemble the souffles that Petunia can assemble
-Voldemort may sprinkle a cake because a student must arrange many souffles that the professor should gobble,pos,Voldemort may sprinkle a cake because a student must arrange many souffles that the professor should gobble
-Harry may make the cakes that the student must hide,pos,Harry may make the cakes that the student must hide
-a witch should arrange a pancake which Hermione must prepare,neg,a witch should not arrange a pancake which Hermione must prepare
-a professor may run,pos,a professor may run
-since the witch can assemble a pancake that the witch must sprinkle a professor must assemble the doughnut that a witch should sprinkle,pos,since the witch can assemble a pancake that the witch must sprinkle a professor must assemble the doughnut that a witch should sprinkle
-a student must smile because the professor can run,neg,a student must not smile because the professor can run
-since George must prepare many chocolates George should prepare many eclaires that Lily can create,neg,since George must prepare many chocolates George should not prepare many eclaires that Lily can create
-the wizard may smile,pos,the wizard may smile
-Vernon may smile,neg,Vernon may not smile
-the wizard should walk,pos,the wizard should walk
-since Vernon must eat the cake the witch may party because he must gobble the baklava which a wizard can gobble because a professor must hiccup,pos,since Vernon must eat the cake the witch may party because he must gobble the baklava which a wizard can gobble because a professor must hiccup
-Ron must make many cakes,pos,Ron must make many cakes
-Vernon can chew the cakes,pos,Vernon can chew the cakes
-George must eat a doughnut that the wizard should gobble,neg,George must not eat a doughnut that the wizard should gobble
-the student should sprinkle a baklava,pos,the student should sprinkle a baklava
-a student may chew the souffles that Sirius can assemble,pos,a student may chew the souffles that Sirius can assemble
-she may hiccup,neg,she may not hiccup
-Ginny may make a chocolate that Petunia should arrange,pos,Ginny may make a chocolate that Petunia should arrange
-Draco should wiggle,neg,Draco should not wiggle
-since Ginny can create the chocolates because Albus must create the chocolate Vernon should make a croissant,pos,since Ginny can create the chocolates because Albus must create the chocolate Vernon should make a croissant
-since Petunia should prepare the pancakes that Ron can sprinkle the professor must gobble the souffles,pos,since Petunia should prepare the pancakes that Ron can sprinkle the professor must gobble the souffles
-Lily can assemble the doughnuts,neg,Lily can not assemble the doughnuts
-Dobby should hide a souffle which Petunia must prepare,pos,Dobby should hide a souffle which Petunia must prepare
-George should run since a student may arrange the chocolate,neg,George should not run since a student may arrange the chocolate
-the student may hide a doughnut because a student may sprinkle the baklava,neg,the student may not hide a doughnut because a student may sprinkle the baklava
-since the witch can make a strudel that Albus may arrange George can wiggle,pos,since the witch can make a strudel that Albus may arrange George can wiggle
-Hermione should hiccup,pos,Hermione should hiccup
-Snape may prepare the croissants that Fred may chew,pos,Snape may prepare the croissants that Fred may chew
-since George may sprinkle the cookies Voldemort must create the pancakes that Ginny should assemble,pos,since George may sprinkle the cookies Voldemort must create the pancakes that Ginny should assemble
-since Lupin must arrange the souffle which Lupin should hide Hermione must eat a chocolate,neg,since Lupin must arrange the souffle which Lupin should hide Hermione must not eat a chocolate
-Sirius can eat the croissants,pos,Sirius can eat the croissants
-Ginny can prepare a pancake that McGonagall should sprinkle,neg,Ginny can not prepare a pancake that McGonagall should sprinkle
-George must create the souffle since a student should run,pos,George must create the souffle since a student should run
-Harry should arrange the baklava that Fred can create since Dobby must chew the baklava,pos,Harry should arrange the baklava that Fred can create since Dobby must chew the baklava
-because James should eat a strudel which Hermione should arrange Petunia must eat a strudel which the student can create,neg,because James should eat a strudel which Hermione should arrange Petunia must not eat a strudel which the student can create
-since Lily should prepare a baklava which the professor may sprinkle because Fred must hide the baklava a professor must arrange the chocolates,neg,since Lily should prepare a baklava which the professor may sprinkle because Fred must hide the baklava a professor must not arrange the chocolates
-George must gobble the doughnuts,pos,George must gobble the doughnuts
-since Neville may giggle Draco should jump since he should assemble a doughnut,pos,since Neville may giggle Draco should jump since he should assemble a doughnut
-Petunia should prepare many souffles,neg,Petunia should not prepare many souffles
-Voldemort can giggle,neg,Voldemort can not giggle
-she should assemble the cookies since Harry may assemble the cakes,neg,she should not assemble the cookies since Harry may assemble the cakes
-since Hermione should sprinkle a baklava since he can arrange the pancakes Lily must prepare many baklava which Petunia may make,neg,since Hermione should sprinkle a baklava since he can arrange the pancakes Lily must not prepare many baklava which Petunia may make
-Petunia should gobble the cake,pos,Petunia should gobble the cake
-Dobby may walk,neg,Dobby may not walk
-because Vernon should arrange the pancakes that Draco may eat Albus should sprinkle the chocolate which Dobby should create,pos,because Vernon should arrange the pancakes that Draco may eat Albus should sprinkle the chocolate which Dobby should create
-since Vernon can chew the baklava that McGonagall can create Lupin should hide many pancakes,neg,since Vernon can chew the baklava that McGonagall can create Lupin should not hide many pancakes
-Ginny may create a strudel,neg,Ginny may not create a strudel
-since James can prepare a doughnut which George must prepare Neville should make a doughnut,pos,since James can prepare a doughnut which George must prepare Neville should make a doughnut
-Draco may hide many baklava that Voldemort can gobble,pos,Draco may hide many baklava that Voldemort can gobble
-Neville may hide the doughnut,neg,Neville may not hide the doughnut
-since Hermione can eat the cookie he may sprinkle many baklava which Dobby can sprinkle,pos,since Hermione can eat the cookie he may sprinkle many baklava which Dobby can sprinkle
+she must swim,pos,she must swim
+Fred can smile,pos,Fred can smile
+she can swim,pos,she can swim
+Fred must jump,pos,Fred must jump
+Ron may jump,pos,Ron may jump
+Draco can run,pos,Draco can run
+she may jump,pos,she may jump
+Hagrid may run,pos,Hagrid may run
+she can smile,pos,she can smile
+he should swim,pos,he should swim
+Lily can swim,pos,Lily can swim
+Ginny may run,pos,Ginny may run
+he can laugh,pos,he can laugh
+Lily may walk,pos,Lily may walk
+she must laugh,pos,she must laugh
+Fred may laugh,pos,Fred may laugh
+he may run,pos,he may run
+she may wiggle,pos,she may wiggle
+he must giggle,pos,he must giggle
+Ginny may swim,pos,Ginny may swim
+Dobby may run,pos,Dobby may run
+Hagrid can run,pos,Hagrid can run
+he can giggle,pos,he can giggle
+Ron must jump,pos,Ron must jump
+she can party,pos,she can party
+Draco can walk,pos,Draco can walk
+Ginny may jump,pos,Ginny may jump
 he should walk,pos,he should walk
-since he can arrange a doughnut which she may gobble Sirius can chew the eclaires,pos,since he can arrange a doughnut which she may gobble Sirius can chew the eclaires
-a wizard must arrange the cakes,pos,a wizard must arrange the cakes
-Neville should arrange many baklava that Fred should arrange,neg,Neville should not arrange many baklava that Fred should arrange
-Albus must walk,pos,Albus must walk
-because a student may chew the strudels the witch should sprinkle the strudels which Ginny can arrange,neg,because a student may chew the strudels the witch should not sprinkle the strudels which Ginny can arrange
-Albus should run,pos,Albus should run
-James should arrange a strudel,pos,James should arrange a strudel
-George can make a souffle,neg,George can not make a souffle
-Dobby should eat the chocolate because Vernon must prepare a cookie since she can assemble the eclaires because a wizard should eat the cakes,pos,Dobby should eat the chocolate because Vernon must prepare a cookie since she can assemble the eclaires because a wizard should eat the cakes
-since Draco can prepare the cake Harry may chew the souffles that Lily must assemble,neg,since Draco can prepare the cake Harry may not chew the souffles that Lily must assemble
-Ron should arrange the doughnut that McGonagall must prepare,pos,Ron should arrange the doughnut that McGonagall must prepare
-Draco must chew the cakes that George should chew,neg,Draco must not chew the cakes that George should chew
-because Voldemort should gobble many croissants which Voldemort must sprinkle Fred can arrange many souffles,neg,because Voldemort should gobble many croissants which Voldemort must sprinkle Fred can not arrange many souffles
-Draco may wiggle,neg,Draco may not wiggle
-Harry should create many strudels,pos,Harry should create many strudels
-Vernon must make the cookies,neg,Vernon must not make the cookies
-because a wizard should arrange the eclaires Hagrid must make the cookies that Snape should gobble,pos,because a wizard should arrange the eclaires Hagrid must make the cookies that Snape should gobble
-he may hide a souffle that Albus can create because Voldemort can prepare the croissants,pos,he may hide a souffle that Albus can create because Voldemort can prepare the croissants
-Fred may smile,pos,Fred may smile
-McGonagall should sprinkle the strudel because Ron must assemble the strudels which George should prepare since Draco should laugh,pos,McGonagall should sprinkle the strudel because Ron must assemble the strudels which George should prepare since Draco should laugh
-the witch can smile,neg,the witch can not smile
-the witch must eat the cookies that Petunia must eat,neg,the witch must not eat the cookies that Petunia must eat
-a student should chew the strudels,neg,a student should not chew the strudels
-since Neville may sprinkle the doughnuts that Vernon must prepare she should sprinkle a doughnut,neg,since Neville may sprinkle the doughnuts that Vernon must prepare she should not sprinkle a doughnut
-since Lupin must assemble the souffle Petunia may eat the pancake because Ron may create a croissant,neg,since Lupin must assemble the souffle Petunia may not eat the pancake because Ron may create a croissant
-he must gobble the baklava since Vernon must prepare the souffle that a student must arrange,neg,he must not gobble the baklava since Vernon must prepare the souffle that a student must arrange
-a professor should arrange the eclaires,neg,a professor should not arrange the eclaires
-Snape may gobble the cookies that Petunia must eat,pos,Snape may gobble the cookies that Petunia must eat
-Petunia should smile,neg,Petunia should not smile
-she should create the strudels that Harry may prepare,pos,she should create the strudels that Harry may prepare
-because she must sprinkle the chocolates Hagrid must chew the strudels which a student may gobble,pos,because she must sprinkle the chocolates Hagrid must chew the strudels which a student may gobble
-Draco can sprinkle the croissant that George must sprinkle,neg,Draco can not sprinkle the croissant that George must sprinkle
-because she must gobble the eclaire Albus can gobble the chocolates,pos,because she must gobble the eclaire Albus can gobble the chocolates
-she must eat the souffles that the witch must hide because Albus may assemble the chocolate,pos,she must eat the souffles that the witch must hide because Albus may assemble the chocolate
-James must arrange a croissant,pos,James must arrange a croissant
-the student may chew the strudels,neg,the student may not chew the strudels
-she should create the pancake,neg,she should not create the pancake
-Albus should giggle,neg,Albus should not giggle
-Neville should arrange a baklava that a wizard may make,neg,Neville should not arrange a baklava that a wizard may make
-Snape must swim since Sirius should wiggle,pos,Snape must swim since Sirius should wiggle
-Lupin must chew the croissant which Lily should gobble,neg,Lupin must not chew the croissant which Lily should gobble
-George can gobble the cookies,neg,George can not gobble the cookies
-Lupin must assemble the pancake that Petunia must assemble,pos,Lupin must assemble the pancake that Petunia must assemble
-because Neville should gobble a cookie Harry must wiggle,pos,because Neville should gobble a cookie Harry must wiggle
-Harry may hiccup,pos,Harry may hiccup
-Ron can make the pancake that a professor should prepare since Fred can gobble the doughnuts that Ginny can prepare,pos,Ron can make the pancake that a professor should prepare since Fred can gobble the doughnuts that Ginny can prepare
-a wizard can chew many eclaires,pos,a wizard can chew many eclaires
-because George must jump Voldemort may sprinkle the croissant that Lupin may create,neg,because George must jump Voldemort may not sprinkle the croissant that Lupin may create
-Albus can eat the pancake,pos,Albus can eat the pancake
-because Vernon must walk because a student must chew a cookie Vernon can eat many eclaires that Ron should chew,neg,because Vernon must walk because a student must chew a cookie Vernon can not eat many eclaires that Ron should chew
-a wizard may assemble the doughnuts that Hermione can arrange because James may make the souffle that Petunia may chew because Dobby should wiggle,neg,a wizard may not assemble the doughnuts that Hermione can arrange because James may make the souffle that Petunia may chew because Dobby should wiggle
-because he must prepare the cookie which Neville can gobble Neville may eat the eclaire which Ron should prepare,pos,because he must prepare the cookie which Neville can gobble Neville may eat the eclaire which Ron should prepare
-because Dobby must swim Albus must make a chocolate that the student may eat,pos,because Dobby must swim Albus must make a chocolate that the student may eat
-Lily may create the cookies,neg,Lily may not create the cookies
-Fred must smile since Draco must chew a chocolate that George should make,pos,Fred must smile since Draco must chew a chocolate that George should make
-Dobby should prepare the chocolate because Dobby can sprinkle the chocolates which Snape should assemble because she must wiggle,neg,Dobby should not prepare the chocolate because Dobby can sprinkle the chocolates which Snape should assemble because she must wiggle
-because Lily should arrange the cookies Dobby may giggle because Albus should walk,neg,because Lily should arrange the cookies Dobby may not giggle because Albus should walk
-because Draco must swim Ginny should eat the cakes,pos,because Draco must swim Ginny should eat the cakes
-Dobby should assemble the doughnut which McGonagall must prepare,neg,Dobby should not assemble the doughnut which McGonagall must prepare
-a student must chew the pancake which a student should sprinkle since Harry must laugh because Draco may assemble the strudels,pos,a student must chew the pancake which a student should sprinkle since Harry must laugh because Draco may assemble the strudels
-Ginny may assemble the strudel that Lily can prepare,neg,Ginny may not assemble the strudel that Lily can prepare
-Dobby must run,neg,Dobby must not run
-George may assemble the croissant that Ron should hide,neg,George may not assemble the croissant that Ron should hide
-since Lupin can jump Ron should run since the witch must jump,pos,since Lupin can jump Ron should run since the witch must jump
-James should make a chocolate,neg,James should not make a chocolate
-a student must create the strudels which Ginny should arrange,neg,a student must not create the strudels which Ginny should arrange
-Sirius can sprinkle many baklava that the wizard must gobble,neg,Sirius can not sprinkle many baklava that the wizard must gobble
-Vernon should hide the eclaire since Ginny must chew the cookie,pos,Vernon should hide the eclaire since Ginny must chew the cookie
-since the wizard should smile since Fred must sprinkle the pancake that Vernon should prepare Lily should assemble a croissant that Hagrid may eat,pos,since the wizard should smile since Fred must sprinkle the pancake that Vernon should prepare Lily should assemble a croissant that Hagrid may eat
-since Lupin must chew the pancake that he may sprinkle Ginny must chew many cookies which McGonagall can prepare since Draco may arrange a doughnut,neg,since Lupin must chew the pancake that he may sprinkle Ginny must not chew many cookies which McGonagall can prepare since Draco may arrange a doughnut
-since Snape may chew many doughnuts which a witch must gobble she may eat the cake which Ron should sprinkle,pos,since Snape may chew many doughnuts which a witch must gobble she may eat the cake which Ron should sprinkle
-since Vernon must sprinkle the cakes Fred may hide the pancakes that the witch can gobble because George must make a baklava,pos,since Vernon must sprinkle the cakes Fred may hide the pancakes that the witch can gobble because George must make a baklava
-Snape can arrange the cookies which Sirius may chew,pos,Snape can arrange the cookies which Sirius may chew
-Lupin can giggle since Vernon should party,pos,Lupin can giggle since Vernon should party
-because Dobby should make many pancakes James must sprinkle the cookies which the professor must create,neg,because Dobby should make many pancakes James must not sprinkle the cookies which the professor must create
-Snape should create the souffles that she should eat,pos,Snape should create the souffles that she should eat
-Voldemort must eat a souffle that Ginny should hide,pos,Voldemort must eat a souffle that Ginny should hide
-Fred can make many chocolates that George must prepare,neg,Fred can not make many chocolates that George must prepare
-Ron should gobble a pancake,pos,Ron should gobble a pancake
-Lily should hiccup,pos,Lily should hiccup
-because Lupin must make the cookie that a wizard should make she must make a strudel,neg,because Lupin must make the cookie that a wizard should make she must not make a strudel
-Neville should create many pancakes,neg,Neville should not create many pancakes
-Hermione must chew the pancakes,neg,Hermione must not chew the pancakes
-Albus should arrange a baklava that Dobby can eat since Lily must hide the pancakes that Sirius should eat,neg,Albus should not arrange a baklava that Dobby can eat since Lily must hide the pancakes that Sirius should eat
-Dobby may prepare the souffle because Sirius should eat the baklava that the student must hide,neg,Dobby may not prepare the souffle because Sirius should eat the baklava that the student must hide
-she may walk because McGonagall must gobble the baklava,pos,she may walk because McGonagall must gobble the baklava
-a student can create the cakes,neg,a student can not create the cakes
-Lupin must gobble a souffle,pos,Lupin must gobble a souffle
-she should sprinkle the cakes since Lily must arrange the chocolates which Hagrid should hide because James may prepare many doughnuts,neg,she should not sprinkle the cakes since Lily must arrange the chocolates which Hagrid should hide because James may prepare many doughnuts
-Lupin must chew the pancakes that McGonagall should eat since Sirius must gobble the chocolates which Sirius may sprinkle,pos,Lupin must chew the pancakes that McGonagall should eat since Sirius must gobble the chocolates which Sirius may sprinkle
-Ginny can sprinkle the croissants that a wizard should eat,pos,Ginny can sprinkle the croissants that a wizard should eat
-he may arrange many baklava,neg,he may not arrange many baklava
-because he should chew the doughnuts that Fred can prepare Snape should run since George may create a souffle which Albus must eat,pos,because he should chew the doughnuts that Fred can prepare Snape should run since George may create a souffle which Albus must eat
-James can prepare the cake that a witch should make,neg,James can not prepare the cake that a witch should make
-Fred may assemble the souffles because a student should sprinkle the chocolate,pos,Fred may assemble the souffles because a student should sprinkle the chocolate
-since she may create many cookies Hagrid can prepare the souffles,neg,since she may create many cookies Hagrid can not prepare the souffles
-he should eat the pancake,pos,he should eat the pancake
-Ginny must hide many cakes that George can gobble,pos,Ginny must hide many cakes that George can gobble
-Lily can arrange the cookies that Neville may arrange,neg,Lily can not arrange the cookies that Neville may arrange
-Petunia should make a doughnut,pos,Petunia should make a doughnut
-a student must prepare a cake that a wizard may hide,pos,a student must prepare a cake that a wizard may hide
-because she should prepare the croissants which Sirius may hide Sirius should chew the eclaire,neg,because she should prepare the croissants which Sirius may hide Sirius should not chew the eclaire
-Draco may create a croissant which Voldemort must prepare,neg,Draco may not create a croissant which Voldemort must prepare
-since a professor should eat the eclaire Lupin may arrange the strudels because Lupin may eat a chocolate,neg,since a professor should eat the eclaire Lupin may not arrange the strudels because Lupin may eat a chocolate
-since Fred may eat a souffle which James may gobble Hermione can swim,pos,since Fred may eat a souffle which James may gobble Hermione can swim
-he must sprinkle the souffles,pos,he must sprinkle the souffles
-the student may chew the pancakes,pos,the student may chew the pancakes
-he can walk,neg,he can not walk
-a professor must arrange the cookies,neg,a professor must not arrange the cookies
-Voldemort may eat the eclaires because Hermione should hiccup,pos,Voldemort may eat the eclaires because Hermione should hiccup
-Dobby must giggle,neg,Dobby must not giggle
-James should assemble the baklava that Voldemort should make,pos,James should assemble the baklava that Voldemort should make
-James must party,neg,James must not party
-because the professor should hide the chocolates that Hermione should hide Hermione should arrange a pancake,neg,because the professor should hide the chocolates that Hermione should hide Hermione should not arrange a pancake
-Fred may sprinkle the croissant,pos,Fred may sprinkle the croissant
-Neville must assemble the cookies,neg,Neville must not assemble the cookies
-because James should arrange the pancakes Albus must arrange the pancake which he can arrange,neg,because James should arrange the pancakes Albus must not arrange the pancake which he can arrange
-the professor may make the eclaires that Hermione may prepare since Vernon must wiggle,pos,the professor may make the eclaires that Hermione may prepare since Vernon must wiggle
-the witch should make many cookies,neg,the witch should not make many cookies
-Hermione can eat the pancakes,neg,Hermione can not eat the pancakes
-a witch should eat the croissants since the student should eat a cookie that Harry must eat,pos,a witch should eat the croissants since the student should eat a cookie that Harry must eat
-Voldemort may prepare many pancakes,pos,Voldemort may prepare many pancakes
-because Snape should sprinkle the cake which Ginny can eat because a student can create the pancakes Sirius may create a baklava,pos,because Snape should sprinkle the cake which Ginny can eat because a student can create the pancakes Sirius may create a baklava
-Hagrid must arrange a chocolate,pos,Hagrid must arrange a chocolate
-since Hagrid can eat the chocolates that Hermione must hide Harry should arrange a strudel,pos,since Hagrid can eat the chocolates that Hermione must hide Harry should arrange a strudel
-because Draco may assemble the pancake George must hiccup because a student may create the baklava that Voldemort can arrange,pos,because Draco may assemble the pancake George must hiccup because a student may create the baklava that Voldemort can arrange
-Vernon should jump since Hagrid should party because Hermione may walk because Hagrid should prepare a strudel which George must arrange,neg,Vernon should not jump since Hagrid should party because Hermione may walk because Hagrid should prepare a strudel which George must arrange
-Sirius must jump,neg,Sirius must not jump
-Dobby must gobble the cakes that Petunia may create,pos,Dobby must gobble the cakes that Petunia may create
-McGonagall should gobble the doughnuts,neg,McGonagall should not gobble the doughnuts
-since the professor may laugh Voldemort may chew the cakes that Ron can assemble since a wizard can create the chocolates that Sirius must sprinkle,neg,since the professor may laugh Voldemort may not chew the cakes that Ron can assemble since a wizard can create the chocolates that Sirius must sprinkle
-Hermione must sprinkle a eclaire that Draco must prepare,neg,Hermione must not sprinkle a eclaire that Draco must prepare
-because Sirius must assemble a eclaire that Voldemort can create Dobby should arrange a doughnut that Albus can prepare,neg,because Sirius must assemble a eclaire that Voldemort can create Dobby should not arrange a doughnut that Albus can prepare
-the professor can gobble the strudels,pos,the professor can gobble the strudels
-Voldemort may hide a strudel which McGonagall can chew,pos,Voldemort may hide a strudel which McGonagall can chew
-the witch must chew the eclaire which Neville should arrange,pos,the witch must chew the eclaire which Neville should arrange
-since Dobby should run Fred may arrange a pancake,pos,since Dobby should run Fred may arrange a pancake
-Dobby may gobble the pancake that Fred can make,neg,Dobby may not gobble the pancake that Fred can make
-Dobby can gobble the strudel,neg,Dobby can not gobble the strudel
-Hermione should make the souffle that she should create,neg,Hermione should not make the souffle that she should create
-since a wizard must chew the baklava that a witch may eat Petunia must sprinkle the cookies,neg,since a wizard must chew the baklava that a witch may eat Petunia must not sprinkle the cookies
-the professor should hide a pancake,pos,the professor should hide a pancake
-Albus can chew a doughnut,neg,Albus can not chew a doughnut
-the professor should gobble a strudel which Lily must prepare because Albus should eat the chocolates which Lily should assemble,neg,the professor should not gobble a strudel which Lily must prepare because Albus should eat the chocolates which Lily should assemble
-she must hide the chocolate,pos,she must hide the chocolate
-since Neville may hide many pancakes a witch should gobble a doughnut since Fred may arrange the chocolates,neg,since Neville may hide many pancakes a witch should not gobble a doughnut since Fred may arrange the chocolates
-George must eat the cakes which a professor can hide,neg,George must not eat the cakes which a professor can hide
-George may hide the eclaires that a wizard should eat,neg,George may not hide the eclaires that a wizard should eat
-the student can create the pancake that Ginny can sprinkle,pos,the student can create the pancake that Ginny can sprinkle
-because Hagrid may arrange a doughnut since Lily can create the chocolate Lupin must eat the strudel,neg,because Hagrid may arrange a doughnut since Lily can create the chocolate Lupin must not eat the strudel
-Fred must giggle because the student can run,pos,Fred must giggle because the student can run
-Dobby should prepare the croissant,pos,Dobby should prepare the croissant
-he can giggle because Lupin should gobble the croissants that he should chew,pos,he can giggle because Lupin should gobble the croissants that he should chew
-Ron may eat the cookie that Sirius must make,pos,Ron may eat the cookie that Sirius must make
-he should party,pos,he should party
-Fred should chew the doughnut,neg,Fred should not chew the doughnut
-because the student should make many croissants which Neville should sprinkle she can wiggle,pos,because the student should make many croissants which Neville should sprinkle she can wiggle
-Harry must eat the baklava which McGonagall may make,neg,Harry must not eat the baklava which McGonagall may make
-Neville may make the strudels that Sirius may create,neg,Neville may not make the strudels that Sirius may create
-Lily should sprinkle a doughnut that Dobby must sprinkle,neg,Lily should not sprinkle a doughnut that Dobby must sprinkle
-a witch can sprinkle many cakes which Snape must gobble,pos,a witch can sprinkle many cakes which Snape must gobble
-McGonagall must hide the souffles which Vernon may sprinkle,neg,McGonagall must not hide the souffles which Vernon may sprinkle
-since Lupin should chew the doughnut since the student should smile Voldemort can hide the doughnut,neg,since Lupin should chew the doughnut since the student should smile Voldemort can not hide the doughnut
-he can chew the souffles that Draco should sprinkle since Vernon should make the souffles which a witch should gobble,pos,he can chew the souffles that Draco should sprinkle since Vernon should make the souffles which a witch should gobble
-Ginny must chew the chocolates which McGonagall must eat,neg,Ginny must not chew the chocolates which McGonagall must eat
-Hagrid must chew the eclaires because she may create a eclaire,neg,Hagrid must not chew the eclaires because she may create a eclaire
-she should chew a pancake that Ron should eat,neg,she should not chew a pancake that Ron should eat
-because George must assemble a cookie the wizard may gobble the souffle that James must assemble,pos,because George must assemble a cookie the wizard may gobble the souffle that James must assemble
-George must hide the chocolate which the student should chew,pos,George must hide the chocolate which the student should chew
-the witch must gobble the chocolates,neg,the witch must not gobble the chocolates
-Albus should arrange many doughnuts since Albus can hide the eclaires since Ginny should sprinkle the cookie,neg,Albus should not arrange many doughnuts since Albus can hide the eclaires since Ginny should sprinkle the cookie
-Snape can giggle,neg,Snape can not giggle
-Albus should prepare the eclaires that Lupin should eat,neg,Albus should not prepare the eclaires that Lupin should eat
-Harry must make a croissant,neg,Harry must not make a croissant
-Hagrid can sprinkle the souffles which Neville must sprinkle since a student must chew the strudels which McGonagall can gobble,pos,Hagrid can sprinkle the souffles which Neville must sprinkle since a student must chew the strudels which McGonagall can gobble
-Harry can sprinkle many strudels that Sirius may create,pos,Harry can sprinkle many strudels that Sirius may create
-Neville should chew a croissant,pos,Neville should chew a croissant
-since Vernon must sprinkle many doughnuts a professor must assemble the doughnuts which Voldemort must prepare,pos,since Vernon must sprinkle many doughnuts a professor must assemble the doughnuts which Voldemort must prepare
-Neville may create the baklava which James should assemble since James can hide many baklava that a student must chew,neg,Neville may not create the baklava which James should assemble since James can hide many baklava that a student must chew
-Fred should make a eclaire which the witch can prepare since James should sprinkle the souffles,neg,Fred should not make a eclaire which the witch can prepare since James should sprinkle the souffles
-Neville can wiggle because Hermione should sprinkle the eclaires,pos,Neville can wiggle because Hermione should sprinkle the eclaires
-Hagrid should assemble the cookie,neg,Hagrid should not assemble the cookie
-the wizard must smile,neg,the wizard must not smile
-he must arrange the eclaires since Vernon must hide the chocolate that Albus can prepare,neg,he must not arrange the eclaires since Vernon must hide the chocolate that Albus can prepare
-Lily must jump,pos,Lily must jump
-since George must hide the strudel a wizard can create the doughnut which Petunia should eat because a witch must chew the chocolate that James can sprinkle,pos,since George must hide the strudel a wizard can create the doughnut which Petunia should eat because a witch must chew the chocolate that James can sprinkle
-because the student must create the doughnuts Harry must prepare the cookies that Petunia should hide,neg,because the student must create the doughnuts Harry must not prepare the cookies that Petunia should hide
-since Vernon must assemble many eclaires that the professor should gobble a witch must sprinkle many baklava,pos,since Vernon must assemble many eclaires that the professor should gobble a witch must sprinkle many baklava
-because Petunia may hide the pancakes that Voldemort may prepare since Fred must wiggle Neville should sprinkle many souffles,neg,because Petunia may hide the pancakes that Voldemort may prepare since Fred must wiggle Neville should not sprinkle many souffles
-Voldemort should make the chocolates which Sirius may sprinkle,neg,Voldemort should not make the chocolates which Sirius may sprinkle
-because a student can chew the eclaires that McGonagall should make Hermione must prepare the cookies,neg,because a student can chew the eclaires that McGonagall should make Hermione must not prepare the cookies
-Neville should eat the baklava,neg,Neville should not eat the baklava
-she can sprinkle the eclaire that Lily should sprinkle,pos,she can sprinkle the eclaire that Lily should sprinkle
-James should sprinkle the croissants that McGonagall may arrange,neg,James should not sprinkle the croissants that McGonagall may arrange
-the wizard should giggle,pos,the wizard should giggle
-because Vernon can chew a chocolate that Lily should prepare he should prepare the cookies,pos,because Vernon can chew a chocolate that Lily should prepare he should prepare the cookies
-since Draco may arrange a pancake he should chew the doughnuts since Fred should make a cookie that a professor may hide,neg,since Draco may arrange a pancake he should not chew the doughnuts since Fred should make a cookie that a professor may hide
-since Ron can walk because Lupin should gobble the chocolates the professor must sprinkle the pancake,pos,since Ron can walk because Lupin should gobble the chocolates the professor must sprinkle the pancake
-because a wizard should arrange the cake that Vernon should sprinkle Harry may create a strudel,neg,because a wizard should arrange the cake that Vernon should sprinkle Harry may not create a strudel
-the professor should eat the pancakes since a wizard should arrange the eclaires,neg,the professor should not eat the pancakes since a wizard should arrange the eclaires
-Hermione can wiggle,pos,Hermione can wiggle
-Petunia must prepare the cookies,neg,Petunia must not prepare the cookies
-George should hide the souffles,pos,George should hide the souffles
-Hagrid can swim because Petunia should run,pos,Hagrid can swim because Petunia should run
-Harry should wiggle since a wizard can hide a cake which the witch may arrange,pos,Harry should wiggle since a wizard can hide a cake which the witch may arrange
-a witch can hide a chocolate because Draco must eat the souffle,neg,a witch can not hide a chocolate because Draco must eat the souffle
-the wizard may hide a souffle which he should make,pos,the wizard may hide a souffle which he should make
-Dobby must prepare the cake,pos,Dobby must prepare the cake
-the student can party,pos,the student can party
-a student may assemble the croissants,pos,a student may assemble the croissants
-James should eat many souffles which Ginny must hide because she should assemble the croissants that McGonagall can hide,pos,James should eat many souffles which Ginny must hide because she should assemble the croissants that McGonagall can hide
-Vernon should chew a chocolate that Neville should hide,neg,Vernon should not chew a chocolate that Neville should hide
-since a witch must make the strudels which Lily can chew the witch must make a croissant which Sirius can prepare,neg,since a witch must make the strudels which Lily can chew the witch must not make a croissant which Sirius can prepare
-Snape should gobble a pancake that Ginny may gobble,neg,Snape should not gobble a pancake that Ginny may gobble
-Neville must create a eclaire that George should create,pos,Neville must create a eclaire that George should create
-she must gobble a cake that Petunia must gobble,pos,she must gobble a cake that Petunia must gobble
-because Hermione must sprinkle the cakes he should gobble a cookie that the professor must make,pos,because Hermione must sprinkle the cakes he should gobble a cookie that the professor must make
-George may hide a pancake,neg,George may not hide a pancake
-a professor may walk,pos,a professor may walk
-the student should make the cake which a student can create,neg,the student should not make the cake which a student can create
-Ron must sprinkle a pancake,neg,Ron must not sprinkle a pancake
-the student should prepare a cookie,pos,the student should prepare a cookie
-Petunia must hide the eclaire that Petunia should gobble since she should prepare the cakes that Voldemort must prepare,neg,Petunia must not hide the eclaire that Petunia should gobble since she should prepare the cakes that Voldemort must prepare
-he should gobble a doughnut,neg,he should not gobble a doughnut
-since she should make the cookies McGonagall may hide the doughnuts that Vernon should chew,neg,since she should make the cookies McGonagall may not hide the doughnuts that Vernon should chew
-because Hagrid should prepare the cakes a professor must make the chocolates that she must chew,pos,because Hagrid should prepare the cakes a professor must make the chocolates that she must chew
-he may prepare the pancake because Neville should create the baklava since George can make the croissants that Voldemort must hide,neg,he may not prepare the pancake because Neville should create the baklava since George can make the croissants that Voldemort must hide
-Draco must arrange a doughnut,neg,Draco must not arrange a doughnut
-because McGonagall must create a cake that Fred can gobble Lily can create the croissants which Harry can assemble,neg,because McGonagall must create a cake that Fred can gobble Lily can not create the croissants which Harry can assemble
-he may sprinkle the pancakes which George must hide,pos,he may sprinkle the pancakes which George must hide
-Neville must eat the chocolate that McGonagall must gobble because Hagrid should assemble the souffles,neg,Neville must not eat the chocolate that McGonagall must gobble because Hagrid should assemble the souffles
-since Petunia should create a cake that Voldemort may assemble Harry can assemble a cookie which Vernon can eat,neg,since Petunia should create a cake that Voldemort may assemble Harry can not assemble a cookie which Vernon can eat
-a student should make the cookies,pos,a student should make the cookies
-Voldemort should make the doughnuts,neg,Voldemort should not make the doughnuts
-the wizard should arrange the croissants that Harry must hide,pos,the wizard should arrange the croissants that Harry must hide
-he can hide the cookie,pos,he can hide the cookie
-because Draco can create the cookie Ginny should gobble the strudels,pos,because Draco can create the cookie Ginny should gobble the strudels
-he may arrange the chocolates,pos,he may arrange the chocolates
-George may make the cakes which Dobby should hide,neg,George may not make the cakes which Dobby should hide
-Draco must jump because Hagrid must make a baklava,neg,Draco must not jump because Hagrid must make a baklava
-he should chew a cookie that the student may arrange,neg,he should not chew a cookie that the student may arrange
-Harry should create many baklava because Voldemort must hide the cake,neg,Harry should not create many baklava because Voldemort must hide the cake
-Ron should hiccup,neg,Ron should not hiccup
-Fred can sprinkle the souffle,neg,Fred can not sprinkle the souffle
-she must hide the cakes,pos,she must hide the cakes
-the student can gobble the doughnuts,neg,the student can not gobble the doughnuts
-Snape should laugh,pos,Snape should laugh
-since Hermione can arrange a croissant because Sirius can chew a cookie the professor can arrange many strudels because Ron must eat a souffle,pos,since Hermione can arrange a croissant because Sirius can chew a cookie the professor can arrange many strudels because Ron must eat a souffle
-since a wizard may create the cakes which he must make he should arrange the cookies,neg,since a wizard may create the cakes which he must make he should not arrange the cookies
-Harry must giggle because he must chew the cakes that Fred can make,neg,Harry must not giggle because he must chew the cakes that Fred can make
-because Ginny may hide a eclaire which Neville should arrange the professor may eat the cakes,neg,because Ginny may hide a eclaire which Neville should arrange the professor may not eat the cakes
-James should arrange many souffles that Draco should prepare,neg,James should not arrange many souffles that Draco should prepare
-Fred must eat the croissants,pos,Fred must eat the croissants
-since George must eat the chocolates Albus should hide a eclaire that Ginny can gobble,neg,since George must eat the chocolates Albus should not hide a eclaire that Ginny can gobble
-Draco should assemble many baklava,neg,Draco should not assemble many baklava
-Neville may smile because Vernon can chew the cookies which Dobby should prepare,pos,Neville may smile because Vernon can chew the cookies which Dobby should prepare
-Draco must assemble many croissants,pos,Draco must assemble many croissants
-she should make the pancakes that he must chew,neg,she should not make the pancakes that he must chew
-Petunia must make the souffle,neg,Petunia must not make the souffle
-since Fred should gobble the souffles that Neville can create he should sprinkle a cake because Voldemort can prepare the cookies,neg,since Fred should gobble the souffles that Neville can create he should not sprinkle a cake because Voldemort can prepare the cookies
-because Lupin should chew the cake since a wizard may smile because Voldemort must arrange the chocolates a student must sprinkle many strudels,neg,because Lupin should chew the cake since a wizard may smile because Voldemort must arrange the chocolates a student must not sprinkle many strudels
-James can gobble a strudel which Ron should eat,neg,James can not gobble a strudel which Ron should eat
-since he can make a baklava which Petunia must hide Lupin must create the cake which Ron must hide,pos,since he can make a baklava which Petunia must hide Lupin must create the cake which Ron must hide
-McGonagall must jump,neg,McGonagall must not jump
-the professor must jump,pos,the professor must jump
-a professor must party because she must sprinkle the chocolates which Vernon must arrange,neg,a professor must not party because she must sprinkle the chocolates which Vernon must arrange
-Petunia can wiggle,pos,Petunia can wiggle
-Ron must gobble many doughnuts since Draco may sprinkle the souffles,neg,Ron must not gobble many doughnuts since Draco may sprinkle the souffles
-the professor may hide the chocolate,pos,the professor may hide the chocolate
-the witch must sprinkle a pancake which Albus can gobble since Voldemort must prepare many doughnuts,neg,the witch must not sprinkle a pancake which Albus can gobble since Voldemort must prepare many doughnuts
-because a witch must arrange the cakes which James should prepare because Vernon must party the witch should create a doughnut which Sirius should prepare,neg,because a witch must arrange the cakes which James should prepare because Vernon must party the witch should not create a doughnut which Sirius should prepare
-Sirius must hide the cookie which a wizard should eat,pos,Sirius must hide the cookie which a wizard should eat
-she may sprinkle many doughnuts that Snape should eat,pos,she may sprinkle many doughnuts that Snape should eat
-a wizard should smile,neg,a wizard should not smile
-Harry may make the pancake that McGonagall should chew,pos,Harry may make the pancake that McGonagall should chew
-James may party because James can make the chocolates which Hermione can make,pos,James may party because James can make the chocolates which Hermione can make
-James should smile,neg,James should not smile
-a student may hide the chocolate that Ginny may chew,neg,a student may not hide the chocolate that Ginny may chew
-Albus can smile,neg,Albus can not smile
-since Neville must create the eclaires he can chew a souffle that the witch must prepare because Vernon should swim,neg,since Neville must create the eclaires he can not chew a souffle that the witch must prepare because Vernon should swim
-Lupin may sprinkle the baklava,neg,Lupin may not sprinkle the baklava
-Petunia may assemble the croissant,neg,Petunia may not assemble the croissant
-because she may gobble many baklava a professor should assemble the pancakes that Snape must sprinkle,pos,because she may gobble many baklava a professor should assemble the pancakes that Snape must sprinkle
-because Sirius should make the souffles that Draco may arrange Hagrid may arrange the chocolates that Draco should sprinkle,neg,because Sirius should make the souffles that Draco may arrange Hagrid may not arrange the chocolates that Draco should sprinkle
-McGonagall must prepare a pancake which Snape may make,pos,McGonagall must prepare a pancake which Snape may make
-a witch should sprinkle a eclaire which Albus should sprinkle,neg,a witch should not sprinkle a eclaire which Albus should sprinkle
-the student must run,pos,the student must run
-a student may chew the cakes which a wizard can chew,neg,a student may not chew the cakes which a wizard can chew
-since Snape can make many cakes the professor can chew the pancakes which Lupin should chew since James must smile since Harry should eat a pancake,pos,since Snape can make many cakes the professor can chew the pancakes which Lupin should chew since James must smile since Harry should eat a pancake
-Lily can sprinkle the baklava,pos,Lily can sprinkle the baklava
-Vernon can eat the baklava which McGonagall should create,pos,Vernon can eat the baklava which McGonagall should create
-she can hide many cookies since the professor can chew a croissant,pos,she can hide many cookies since the professor can chew a croissant
-Petunia must eat a chocolate,pos,Petunia must eat a chocolate
-Ron should arrange the cake since Neville may party,pos,Ron should arrange the cake since Neville may party
-he should assemble a cookie,neg,he should not assemble a cookie
-Draco can jump,neg,Draco can not jump
-Ron must arrange the cakes because Neville should eat the chocolate that she can assemble,neg,Ron must not arrange the cakes because Neville should eat the chocolate that she can assemble
-she should arrange the croissant which he can assemble since James should hide a eclaire which Lupin may eat since Vernon may chew a souffle,pos,she should arrange the croissant which he can assemble since James should hide a eclaire which Lupin may eat since Vernon may chew a souffle
-Lupin can prepare the baklava,neg,Lupin can not prepare the baklava
-McGonagall can gobble the chocolates,pos,McGonagall can gobble the chocolates
-Lupin should smile since Albus must prepare a cake which the witch must prepare,neg,Lupin should not smile since Albus must prepare a cake which the witch must prepare
-Sirius may eat many eclaires,neg,Sirius may not eat many eclaires
-Hermione must arrange many souffles,pos,Hermione must arrange many souffles
-Ron must assemble a chocolate,neg,Ron must not assemble a chocolate
-Lily may eat a cookie that a student must prepare,neg,Lily may not eat a cookie that a student must prepare
-since a student can jump because Sirius must walk Voldemort should prepare a pancake since Hagrid must gobble the cookies,neg,since a student can jump because Sirius must walk Voldemort should not prepare a pancake since Hagrid must gobble the cookies
-because James may assemble many cookies that James must gobble Ron must hide the strudels which Neville may arrange,neg,because James may assemble many cookies that James must gobble Ron must not hide the strudels which Neville may arrange
-the professor must gobble a cake which Dobby can create,neg,the professor must not gobble a cake which Dobby can create
-since James should arrange the strudels that a student may eat Snape should walk,neg,since James should arrange the strudels that a student may eat Snape should not walk
-since Sirius must hide the pancakes Hagrid can jump,neg,since Sirius must hide the pancakes Hagrid can not jump
-McGonagall must make a pancake that James may chew,neg,McGonagall must not make a pancake that James may chew
-Harry must chew the chocolate,neg,Harry must not chew the chocolate
-the witch should eat a souffle,pos,the witch should eat a souffle
-Vernon should eat the chocolates,neg,Vernon should not eat the chocolates
-Neville may chew many eclaires that James can hide,neg,Neville may not chew many eclaires that James can hide
-Hermione may gobble the baklava,pos,Hermione may gobble the baklava
-Petunia must arrange the cakes,pos,Petunia must arrange the cakes
-Vernon should run,pos,Vernon should run
-Lupin can smile,pos,Lupin can smile
-Lily should hide the souffles,pos,Lily should hide the souffles
-the professor must eat a pancake since Dobby should arrange the cookies which Fred can make,neg,the professor must not eat a pancake since Dobby should arrange the cookies which Fred can make
-she can chew a pancake which Neville must gobble,pos,she can chew a pancake which Neville must gobble
-Snape may arrange a strudel that Albus can prepare,neg,Snape may not arrange a strudel that Albus can prepare
-a professor should hide the baklava,neg,a professor should not hide the baklava
-because Ron can make the croissant since McGonagall should create the chocolates that Dobby should make she may chew a baklava that she should sprinkle,neg,because Ron can make the croissant since McGonagall should create the chocolates that Dobby should make she may not chew a baklava that she should sprinkle
-she should eat a croissant that Albus should sprinkle,pos,she should eat a croissant that Albus should sprinkle
-she can sprinkle the cakes because Ron must hiccup,neg,she can not sprinkle the cakes because Ron must hiccup
-Neville must wiggle,neg,Neville must not wiggle
-because Snape must chew the cake which Petunia may eat the professor should laugh,neg,because Snape must chew the cake which Petunia may eat the professor should not laugh
-Hagrid may gobble the doughnuts,neg,Hagrid may not gobble the doughnuts
-she must hiccup since Fred should wiggle,neg,she must not hiccup since Fred should wiggle
-she can prepare the souffle which Ron should hide since Dobby must arrange the chocolates that Fred must arrange,pos,she can prepare the souffle which Ron should hide since Dobby must arrange the chocolates that Fred must arrange
-Ron should arrange the chocolates,neg,Ron should not arrange the chocolates
-Lupin can eat the strudels,pos,Lupin can eat the strudels
-because Lupin should eat a eclaire since the student can jump since she must gobble the souffle Ron should chew a pancake because he must make the croissants,pos,because Lupin should eat a eclaire since the student can jump since she must gobble the souffle Ron should chew a pancake because he must make the croissants
-since Fred must create a chocolate that Draco should sprinkle Albus may swim,neg,since Fred must create a chocolate that Draco should sprinkle Albus may not swim
-Ron may arrange the baklava which Voldemort can hide,pos,Ron may arrange the baklava which Voldemort can hide
-Draco may gobble the cookies that Petunia should arrange because George must make the souffle since Draco may assemble the cookie,pos,Draco may gobble the cookies that Petunia should arrange because George must make the souffle since Draco may assemble the cookie
-Hagrid must hide a chocolate,neg,Hagrid must not hide a chocolate
-Draco must assemble the croissants that Fred must sprinkle,neg,Draco must not assemble the croissants that Fred must sprinkle
-Petunia should sprinkle the cake,pos,Petunia should sprinkle the cake
-since she should swim Lily can eat many croissants that James should chew,neg,since she should swim Lily can not eat many croissants that James should chew
-Petunia can sprinkle the cookie,neg,Petunia can not sprinkle the cookie
-Ginny can assemble the souffle which Voldemort should arrange,pos,Ginny can assemble the souffle which Voldemort should arrange
-Lupin should chew the pancakes,neg,Lupin should not chew the pancakes
-since the wizard must hide the baklava which she should make a student may make many chocolates because McGonagall should chew a cookie which he must chew,neg,since the wizard must hide the baklava which she should make a student may not make many chocolates because McGonagall should chew a cookie which he must chew
-Lily should make the strudel which a professor must hide since the professor must eat the croissants because he should prepare a strudel,pos,Lily should make the strudel which a professor must hide since the professor must eat the croissants because he should prepare a strudel
-she should laugh,pos,she should laugh
-the wizard should eat many strudels that Ron can gobble,pos,the wizard should eat many strudels that Ron can gobble
-Ron can eat the cookies since the student may assemble many eclaires which the student must sprinkle,neg,Ron can not eat the cookies since the student may assemble many eclaires which the student must sprinkle
-Ginny should make the strudel that she must arrange,neg,Ginny should not make the strudel that she must arrange
-Hagrid should create the chocolate,neg,Hagrid should not create the chocolate
-Hermione should sprinkle the baklava which she can hide,pos,Hermione should sprinkle the baklava which she can hide
-a professor may make a croissant because Ginny should smile,neg,a professor may not make a croissant because Ginny should smile
-a professor can sprinkle the cakes,neg,a professor can not sprinkle the cakes
-a witch should eat the souffles since Sirius can gobble the doughnuts that he should prepare,pos,a witch should eat the souffles since Sirius can gobble the doughnuts that he should prepare
-Hermione may eat the strudel which Petunia can sprinkle since James must jump because the professor should sprinkle a croissant,pos,Hermione may eat the strudel which Petunia can sprinkle since James must jump because the professor should sprinkle a croissant
-Ginny can gobble the croissant that James can arrange,neg,Ginny can not gobble the croissant that James can arrange
-the professor can hide the strudel,pos,the professor can hide the strudel
-she can hide the croissants which he may sprinkle,pos,she can hide the croissants which he may sprinkle
-Sirius should hide the chocolates,neg,Sirius should not hide the chocolates
-Snape can arrange the doughnut that the student should assemble,neg,Snape can not arrange the doughnut that the student should assemble
-Ginny may arrange a cookie,pos,Ginny may arrange a cookie
-since Lupin can arrange the cake George should party,neg,since Lupin can arrange the cake George should not party
-Ginny should create many chocolates,neg,Ginny should not create many chocolates
-she may create the doughnuts which George may arrange since the professor should hide a doughnut,pos,she may create the doughnuts which George may arrange since the professor should hide a doughnut
-since Draco may gobble the baklava Neville can create many chocolates which a witch must arrange,pos,since Draco may gobble the baklava Neville can create many chocolates which a witch must arrange
-Sirius may sprinkle a strudel that the witch can arrange,pos,Sirius may sprinkle a strudel that the witch can arrange
-Vernon may arrange the chocolates,pos,Vernon may arrange the chocolates
-Sirius must prepare the chocolates that the wizard should sprinkle,pos,Sirius must prepare the chocolates that the wizard should sprinkle
-Dobby can prepare the baklava,pos,Dobby can prepare the baklava
-Hagrid can walk,pos,Hagrid can walk
-because Lupin must assemble the souffles that Hagrid must gobble she can chew the baklava that Voldemort may assemble since Harry should eat a chocolate,pos,because Lupin must assemble the souffles that Hagrid must gobble she can chew the baklava that Voldemort may assemble since Harry should eat a chocolate
-since the wizard must swim Ron can walk,neg,since the wizard must swim Ron can not walk
-Dobby must prepare the pancakes that James must arrange because James should sprinkle the cakes,neg,Dobby must not prepare the pancakes that James must arrange because James should sprinkle the cakes
-a student may run since Albus should sprinkle the strudels that Draco can prepare,neg,a student may not run since Albus should sprinkle the strudels that Draco can prepare
-since Hermione can hiccup McGonagall may arrange the souffle which Dobby can gobble because James may hiccup,neg,since Hermione can hiccup McGonagall may not arrange the souffle which Dobby can gobble because James may hiccup
-George should make the pancake which a student can prepare,neg,George should not make the pancake which a student can prepare
-Dobby should arrange a souffle because Vernon can wiggle,neg,Dobby should not arrange a souffle because Vernon can wiggle
-a witch may arrange the pancakes,neg,a witch may not arrange the pancakes
-the witch may eat the cookie that Albus can eat because a wizard should sprinkle the croissants which Lily should eat,neg,the witch may not eat the cookie that Albus can eat because a wizard should sprinkle the croissants which Lily should eat
-Hagrid may sprinkle many doughnuts,pos,Hagrid may sprinkle many doughnuts
-Hermione may chew the croissants that Hermione should chew because the professor must chew a doughnut that Albus should create,pos,Hermione may chew the croissants that Hermione should chew because the professor must chew a doughnut that Albus should create
-since a professor must assemble the souffles which Hermione should create Hermione can prepare the cakes that Dobby should sprinkle,pos,since a professor must assemble the souffles which Hermione should create Hermione can prepare the cakes that Dobby should sprinkle
-a witch can prepare the eclaires which George must chew because a wizard must eat the baklava that Harry must hide,pos,a witch can prepare the eclaires which George must chew because a wizard must eat the baklava that Harry must hide
-Albus may hide a baklava that Harry should eat,pos,Albus may hide a baklava that Harry should eat
-Fred must eat the pancake that Snape can assemble,neg,Fred must not eat the pancake that Snape can assemble
-Lupin must jump since Albus can hide the eclaire that she must make since Ginny should gobble the souffles which she must eat,neg,Lupin must not jump since Albus can hide the eclaire that she must make since Ginny should gobble the souffles which she must eat
-because he may chew a croissant he should run because the student can prepare the doughnuts that Ron may assemble because Ginny must sprinkle a cookie,neg,because he may chew a croissant he should not run because the student can prepare the doughnuts that Ron may assemble because Ginny must sprinkle a cookie
-Neville must make the doughnut that Fred may hide,neg,Neville must not make the doughnut that Fred may hide
-Hagrid must chew the chocolates,pos,Hagrid must chew the chocolates
-since Sirius must run Neville should assemble the cookies because Ginny may gobble the baklava which a student must make,pos,since Sirius must run Neville should assemble the cookies because Ginny may gobble the baklava which a student must make
-Petunia must hiccup,pos,Petunia must hiccup
-the professor may chew the pancake,pos,the professor may chew the pancake
-because Voldemort should giggle a student may chew the strudels since Dobby must jump because Dobby may arrange the baklava,neg,because Voldemort should giggle a student may not chew the strudels since Dobby must jump because Dobby may arrange the baklava
-Voldemort should make many pancakes since the student may prepare the eclaire that Petunia may arrange,pos,Voldemort should make many pancakes since the student may prepare the eclaire that Petunia may arrange
-Fred should prepare many souffles,neg,Fred should not prepare many souffles
-she must sprinkle the chocolates that Vernon can eat,pos,she must sprinkle the chocolates that Vernon can eat
-Harry may gobble many souffles that Ron can arrange,neg,Harry may not gobble many souffles that Ron can arrange
-a student must eat a souffle,neg,a student must not eat a souffle
-Lily must gobble the chocolates,neg,Lily must not gobble the chocolates
-George should jump,neg,George should not jump
-Fred can chew the cookies,pos,Fred can chew the cookies
-because the professor must chew a chocolate that he should make Snape can make the eclaires,neg,because the professor must chew a chocolate that he should make Snape can not make the eclaires
-Hagrid should hiccup,pos,Hagrid should hiccup
-Hermione may chew a pancake that the wizard must assemble,neg,Hermione may not chew a pancake that the wizard must assemble
-he must sprinkle the chocolates that a professor can hide,pos,he must sprinkle the chocolates that a professor can hide
-since the student should wiggle the student may sprinkle the croissants,pos,since the student should wiggle the student may sprinkle the croissants
-Fred should gobble a doughnut,neg,Fred should not gobble a doughnut
-since a student may make the croissant which Vernon must make since Snape should gobble the cakes George may sprinkle many pancakes which he may prepare,pos,since a student may make the croissant which Vernon must make since Snape should gobble the cakes George may sprinkle many pancakes which he may prepare
-Draco must make the eclaire,pos,Draco must make the eclaire
-Albus should make the croissants,neg,Albus should not make the croissants
-Hagrid should party,neg,Hagrid should not party
-Dobby can create a doughnut that Ginny may assemble,neg,Dobby can not create a doughnut that Ginny may assemble
-Lily should arrange the croissants,pos,Lily should arrange the croissants
-George should arrange the doughnuts which Petunia must create,pos,George should arrange the doughnuts which Petunia must create
-Ron should chew the souffles,pos,Ron should chew the souffles
-he can create the baklava that George must create,neg,he can not create the baklava that George must create
-Voldemort should hide many eclaires that Neville should hide,pos,Voldemort should hide many eclaires that Neville should hide
-Fred should hide a souffle,neg,Fred should not hide a souffle
-James must sprinkle the chocolates which Hagrid must assemble,pos,James must sprinkle the chocolates which Hagrid must assemble
-Petunia can create the souffles which George should eat,pos,Petunia can create the souffles which George should eat
-George must walk,pos,George must walk
-the student can sprinkle the croissants since Hagrid must arrange the pancake,neg,the student can not sprinkle the croissants since Hagrid must arrange the pancake
-Sirius can create the chocolates that Fred can prepare,pos,Sirius can create the chocolates that Fred can prepare
-because Ron may eat a pancake she can eat a strudel which Lupin may sprinkle,neg,because Ron may eat a pancake she can not eat a strudel which Lupin may sprinkle
-Snape must chew the cake because the witch must sprinkle the baklava,pos,Snape must chew the cake because the witch must sprinkle the baklava
-he can jump,pos,he can jump
-because Neville should hide a pancake that Snape must assemble a professor must chew the baklava,pos,because Neville should hide a pancake that Snape must assemble a professor must chew the baklava
-the student should make the cakes that Albus can assemble,neg,the student should not make the cakes that Albus can assemble
-since Harry may assemble a baklava that George may chew a witch must sprinkle a cookie,pos,since Harry may assemble a baklava that George may chew a witch must sprinkle a cookie
-he must chew a souffle that Harry can hide,pos,he must chew a souffle that Harry can hide
-James can create the croissant that she must sprinkle,neg,James can not create the croissant that she must sprinkle
-she should hide the baklava,pos,she should hide the baklava
-a student may assemble the strudels which Snape should hide,pos,a student may assemble the strudels which Snape should hide
-the wizard can arrange a chocolate,pos,the wizard can arrange a chocolate
-since the professor may eat a strudel Hagrid should create a eclaire that George can chew,pos,since the professor may eat a strudel Hagrid should create a eclaire that George can chew
-the student can prepare the strudel,pos,the student can prepare the strudel
-because McGonagall can make the strudels which the witch can arrange Voldemort can arrange the cake since a student must create the strudels,pos,because McGonagall can make the strudels which the witch can arrange Voldemort can arrange the cake since a student must create the strudels
-Hermione may chew a croissant,neg,Hermione may not chew a croissant
-Albus must smile,neg,Albus must not smile
-since Neville should sprinkle a pancake that the wizard should assemble Harry must chew the chocolate,neg,since Neville should sprinkle a pancake that the wizard should assemble Harry must not chew the chocolate
-McGonagall may gobble a pancake,neg,McGonagall may not gobble a pancake
-a professor should walk,pos,a professor should walk
-the professor may jump,neg,the professor may not jump
-McGonagall must gobble many cakes since a student should chew the cakes,neg,McGonagall must not gobble many cakes since a student should chew the cakes
-because a witch can assemble a baklava since Albus may make the baklava which he can arrange George must prepare the souffle,neg,because a witch can assemble a baklava since Albus may make the baklava which he can arrange George must not prepare the souffle
-since Harry can arrange the cookies Neville must chew the croissant that the wizard must chew because Snape may walk,neg,since Harry can arrange the cookies Neville must not chew the croissant that the wizard must chew because Snape may walk
-since Hagrid should make the eclaire Neville should arrange the chocolates which George must eat since she must sprinkle the cookies,pos,since Hagrid should make the eclaire Neville should arrange the chocolates which George must eat since she must sprinkle the cookies
-McGonagall may arrange the baklava that Petunia should sprinkle because the wizard should sprinkle a eclaire that George may arrange,pos,McGonagall may arrange the baklava that Petunia should sprinkle because the wizard should sprinkle a eclaire that George may arrange
-she must prepare the cookies,neg,she must not prepare the cookies
-Fred must laugh,pos,Fred must laugh
-the professor should sprinkle a cookie which a witch must prepare because Snape should eat a strudel that George should make,neg,the professor should not sprinkle a cookie which a witch must prepare because Snape should eat a strudel that George should make
-the wizard can assemble the croissants,pos,the wizard can assemble the croissants
-the professor must wiggle because McGonagall must hide the doughnut that Hermione can prepare,neg,the professor must not wiggle because McGonagall must hide the doughnut that Hermione can prepare
-since Draco must gobble the souffles because a witch should hide the cookie that a wizard should assemble Hermione should hide the cake,neg,since Draco must gobble the souffles because a witch should hide the cookie that a wizard should assemble Hermione should not hide the cake
-the witch should hide many strudels that Hermione should eat,neg,the witch should not hide many strudels that Hermione should eat
-Voldemort must wiggle,pos,Voldemort must wiggle
-James must gobble a souffle since Albus should arrange the cakes which the professor must assemble,pos,James must gobble a souffle since Albus should arrange the cakes which the professor must assemble
-a student must arrange the strudels which Draco must make,pos,a student must arrange the strudels which Draco must make
-Ginny should assemble the souffle since Lily can create the eclaires that the witch may gobble,pos,Ginny should assemble the souffle since Lily can create the eclaires that the witch may gobble
-Lupin may eat many pancakes that the student should sprinkle,pos,Lupin may eat many pancakes that the student should sprinkle
-a witch should make the doughnut that Vernon should make,pos,a witch should make the doughnut that Vernon should make
-since Hermione should make a chocolate a professor must arrange the croissant,pos,since Hermione should make a chocolate a professor must arrange the croissant
-Snape can chew a cookie that Hagrid should assemble,pos,Snape can chew a cookie that Hagrid should assemble
-Dobby must arrange a cake,neg,Dobby must not arrange a cake
-George can assemble the cookie,pos,George can assemble the cookie
-the professor must sprinkle the croissants,pos,the professor must sprinkle the croissants
-Draco should assemble the cookie that she must prepare,neg,Draco should not assemble the cookie that she must prepare
-since Lupin must create a doughnut which Lily can chew a witch must laugh,pos,since Lupin must create a doughnut which Lily can chew a witch must laugh
-Dobby may chew the baklava which Vernon can eat,neg,Dobby may not chew the baklava which Vernon can eat
-he can arrange the cookie that Sirius must chew since Harry must sprinkle many chocolates which Voldemort may sprinkle since Lupin must hide a eclaire,pos,he can arrange the cookie that Sirius must chew since Harry must sprinkle many chocolates which Voldemort may sprinkle since Lupin must hide a eclaire
-James can run,neg,James can not run
-a student can create the baklava that McGonagall should assemble because Lily should party,neg,a student can not create the baklava that McGonagall should assemble because Lily should party
-Lupin may arrange the strudel,pos,Lupin may arrange the strudel
-the student must party,neg,the student must not party
-since Voldemort can create the chocolate which Fred may assemble he can sprinkle the strudels,neg,since Voldemort can create the chocolate which Fred may assemble he can not sprinkle the strudels
-a wizard should arrange the baklava which James should arrange,neg,a wizard should not arrange the baklava which James should arrange
-since James may make a souffle he may eat the baklava,neg,since James may make a souffle he may not eat the baklava
-Ginny may gobble many doughnuts which James should make,pos,Ginny may gobble many doughnuts which James should make
-the professor should hide many croissants,neg,the professor should not hide many croissants
-Harry can sprinkle the souffles because the professor can create many croissants,pos,Harry can sprinkle the souffles because the professor can create many croissants
-Vernon must gobble the souffle which Dobby must create because she must sprinkle a eclaire which Hagrid must arrange,pos,Vernon must gobble the souffle which Dobby must create because she must sprinkle a eclaire which Hagrid must arrange
-Vernon should sprinkle the pancakes,pos,Vernon should sprinkle the pancakes
-Lily may smile,neg,Lily may not smile
-since James can assemble the eclaires that the witch should assemble since George can chew the cakes McGonagall can eat many croissants that she should eat,neg,since James can assemble the eclaires that the witch should assemble since George can chew the cakes McGonagall can not eat many croissants that she should eat
-because Fred can chew the cookie James should eat the cookies that she should gobble,neg,because Fred can chew the cookie James should not eat the cookies that she should gobble
-Draco should arrange a strudel that the wizard should eat,pos,Draco should arrange a strudel that the wizard should eat
-since Neville should assemble a eclaire that Vernon must eat James should chew the pancakes which McGonagall must create,pos,since Neville should assemble a eclaire that Vernon must eat James should chew the pancakes which McGonagall must create
-James can hide a souffle,pos,James can hide a souffle
-Lupin must eat the baklava,pos,Lupin must eat the baklava
-because Dobby should eat the cakes that Ron may hide Sirius should eat the eclaires,neg,because Dobby should eat the cakes that Ron may hide Sirius should not eat the eclaires
-Draco should hiccup since he can smile,pos,Draco should hiccup since he can smile
-because Draco should gobble the doughnut which the student may hide Neville must chew many strudels,neg,because Draco should gobble the doughnut which the student may hide Neville must not chew many strudels
-a wizard must make a souffle that Lupin may create,pos,a wizard must make a souffle that Lupin may create
-Hagrid should assemble a cookie,pos,Hagrid should assemble a cookie
-a wizard can sprinkle many doughnuts that a wizard must prepare because James should assemble the chocolate,pos,a wizard can sprinkle many doughnuts that a wizard must prepare because James should assemble the chocolate
-George can laugh since Hermione can create the pancakes that Sirius must create,neg,George can not laugh since Hermione can create the pancakes that Sirius must create
-since Ron should gobble a eclaire the student must create many strudels that a professor should arrange,neg,since Ron should gobble a eclaire the student must not create many strudels that a professor should arrange
-the professor must chew many croissants,neg,the professor must not chew many croissants
-Sirius must arrange a souffle that the student may prepare because the student should giggle,pos,Sirius must arrange a souffle that the student may prepare because the student should giggle
-because Albus must assemble the souffles Ron may hide the souffles which Sirius may make since Hagrid must arrange the eclaire,pos,because Albus must assemble the souffles Ron may hide the souffles which Sirius may make since Hagrid must arrange the eclaire
-Ginny may assemble the chocolate which the witch should hide,pos,Ginny may assemble the chocolate which the witch should hide
-a witch must chew many eclaires which Hagrid should create since Lily can create the souffle,pos,a witch must chew many eclaires which Hagrid should create since Lily can create the souffle
-because Sirius should giggle James should assemble a baklava which Vernon must gobble since a student can assemble many strudels which George must assemble,pos,because Sirius should giggle James should assemble a baklava which Vernon must gobble since a student can assemble many strudels which George must assemble
-she can create the cookie,neg,she can not create the cookie
-Lily should create a baklava which a student must make,neg,Lily should not create a baklava which a student must make
-McGonagall should make many pancakes that the student must make,pos,McGonagall should make many pancakes that the student must make
-Petunia must make a baklava that a witch may arrange,neg,Petunia must not make a baklava that a witch may arrange
-Albus can make the eclaires,neg,Albus can not make the eclaires
-the professor should create the eclaires because Ginny may swim,neg,the professor should not create the eclaires because Ginny may swim
-Dobby must create the baklava,neg,Dobby must not create the baklava
-Neville may sprinkle the cakes that Sirius may chew,pos,Neville may sprinkle the cakes that Sirius may chew
+Draco must run,pos,Draco must run
+she should run,pos,she should run
 he must smile,pos,he must smile
-she must swim,neg,she must not swim
-a student should arrange a cookie,pos,a student should arrange a cookie
-a professor can gobble the cookie,pos,a professor can gobble the cookie
-the student may wiggle since she should assemble a baklava that Fred should sprinkle,neg,the student may not wiggle since she should assemble a baklava that Fred should sprinkle
-a wizard should gobble the croissants which she must assemble,neg,a wizard should not gobble the croissants which she must assemble
-Fred must prepare the pancakes since Fred can hide a chocolate,neg,Fred must not prepare the pancakes since Fred can hide a chocolate
-the wizard should eat a cake that Ron should hide,pos,the wizard should eat a cake that Ron should hide
-Dobby can chew the eclaires,pos,Dobby can chew the eclaires
-because Lily must make the strudels that Voldemort must gobble since Hagrid can assemble many chocolates Albus should arrange the cake,neg,because Lily must make the strudels that Voldemort must gobble since Hagrid can assemble many chocolates Albus should not arrange the cake
-since James should make many pancakes which Sirius should chew he should sprinkle a pancake,pos,since James should make many pancakes which Sirius should chew he should sprinkle a pancake
-Lupin may eat the pancakes because James should prepare the chocolate,neg,Lupin may not eat the pancakes because James should prepare the chocolate
-Petunia may smile,pos,Petunia may smile
-McGonagall should sprinkle the pancake,neg,McGonagall should not sprinkle the pancake
-since she must create the cookies Harry must party,pos,since she must create the cookies Harry must party
-Petunia may prepare a strudel that Draco should gobble,pos,Petunia may prepare a strudel that Draco should gobble
-because McGonagall can eat the baklava which a professor may sprinkle George may swim,neg,because McGonagall can eat the baklava which a professor may sprinkle George may not swim
-James may smile,pos,James may smile
-James may assemble the chocolate,neg,James may not assemble the chocolate
-because Hermione should assemble the doughnuts which George can make Vernon may sprinkle a souffle,neg,because Hermione should assemble the doughnuts which George can make Vernon may not sprinkle a souffle
-since George can chew the baklava that Ron must sprinkle Sirius may create a baklava,neg,since George can chew the baklava that Ron must sprinkle Sirius may not create a baklava
-a professor must create the eclaires,pos,a professor must create the eclaires
-because a professor should create a strudel Ginny can arrange the croissant which Albus should assemble,neg,because a professor should create a strudel Ginny can not arrange the croissant which Albus should assemble
-he can prepare a doughnut which Hermione should sprinkle,pos,he can prepare a doughnut which Hermione should sprinkle
-Fred should sprinkle the cookie,neg,Fred should not sprinkle the cookie
-the wizard must hide a doughnut that Sirius must eat since she must arrange the croissant that Neville should eat,pos,the wizard must hide a doughnut that Sirius must eat since she must arrange the croissant that Neville should eat
-a wizard can sprinkle the eclaires that Albus must assemble,neg,a wizard can not sprinkle the eclaires that Albus must assemble
-Voldemort must arrange a cake which she must chew,neg,Voldemort must not arrange a cake which she must chew
-he may hide a croissant which the professor should prepare,pos,he may hide a croissant which the professor should prepare
-Vernon can eat many chocolates,pos,Vernon can eat many chocolates
+she must laugh,pos,she must laugh
+she may wiggle,pos,she may wiggle
+Ginny can run,pos,Ginny can run
+Lupin must run,pos,Lupin must run
+he may run,pos,he may run
+Lupin must run,pos,Lupin must run
+Ron must party,pos,Ron must party
+she should run,pos,she should run
+Lily can party,pos,Lily can party
+he can swim,pos,he can swim
+Draco must run,pos,Draco must run
+Lupin must run,pos,Lupin must run
+Ron may walk,pos,Ron may walk
+Albus can jump,pos,Albus can jump
+George may run,pos,George may run
+she must smile,pos,she must smile
 Dobby may walk,pos,Dobby may walk
-a professor should jump since Sirius must arrange many chocolates because Hagrid may hide a cake that Fred can chew,pos,a professor should jump since Sirius must arrange many chocolates because Hagrid may hide a cake that Fred can chew
-because a student can assemble the cakes Vernon must arrange the cake,pos,because a student can assemble the cakes Vernon must arrange the cake
-Fred may make the baklava,neg,Fred may not make the baklava
-Sirius may create the strudel,pos,Sirius may create the strudel
-a professor should sprinkle a cake,pos,a professor should sprinkle a cake
-Draco must assemble a baklava that he may arrange,pos,Draco must assemble a baklava that he may arrange
-Sirius may make the cakes,pos,Sirius may make the cakes
-Fred must smile,pos,Fred must smile
-he may eat many baklava,neg,he may not eat many baklava
-McGonagall can smile,neg,McGonagall can not smile
-George may giggle,pos,George may giggle
-because Draco must make the eclaire Neville can gobble many pancakes,pos,because Draco must make the eclaire Neville can gobble many pancakes
-Draco should gobble the souffle,neg,Draco should not gobble the souffle
-because Fred should eat the chocolate which Petunia should eat Sirius should hide the eclaire,neg,because Fred should eat the chocolate which Petunia should eat Sirius should not hide the eclaire
-Lily should make the baklava,neg,Lily should not make the baklava
-James must arrange the baklava since a witch should walk,neg,James must not arrange the baklava since a witch should walk
-Hermione may eat the eclaires,neg,Hermione may not eat the eclaires
-since Hagrid must laugh a witch must arrange the doughnuts that the witch should eat,pos,since Hagrid must laugh a witch must arrange the doughnuts that the witch should eat
-Draco must prepare the souffle,pos,Draco must prepare the souffle
-Fred can jump,neg,Fred can not jump
-George may assemble the cakes that Ron should arrange since Draco should giggle,pos,George may assemble the cakes that Ron should arrange since Draco should giggle
-a student must make a chocolate that Albus should eat because Ginny can sprinkle many baklava,neg,a student must not make a chocolate that Albus should eat because Ginny can sprinkle many baklava
-a wizard must assemble a souffle,neg,a wizard must not assemble a souffle
-a wizard must party,neg,a wizard must not party
-Voldemort should assemble the eclaires,pos,Voldemort should assemble the eclaires
-James should make the chocolate,pos,James should make the chocolate
-the witch must create the strudels which Sirius must prepare,pos,the witch must create the strudels which Sirius must prepare
-the witch may sprinkle the strudels because Dobby should walk,neg,the witch may not sprinkle the strudels because Dobby should walk
-Snape must sprinkle the pancake,pos,Snape must sprinkle the pancake
-he must swim,pos,he must swim
-Draco can laugh because George should eat a strudel,neg,Draco can not laugh because George should eat a strudel
-Harry must jump,pos,Harry must jump
-Albus must hide the pancake,neg,Albus must not hide the pancake
-Harry should chew a souffle which Sirius may eat,pos,Harry should chew a souffle which Sirius may eat
-she should eat the eclaire,pos,she should eat the eclaire
-a witch must jump,neg,a witch must not jump
-the student may sprinkle the souffle that the witch can hide since Sirius may assemble a chocolate which James must hide,neg,the student may not sprinkle the souffle that the witch can hide since Sirius may assemble a chocolate which James must hide
-a student can eat the strudels that a witch may chew,pos,a student can eat the strudels that a witch may chew
-Harry must laugh,neg,Harry must not laugh
-since a professor must make the cakes that McGonagall should sprinkle Snape must swim,pos,since a professor must make the cakes that McGonagall should sprinkle Snape must swim
-Dobby must prepare the pancake that Dobby should gobble because Voldemort should create the croissants,pos,Dobby must prepare the pancake that Dobby should gobble because Voldemort should create the croissants
-a professor should make a cookie,pos,a professor should make a cookie
-George can gobble a baklava since Neville can giggle,neg,George can not gobble a baklava since Neville can giggle
-Hagrid should chew the strudel that George can gobble,neg,Hagrid should not chew the strudel that George can gobble
-Sirius should giggle,pos,Sirius should giggle
-Fred must eat a cake which Ron must assemble because the professor should create many pancakes which Snape may chew,neg,Fred must not eat a cake which Ron must assemble because the professor should create many pancakes which Snape may chew
-since Neville may make the souffle which Draco must prepare Harry should arrange a souffle,neg,since Neville may make the souffle which Draco must prepare Harry should not arrange a souffle
-she must hide the baklava that Lupin can create,pos,she must hide the baklava that Lupin can create
-Snape must eat a croissant that the wizard can chew,neg,Snape must not eat a croissant that the wizard can chew
-Hermione must gobble many doughnuts,pos,Hermione must gobble many doughnuts
-since he may eat the pancakes Draco may arrange the doughnuts that Sirius should gobble,neg,since he may eat the pancakes Draco may not arrange the doughnuts that Sirius should gobble
-since Lily can sprinkle a souffle a witch must hiccup,pos,since Lily can sprinkle a souffle a witch must hiccup
-Harry must hide many chocolates,neg,Harry must not hide many chocolates
-since Albus should sprinkle many cookies Petunia should jump because Snape should run,pos,since Albus should sprinkle many cookies Petunia should jump because Snape should run
-Ron should giggle,neg,Ron should not giggle
-Vernon must laugh since Vernon can make many strudels that Snape must sprinkle,neg,Vernon must not laugh since Vernon can make many strudels that Snape must sprinkle
-Snape can create the pancake,pos,Snape can create the pancake
-Hagrid may arrange the baklava,neg,Hagrid may not arrange the baklava
-Harry must hide a strudel,pos,Harry must hide a strudel
-Lupin should hide the strudel that she should gobble,neg,Lupin should not hide the strudel that she should gobble
-Hagrid must arrange the souffles that Petunia must arrange,pos,Hagrid must arrange the souffles that Petunia must arrange
-Albus should walk,pos,Albus should walk
-Voldemort can arrange the cookies that Hermione may make,neg,Voldemort can not arrange the cookies that Hermione may make
-the student should hide the chocolates since he may sprinkle a doughnut which Harry should eat,pos,the student should hide the chocolates since he may sprinkle a doughnut which Harry should eat
-Petunia should chew many eclaires because Albus should chew many eclaires that Snape may create,neg,Petunia should not chew many eclaires because Albus should chew many eclaires that Snape may create
-Draco can assemble a cookie which a witch should make,pos,Draco can assemble a cookie which a witch should make
-because she can chew the souffles Sirius should party,pos,because she can chew the souffles Sirius should party
-Neville may make a croissant which Dobby may gobble,pos,Neville may make a croissant which Dobby may gobble
-Hagrid should create the cookies,neg,Hagrid should not create the cookies
-because Albus must make the cake Harry should gobble a baklava,pos,because Albus must make the cake Harry should gobble a baklava
-Draco should sprinkle many souffles,neg,Draco should not sprinkle many souffles
-Harry should assemble the souffles which Neville should gobble since George should party,neg,Harry should not assemble the souffles which Neville should gobble since George should party
-James must hide the doughnuts,pos,James must hide the doughnuts
-because Ron should make the cake which he must prepare Draco can assemble the eclaire,pos,because Ron should make the cake which he must prepare Draco can assemble the eclaire
-Dobby should hide a cookie which the witch can assemble,neg,Dobby should not hide a cookie which the witch can assemble
-because Draco must chew a strudel which the professor must chew a student can chew the doughnuts,pos,because Draco must chew a strudel which the professor must chew a student can chew the doughnuts
-since Petunia can arrange many baklava Sirius should smile since Lily must assemble the cake,neg,since Petunia can arrange many baklava Sirius should not smile since Lily must assemble the cake
-since she must gobble the eclaires a professor may create the cake that she can gobble,pos,since she must gobble the eclaires a professor may create the cake that she can gobble
-McGonagall must jump,pos,McGonagall must jump
-Hagrid must create the cookies,neg,Hagrid must not create the cookies
-Draco must eat many pancakes since Dobby should make the cookie since the witch may swim because Neville can make a croissant,pos,Draco must eat many pancakes since Dobby should make the cookie since the witch may swim because Neville can make a croissant
-Hermione must prepare the cookies that she should assemble,neg,Hermione must not prepare the cookies that she should assemble
-the wizard must chew a pancake,neg,the wizard must not chew a pancake
-Sirius must make many croissants that George can chew,pos,Sirius must make many croissants that George can chew
-Ron should gobble the croissants which George must create,neg,Ron should not gobble the croissants which George must create
-since the professor must make many souffles Vernon must sprinkle many cakes,pos,since the professor must make many souffles Vernon must sprinkle many cakes
-since Sirius should arrange a doughnut which the student must make the wizard should prepare the eclaire that the student may chew,pos,since Sirius should arrange a doughnut which the student must make the wizard should prepare the eclaire that the student may chew
-the witch may party,neg,the witch may not party
-McGonagall may create the baklava,neg,McGonagall may not create the baklava
-Draco may party,neg,Draco may not party
-he should giggle,neg,he should not giggle
-Draco may chew the doughnuts because Fred must smile because the student must assemble the croissants that a student must sprinkle,pos,Draco may chew the doughnuts because Fred must smile because the student must assemble the croissants that a student must sprinkle
-Albus can make the cake that the student may assemble,neg,Albus can not make the cake that the student may assemble
-he should hide a baklava,pos,he should hide a baklava
-Harry can eat the croissants that Ginny should create,neg,Harry can not eat the croissants that Ginny should create
-Ginny may assemble many baklava that Vernon must gobble since Voldemort may create the croissant,pos,Ginny may assemble many baklava that Vernon must gobble since Voldemort may create the croissant
-since George should gobble many doughnuts since Draco may prepare a doughnut a professor should gobble many baklava that James may chew,neg,since George should gobble many doughnuts since Draco may prepare a doughnut a professor should not gobble many baklava that James may chew
-Vernon should hide the eclaire,pos,Vernon should hide the eclaire
-James must hide the cakes,pos,James must hide the cakes
-the professor may prepare the souffle,pos,the professor may prepare the souffle
-because a wizard may sprinkle the cakes because Ron must walk since the witch can sprinkle the baklava Lupin may eat many doughnuts which the witch may hide,neg,because a wizard may sprinkle the cakes because Ron must walk since the witch can sprinkle the baklava Lupin may not eat many doughnuts which the witch may hide
-Albus must create the cookies that Fred may make since he may create the cakes that James should sprinkle,pos,Albus must create the cookies that Fred may make since he may create the cakes that James should sprinkle
-since Sirius should gobble the souffle which a student should hide Ron should eat the cookies which Voldemort may gobble,pos,since Sirius should gobble the souffle which a student should hide Ron should eat the cookies which Voldemort may gobble
-the wizard must sprinkle the strudels which the professor can create,neg,the wizard must not sprinkle the strudels which the professor can create
-Vernon should gobble the croissants,neg,Vernon should not gobble the croissants
-Ron should run,neg,Ron should not run
-because she must eat the doughnuts that Harry must sprinkle Hagrid should prepare many baklava,neg,because she must eat the doughnuts that Harry must sprinkle Hagrid should not prepare many baklava
-a wizard should party,pos,a wizard should party
-Sirius must prepare the chocolates that the student must chew,pos,Sirius must prepare the chocolates that the student must chew
-because Snape can chew the doughnuts George should create a souffle which Fred must assemble,pos,because Snape can chew the doughnuts George should create a souffle which Fred must assemble
-James should prepare the baklava,pos,James should prepare the baklava
-Vernon can hide the pancake,neg,Vernon can not hide the pancake
-Lily may assemble the croissants which Hermione can gobble,neg,Lily may not assemble the croissants which Hermione can gobble
-she should gobble the baklava that Snape must assemble since Neville must create a strudel which a student should eat,pos,she should gobble the baklava that Snape must assemble since Neville must create a strudel which a student should eat
-because he can party because Albus must arrange the cakes he must make the pancakes since a professor should create many pancakes which Ginny must gobble,neg,because he can party because Albus must arrange the cakes he must not make the pancakes since a professor should create many pancakes which Ginny must gobble
-Vernon can hide the doughnuts that George can eat,neg,Vernon can not hide the doughnuts that George can eat
-because Fred should chew a croissant which Lupin may hide he should hide the croissants,neg,because Fred should chew a croissant which Lupin may hide he should not hide the croissants
-Neville should sprinkle a cake,neg,Neville should not sprinkle a cake
-since he must prepare a chocolate that James must assemble Hagrid should smile,pos,since he must prepare a chocolate that James must assemble Hagrid should smile
-he may sprinkle the croissants,neg,he may not sprinkle the croissants
-Ron can assemble the pancake,pos,Ron can assemble the pancake
-a witch should hide a pancake,neg,a witch should not hide a pancake
-Ginny should party,neg,Ginny should not party
-a wizard may party,pos,a wizard may party
-since Albus must assemble a cookie she must prepare the eclaires which Neville should arrange,neg,since Albus must assemble a cookie she must not prepare the eclaires which Neville should arrange
-Snape should party since Lupin should chew the cookies which Draco can sprinkle,neg,Snape should not party since Lupin should chew the cookies which Draco can sprinkle
-Fred can create the pancakes,neg,Fred can not create the pancakes
-James may create the cookies that the professor can arrange,neg,James may not create the cookies that the professor can arrange
-since Voldemort can jump Hermione must create the strudels,neg,since Voldemort can jump Hermione must not create the strudels
-Albus should arrange a strudel that Dobby must eat,neg,Albus should not arrange a strudel that Dobby must eat
-Dobby must create the strudels,neg,Dobby must not create the strudels
-Harry must sprinkle the eclaires which a student may hide,neg,Harry must not sprinkle the eclaires which a student may hide
-the professor can assemble a cookie,neg,the professor can not assemble a cookie
-Dobby can assemble many eclaires that Vernon may hide since Lupin must swim,neg,Dobby can not assemble many eclaires that Vernon may hide since Lupin must swim
-since a witch may make a cake Albus should create a croissant that she should hide,neg,since a witch may make a cake Albus should not create a croissant that she should hide
-Ginny must assemble the chocolates that the wizard can arrange,pos,Ginny must assemble the chocolates that the wizard can arrange
-a witch must sprinkle the cake because Dobby must gobble the baklava that Vernon can make,neg,a witch must not sprinkle the cake because Dobby must gobble the baklava that Vernon can make
-since Vernon must chew a strudel the student should chew many cakes which Sirius must make,neg,since Vernon must chew a strudel the student should not chew many cakes which Sirius must make
-she should make the chocolates,pos,she should make the chocolates
-he may create the strudels that Ron may hide,neg,he may not create the strudels that Ron may hide
-Petunia must create the cakes which Fred must create,pos,Petunia must create the cakes which Fred must create
-since Ginny can gobble the croissants a witch can swim since Hagrid can arrange a baklava that a student may prepare,neg,since Ginny can gobble the croissants a witch can not swim since Hagrid can arrange a baklava that a student may prepare
-since a student should arrange a strudel that Dobby may sprinkle Lupin can make the cookies that Harry may make,pos,since a student should arrange a strudel that Dobby may sprinkle Lupin can make the cookies that Harry may make
-Neville should eat the baklava which Petunia must assemble,neg,Neville should not eat the baklava which Petunia must assemble
-Harry should create the strudels which Hermione should arrange,pos,Harry should create the strudels which Hermione should arrange
-he should sprinkle the cake,pos,he should sprinkle the cake
-Dobby can sprinkle a strudel since the wizard can eat the cake that Sirius can sprinkle,pos,Dobby can sprinkle a strudel since the wizard can eat the cake that Sirius can sprinkle
-Harry must hide a cake that the student should create since a witch must hiccup,pos,Harry must hide a cake that the student should create since a witch must hiccup
-a wizard must prepare a souffle which Hagrid must sprinkle,pos,a wizard must prepare a souffle which Hagrid must sprinkle
-Fred should arrange the chocolates,neg,Fred should not arrange the chocolates
-Sirius must sprinkle the souffles because Lily must make the cake,pos,Sirius must sprinkle the souffles because Lily must make the cake
-Ginny may swim since Lily must prepare many strudels,pos,Ginny may swim since Lily must prepare many strudels
-James must party,neg,James must not party
-Dobby can sprinkle the doughnut,neg,Dobby can not sprinkle the doughnut
-since Draco must hiccup because Neville should hiccup Hermione may jump because she must party,pos,since Draco must hiccup because Neville should hiccup Hermione may jump because she must party
-a professor must make the doughnuts,pos,a professor must make the doughnuts
-a witch may chew a eclaire which she must arrange,neg,a witch may not chew a eclaire which she must arrange
-because the witch may create the cookies he can hiccup since Lupin should sprinkle the cookie since Ginny may walk,pos,because the witch may create the cookies he can hiccup since Lupin should sprinkle the cookie since Ginny may walk
-Sirius should prepare the pancakes because Lily should chew a chocolate that Ron should make,neg,Sirius should not prepare the pancakes because Lily should chew a chocolate that Ron should make
-because Lily should create the strudels the student must gobble the souffles that the professor must arrange,pos,because Lily should create the strudels the student must gobble the souffles that the professor must arrange
-Neville must smile,neg,Neville must not smile
-Dobby can prepare the chocolate,neg,Dobby can not prepare the chocolate
-George must assemble the croissants since Draco should create the strudel that Lily can arrange,pos,George must assemble the croissants since Draco should create the strudel that Lily can arrange
-a wizard should giggle,neg,a wizard should not giggle
-Fred may hide many cakes since Petunia may swim,pos,Fred may hide many cakes since Petunia may swim
-because Albus should chew the souffles that Ginny should create the witch must create the cookie since Sirius must eat the doughnuts which Ginny can eat,pos,because Albus should chew the souffles that Ginny should create the witch must create the cookie since Sirius must eat the doughnuts which Ginny can eat
-he can gobble the souffles which a professor should make,neg,he can not gobble the souffles which a professor should make
-Snape should eat a souffle that the witch can assemble because he should assemble a chocolate that Voldemort can gobble,neg,Snape should not eat a souffle that the witch can assemble because he should assemble a chocolate that Voldemort can gobble
-since Lily must sprinkle the cakes that Harry must eat Albus can hide a doughnut that the professor should create because Dobby must sprinkle the pancake,pos,since Lily must sprinkle the cakes that Harry must eat Albus can hide a doughnut that the professor should create because Dobby must sprinkle the pancake
-the witch may gobble the croissants,pos,the witch may gobble the croissants
-Snape must run,pos,Snape must run
-Snape must chew the baklava since Voldemort should jump,pos,Snape must chew the baklava since Voldemort should jump
-Lupin must run since a witch must arrange the cookie that Petunia should prepare,neg,Lupin must not run since a witch must arrange the cookie that Petunia should prepare
-since McGonagall must make the chocolates she must walk,neg,since McGonagall must make the chocolates she must not walk
-the wizard should jump,neg,the wizard should not jump
-Voldemort should swim,pos,Voldemort should swim
-Hermione may giggle since a witch can gobble a pancake that Dobby can create,pos,Hermione may giggle since a witch can gobble a pancake that Dobby can create
-Albus must create the strudel,pos,Albus must create the strudel
-Neville should prepare the baklava that George should assemble,pos,Neville should prepare the baklava that George should assemble
-George must create many croissants that Fred can assemble,neg,George must not create many croissants that Fred can assemble
-Dobby must make the souffle that a witch should sprinkle,pos,Dobby must make the souffle that a witch should sprinkle
-because he must eat a chocolate Ginny must prepare a cookie,neg,because he must eat a chocolate Ginny must not prepare a cookie
-because McGonagall should create a strudel Fred should assemble a baklava,pos,because McGonagall should create a strudel Fred should assemble a baklava
-since Dobby should eat the cookies Fred may chew many pancakes,pos,since Dobby should eat the cookies Fred may chew many pancakes
-Lily should sprinkle the doughnut which Voldemort may assemble,neg,Lily should not sprinkle the doughnut which Voldemort may assemble
-the witch should chew the cookies which Snape may chew,neg,the witch should not chew the cookies which Snape may chew
-Hermione must eat the chocolates,pos,Hermione must eat the chocolates
-Albus must arrange many doughnuts,neg,Albus must not arrange many doughnuts
-Lupin must arrange the cookies,neg,Lupin must not arrange the cookies
-since Lily can giggle Voldemort may swim,pos,since Lily can giggle Voldemort may swim
-Hermione may assemble a cake that a student can make,neg,Hermione may not assemble a cake that a student can make
-since Snape must hide the strudels James must prepare the strudel,pos,since Snape must hide the strudels James must prepare the strudel
-Hagrid should arrange the cakes which Albus can gobble,pos,Hagrid should arrange the cakes which Albus can gobble
-the student should sprinkle the doughnuts,pos,the student should sprinkle the doughnuts
-Lupin should prepare the chocolates that Vernon should sprinkle because Lily must laugh,neg,Lupin should not prepare the chocolates that Vernon should sprinkle because Lily must laugh
-Hermione can gobble the croissants which Fred must chew,pos,Hermione can gobble the croissants which Fred must chew
-McGonagall must hide a strudel,neg,McGonagall must not hide a strudel
-because Vernon must wiggle she must arrange the eclaires since Sirius should chew the croissant which a professor must prepare,pos,because Vernon must wiggle she must arrange the eclaires since Sirius should chew the croissant which a professor must prepare
-because Albus should make a strudel that James may arrange McGonagall should run because Hermione can arrange the eclaires that the wizard must prepare,pos,because Albus should make a strudel that James may arrange McGonagall should run because Hermione can arrange the eclaires that the wizard must prepare
-the student must party,pos,the student must party
-Vernon should hide many strudels,pos,Vernon should hide many strudels
-since Lupin can hide the croissant because Neville must jump Draco can create the pancake,pos,since Lupin can hide the croissant because Neville must jump Draco can create the pancake
-because Hermione must wiggle a witch must arrange a strudel which Albus can chew,neg,because Hermione must wiggle a witch must not arrange a strudel which Albus can chew
-since McGonagall must make the cake he must create a eclaire,pos,since McGonagall must make the cake he must create a eclaire
-Sirius can hide a cookie,pos,Sirius can hide a cookie
-Fred must create the cakes that Voldemort must prepare,neg,Fred must not create the cakes that Voldemort must prepare
-the professor can run,pos,the professor can run
-McGonagall may create many croissants that James must sprinkle,pos,McGonagall may create many croissants that James must sprinkle
-Snape should create the doughnut that a professor may create,neg,Snape should not create the doughnut that a professor may create
-she should hide a strudel because Draco must sprinkle the eclaire that Dobby should prepare,neg,she should not hide a strudel because Draco must sprinkle the eclaire that Dobby should prepare
-a wizard can create many croissants,pos,a wizard can create many croissants
-Ginny should walk,neg,Ginny should not walk
-Albus must chew the croissants which Vernon must gobble,neg,Albus must not chew the croissants which Vernon must gobble
-Albus may create many cookies,pos,Albus may create many cookies
-Snape can eat a eclaire that he can sprinkle,pos,Snape can eat a eclaire that he can sprinkle
-Voldemort can create the eclaire,neg,Voldemort can not create the eclaire
-she should chew the eclaire,pos,she should chew the eclaire
-a professor must laugh because Harry should create a chocolate which he can arrange,pos,a professor must laugh because Harry should create a chocolate which he can arrange
-Albus can arrange the croissants that Hagrid should hide,pos,Albus can arrange the croissants that Hagrid should hide
-Snape must laugh,pos,Snape must laugh
-McGonagall should prepare the eclaire that Petunia may chew because Lupin may wiggle because James may run since Dobby should sprinkle many cookies,pos,McGonagall should prepare the eclaire that Petunia may chew because Lupin may wiggle because James may run since Dobby should sprinkle many cookies
-George should smile,neg,George should not smile
-Fred can gobble the doughnuts,pos,Fred can gobble the doughnuts
-McGonagall can assemble the cookies that Draco should make,pos,McGonagall can assemble the cookies that Draco should make
-a wizard must arrange the eclaires which Sirius should arrange,neg,a wizard must not arrange the eclaires which Sirius should arrange
-Dobby can arrange the chocolate which Hagrid may arrange,pos,Dobby can arrange the chocolate which Hagrid may arrange
-he may arrange the eclaires,pos,he may arrange the eclaires
-Lily should party,neg,Lily should not party
-James should gobble the souffle,pos,James should gobble the souffle
-a professor may sprinkle the baklava that the professor can prepare,neg,a professor may not sprinkle the baklava that the professor can prepare
-a professor can make the croissants that she must prepare,neg,a professor can not make the croissants that she must prepare
-Ron can gobble many cookies which a student should make,pos,Ron can gobble many cookies which a student should make
-because Neville may gobble many baklava the student may eat many strudels,neg,because Neville may gobble many baklava the student may not eat many strudels
-since Sirius should giggle because Sirius should walk Ginny can chew the baklava which McGonagall may eat since the witch should chew the cookies,neg,since Sirius should giggle because Sirius should walk Ginny can not chew the baklava which McGonagall may eat since the witch should chew the cookies
-Ginny must eat the croissants,pos,Ginny must eat the croissants
-since Neville may hide a croissant Fred can sprinkle a baklava that Neville should gobble since Voldemort must prepare the doughnut,neg,since Neville may hide a croissant Fred can not sprinkle a baklava that Neville should gobble since Voldemort must prepare the doughnut
-James must chew a cookie,pos,James must chew a cookie
-Ginny can wiggle,pos,Ginny can wiggle
-Ron may chew a pancake which Dobby must prepare,neg,Ron may not chew a pancake which Dobby must prepare
-a professor must smile,neg,a professor must not smile
-Lily can hide the doughnut,pos,Lily can hide the doughnut
-since Draco should arrange a souffle which Harry must prepare Ron should create a doughnut,pos,since Draco should arrange a souffle which Harry must prepare Ron should create a doughnut
+he may jump,pos,he may jump
+she can smile,pos,she can smile
+Fred can swim,pos,Fred can swim
+Fred must walk,pos,Fred must walk
+she can walk,pos,she can walk
+she can swim,pos,she can swim
+Ron may giggle,pos,Ron may giggle
+Lily must walk,pos,Lily must walk
+she must party,pos,she must party
+Ron must walk,pos,Ron must walk
+she must smile,pos,she must smile
+Ron may swim,pos,Ron may swim
+Dobby can jump,pos,Dobby can jump
+he must wiggle,pos,he must wiggle
+Harry may run,pos,Harry may run
+she must party,pos,she must party
+he can smile,pos,he can smile
+Dobby must run,pos,Dobby must run
+he must run,pos,he must run
+Fred may party,pos,Fred may party
+Snape may walk,pos,Snape may walk
+Lily may run,pos,Lily may run
+Ginny must run,pos,Ginny must run
+Lily must swim,pos,Lily must swim
+Ginny can swim,pos,Ginny can swim
+Harry may jump,pos,Harry may jump
+Lily may jump,pos,Lily may jump
+James can run,pos,James can run
+Lily can party,pos,Lily can party
+Ron can laugh,pos,Ron can laugh
+James may run,pos,James may run
+James may jump,pos,James may jump
+she may hiccup,pos,she may hiccup
+Ron must jump,pos,Ron must jump
+he should swim,pos,he should swim
+Harry must run,pos,Harry must run
+she must jump,pos,she must jump
+Snape may jump,pos,Snape may jump
+Sirius can run,pos,Sirius can run
+Draco can run,pos,Draco can run
+Dobby may run,pos,Dobby may run
+Fred must walk,pos,Fred must walk
+he must hiccup,pos,he must hiccup
+she can swim,pos,she can swim
+he must jump,pos,he must jump
+Lily may swim,pos,Lily may swim
+he should swim,pos,he should swim
 she can laugh,pos,she can laugh
-he can hide a cookie that James must gobble,neg,he can not hide a cookie that James must gobble
-Harry may assemble the eclaire,neg,Harry may not assemble the eclaire
-a witch must swim,neg,a witch must not swim
+Lupin may jump,pos,Lupin may jump
+Ron may swim,pos,Ron may swim
+he should swim,pos,he should swim
+she can hiccup,pos,she can hiccup
+Lupin may swim,pos,Lupin may swim
+Lily may run,pos,Lily may run
+Albus may jump,pos,Albus may jump
+she can run,pos,she can run
+he may wiggle,pos,he may wiggle
+Ron may giggle,pos,Ron may giggle
+Ron must jump,pos,Ron must jump
+Ron may laugh,pos,Ron may laugh
+he should jump,pos,he should jump
+Lily may laugh,pos,Lily may laugh
+he must laugh,pos,he must laugh
+Fred can run,pos,Fred can run
+Dobby may swim,pos,Dobby may swim
+Ron can party,pos,Ron can party
+he must laugh,pos,he must laugh
+she can swim,pos,she can swim
+Lupin may run,pos,Lupin may run
+Ron may hiccup,pos,Ron may hiccup
+she may smile,pos,she may smile
+Hagrid may run,pos,Hagrid may run
+Fred may jump,pos,Fred may jump
+Dobby may jump,pos,Dobby may jump
+Ron can walk,pos,Ron can walk
+she must party,pos,she must party
+he can walk,pos,he can walk
+she can smile,pos,she can smile
+Fred can smile,pos,Fred can smile
+Fred may walk,pos,Fred may walk
+Ron may swim,pos,Ron may swim
+Fred must walk,pos,Fred must walk
+Ron may swim,pos,Ron may swim
+George may run,pos,George may run
+Fred may swim,pos,Fred may swim
+she may party,pos,she may party
+he must party,pos,he must party
+Ginny may swim,pos,Ginny may swim
+Lily can smile,pos,Lily can smile
+he may giggle,pos,he may giggle
+she must run,pos,she must run
+he can walk,pos,he can walk
+Harry may run,pos,Harry may run
+Snape can swim,pos,Snape can swim
+Snape must run,pos,Snape must run
+she must laugh,pos,she must laugh
+he may party,pos,he may party
+he can laugh,pos,he can laugh
+Lily may laugh,pos,Lily may laugh
+she can swim,pos,she can swim
+he should jump,pos,he should jump
+she may walk,pos,she may walk
+Lupin may run,pos,Lupin may run
+Lupin can swim,pos,Lupin can swim
+Ron may smile,pos,Ron may smile
+Ron must run,pos,Ron must run
+Lupin can walk,pos,Lupin can walk
+she must walk,pos,she must walk
+Ron can jump,pos,Ron can jump
+she must swim,pos,she must swim
+Ron can walk,pos,Ron can walk
+Lily can run,pos,Lily can run
+Lily must run,pos,Lily must run
+Dobby can run,pos,Dobby can run
+Fred can smile,pos,Fred can smile
+Draco must run,pos,Draco must run
+he may run,pos,he may run
+James may jump,pos,James may jump
+she must run,pos,she must run
+she can smile,pos,she can smile
+Draco may walk,pos,Draco may walk
+Fred may jump,pos,Fred may jump
+she may giggle,pos,she may giggle
+Fred must run,pos,Fred must run
+Lily can smile,pos,Lily can smile
+Ron should run,pos,Ron should run
+she may swim,pos,she may swim
+Ginny can walk,pos,Ginny can walk
+Fred may laugh,pos,Fred may laugh
+James can swim,pos,James can swim
+Dobby may run,pos,Dobby may run
+Fred must swim,pos,Fred must swim
+Ginny must run,pos,Ginny must run
+he can smile,pos,he can smile
+he should walk,pos,he should walk
+Lily may party,pos,Lily may party
+he must giggle,pos,he must giggle
+Albus may jump,pos,Albus may jump
+he must run,pos,he must run
+Lily can laugh,pos,Lily can laugh
+Ron can swim,pos,Ron can swim
+Lily can run,pos,Lily can run
+he must walk,pos,he must walk
+he should walk,pos,he should walk
+Draco can swim,pos,Draco can swim
+he may smile,pos,he may smile
+he can laugh,pos,he can laugh
+he must jump,pos,he must jump
+he must smile,pos,he must smile
+Vernon may run,pos,Vernon may run
+Ron must laugh,pos,Ron must laugh
+Dobby may run,pos,Dobby may run
+he may hiccup,pos,he may hiccup
+he must walk,pos,he must walk
+he can party,pos,he can party
+Lupin may run,pos,Lupin may run
+he must party,pos,he must party
+Ron may jump,pos,Ron may jump
+Lily may jump,pos,Lily may jump
+Fred must swim,pos,Fred must swim
+Albus can run,pos,Albus can run
+Albus can run,pos,Albus can run
+he may walk,pos,he may walk
+he must giggle,pos,he must giggle
+Ron can jump,pos,Ron can jump
+he must jump,pos,he must jump
+Lily can swim,pos,Lily can swim
+she can party,pos,she can party
+Lily must walk,pos,Lily must walk
+Lily must swim,pos,Lily must swim
+Ron must jump,pos,Ron must jump
+he must giggle,pos,he must giggle
+Ron may wiggle,pos,Ron may wiggle
+she must party,pos,she must party
+he can swim,pos,he can swim
+he must smile,pos,he must smile
+Ron may laugh,pos,Ron may laugh
+she can walk,pos,she can walk
+Ron may swim,pos,Ron may swim
+Draco may run,pos,Draco may run
+she may party,pos,she may party
+he can laugh,pos,he can laugh
+he may swim,pos,he may swim
+Ron must jump,pos,Ron must jump
+Ron can wiggle,pos,Ron can wiggle
+Ron can party,pos,Ron can party
+he must smile,pos,he must smile
+Ron can smile,pos,Ron can smile
+Sirius may run,pos,Sirius may run
+she must smile,pos,she must smile
+Albus may swim,pos,Albus may swim
+he may hiccup,pos,he may hiccup
+he may swim,pos,he may swim
+she must swim,pos,she must swim
+he can laugh,pos,he can laugh
+Ron can swim,pos,Ron can swim
+Harry may walk,pos,Harry may walk
+he must giggle,pos,he must giggle
+Lily must jump,pos,Lily must jump
+Lily may party,pos,Lily may party
+Sirius may run,pos,Sirius may run
+Snape can jump,pos,Snape can jump
+Ron may swim,pos,Ron may swim
+she may laugh,pos,she may laugh
+Snape can jump,pos,Snape can jump
+he may run,pos,he may run
+Fred can walk,pos,Fred can walk
+Albus may walk,pos,Albus may walk
+he should swim,pos,he should swim
+Ron must walk,pos,Ron must walk
+Dobby may jump,pos,Dobby may jump
+Ginny can jump,pos,Ginny can jump
+she can party,pos,she can party
+Snape may walk,pos,Snape may walk
+he may wiggle,pos,he may wiggle
+he must walk,pos,he must walk
+Snape may jump,pos,Snape may jump
+she may wiggle,pos,she may wiggle
+she can jump,pos,she can jump
+she can run,pos,she can run
+he must laugh,pos,he must laugh
+she may wiggle,pos,she may wiggle
+Lupin may run,pos,Lupin may run
+Dobby may swim,pos,Dobby may swim
+Albus may run,pos,Albus may run
+she must jump,pos,she must jump
+Ron can party,pos,Ron can party
+she may hiccup,pos,she may hiccup
+Ginny may jump,pos,Ginny may jump
+Draco can walk,pos,Draco can walk
+Harry must run,pos,Harry must run
+Harry can swim,pos,Harry can swim
+she can laugh,pos,she can laugh
+Dobby can run,pos,Dobby can run
+Sirius can run,pos,Sirius can run
+Lily can walk,pos,Lily can walk
+she may giggle,pos,she may giggle
+she may giggle,pos,she may giggle
+Ginny can jump,pos,Ginny can jump
+he must laugh,pos,he must laugh
+Draco can run,pos,Draco can run
+Fred may jump,pos,Fred may jump
+Lily must jump,pos,Lily must jump
+he must jump,pos,he must jump
+Fred can swim,pos,Fred can swim
+he can giggle,pos,he can giggle
+she can party,pos,she can party
+he can wiggle,pos,he can wiggle
+Albus can swim,pos,Albus can swim
+he must jump,pos,he must jump
+Harry must run,pos,Harry must run
+Ron can hiccup,pos,Ron can hiccup
+Draco may walk,pos,Draco may walk
+she can hiccup,pos,she can hiccup
+Ron may walk,pos,Ron may walk
+Vernon can run,pos,Vernon can run
+he should jump,pos,he should jump
+Fred may swim,pos,Fred may swim
+Ron must laugh,pos,Ron must laugh
+Dobby can walk,pos,Dobby can walk
+Ron may party,pos,Ron may party
+Fred may party,pos,Fred may party
+Albus may walk,pos,Albus may walk
+he may jump,pos,he may jump
+Draco must run,pos,Draco must run
+he can smile,pos,he can smile
+Lily must walk,pos,Lily must walk
+he must party,pos,he must party
+Ginny may run,pos,Ginny may run
+he can swim,pos,he can swim
+Lupin can run,pos,Lupin can run
+Ron must run,pos,Ron must run
+he can giggle,pos,he can giggle
+Dobby must run,pos,Dobby must run
+Snape may swim,pos,Snape may swim
+she can laugh,pos,she can laugh
+Ron may hiccup,pos,Ron may hiccup
+Ginny may jump,pos,Ginny may jump
+Albus must run,pos,Albus must run
+Dobby can walk,pos,Dobby can walk
+he may wiggle,pos,he may wiggle
+Harry must run,pos,Harry must run
+Lily can walk,pos,Lily can walk
+she may smile,pos,she may smile
+he can hiccup,pos,he can hiccup
+she must laugh,pos,she must laugh
+he can smile,pos,he can smile
+she can walk,pos,she can walk
+he must wiggle,pos,he must wiggle
+she may laugh,pos,she may laugh
+Ginny must run,pos,Ginny must run
+Snape can swim,pos,Snape can swim
+she may run,pos,she may run
+Dobby may walk,pos,Dobby may walk
+Ron may walk,pos,Ron may walk
+he can run,pos,he can run
+Ron can wiggle,pos,Ron can wiggle
+she can run,pos,she can run
+Lily can jump,pos,Lily can jump
+Snape can run,pos,Snape can run
+James must run,pos,James must run
+Fred can jump,pos,Fred can jump
+Harry can swim,pos,Harry can swim
+Draco may swim,pos,Draco may swim
+Lily must swim,pos,Lily must swim
+Ron can smile,pos,Ron can smile
+Dobby can walk,pos,Dobby can walk
+Lily must jump,pos,Lily must jump
+James can run,pos,James can run
+Draco may run,pos,Draco may run
+Ron must walk,pos,Ron must walk
+Fred may jump,pos,Fred may jump
+Ron can walk,pos,Ron can walk
+he should swim,pos,he should swim
+Snape may run,pos,Snape may run
+Snape may swim,pos,Snape may swim
+Ginny must run,pos,Ginny must run
+Snape can jump,pos,Snape can jump
+Snape may run,pos,Snape may run
+Fred can run,pos,Fred can run
+he must smile,pos,he must smile
+she must smile,pos,she must smile
+James can run,pos,James can run
+Sirius can run,pos,Sirius can run
+Vernon can run,pos,Vernon can run
+Lily must run,pos,Lily must run
+he must hiccup,pos,he must hiccup
+he can run,pos,he can run
+Hagrid can run,pos,Hagrid can run
+Fred must swim,pos,Fred must swim
+Lily may smile,pos,Lily may smile
+Lily may jump,pos,Lily may jump
+he can party,pos,he can party
+Draco may walk,pos,Draco may walk
+he should run,pos,he should run
+Harry can run,pos,Harry can run
+she may giggle,pos,she may giggle
+he may giggle,pos,he may giggle
+Ron may walk,pos,Ron may walk
+he may giggle,pos,he may giggle
+she must jump,pos,she must jump
+George may run,pos,George may run
+Fred must run,pos,Fred must run
+he can swim,pos,he can swim
+Dobby may jump,pos,Dobby may jump
+Lupin may swim,pos,Lupin may swim
+Snape can walk,pos,Snape can walk
+she must jump,pos,she must jump
+Lily may walk,pos,Lily may walk
+he can jump,pos,he can jump
+Fred must swim,pos,Fred must swim
+she must laugh,pos,she must laugh
+Draco may jump,pos,Draco may jump
+she can smile,pos,she can smile
+Ron must walk,pos,Ron must walk
+he can laugh,pos,he can laugh
+Snape may jump,pos,Snape may jump
+Draco can walk,pos,Draco can walk
+Ron must laugh,pos,Ron must laugh
+Albus must run,pos,Albus must run
+she must walk,pos,she must walk
+Draco may swim,pos,Draco may swim
+Hagrid can run,pos,Hagrid can run
+he can run,pos,he can run
+she must smile,pos,she must smile
+Ginny must run,pos,Ginny must run
+he should jump,pos,he should jump
+Ginny may jump,pos,Ginny may jump
+Albus may jump,pos,Albus may jump
+Snape can jump,pos,Snape can jump
+Harry can run,pos,Harry can run
+he must laugh,pos,he must laugh
+Lily may run,pos,Lily may run
+Fred may walk,pos,Fred may walk
+he must giggle,pos,he must giggle
+Lily can swim,pos,Lily can swim
+Ron must smile,pos,Ron must smile
+she may wiggle,pos,she may wiggle
+Draco can walk,pos,Draco can walk
+Ron must smile,pos,Ron must smile
+James must run,pos,James must run
+Lily may smile,pos,Lily may smile
+she should run,pos,she should run
+he must wiggle,pos,he must wiggle
+James can swim,pos,James can swim
+Dobby may jump,pos,Dobby may jump
+he must jump,pos,he must jump
+Dobby can walk,pos,Dobby can walk
+Draco can run,pos,Draco can run
+Fred may swim,pos,Fred may swim
+Ron can hiccup,pos,Ron can hiccup
+Lily must walk,pos,Lily must walk
+she can run,pos,she can run
+Ron can wiggle,pos,Ron can wiggle
+he should jump,pos,he should jump
+Harry may swim,pos,Harry may swim
+Lupin may swim,pos,Lupin may swim
+she can walk,pos,she can walk
+Fred must swim,pos,Fred must swim
+Snape may jump,pos,Snape may jump
+he may smile,pos,he may smile
+he may jump,pos,he may jump
+he must laugh,pos,he must laugh
+Draco must run,pos,Draco must run
+Harry can jump,pos,Harry can jump
+Fred can laugh,pos,Fred can laugh
+Albus may jump,pos,Albus may jump
+Lily can jump,pos,Lily can jump
+he must hiccup,pos,he must hiccup
+Fred can swim,pos,Fred can swim
+she may walk,pos,she may walk
+he must laugh,pos,he must laugh
+Ginny may jump,pos,Ginny may jump
+Ron must laugh,pos,Ron must laugh
+Ron can jump,pos,Ron can jump
+he must smile,pos,he must smile
+Harry must run,pos,Harry must run
+Lupin can walk,pos,Lupin can walk
+Lupin may walk,pos,Lupin may walk
+Lily can smile,pos,Lily can smile
+Lily may swim,pos,Lily may swim
+Ginny must run,pos,Ginny must run
+James may jump,pos,James may jump
+Ginny can swim,pos,Ginny can swim
+she can jump,pos,she can jump
+she must laugh,pos,she must laugh
+he must smile,pos,he must smile
+James may swim,pos,James may swim
+James may walk,pos,James may walk
+Ron may smile,pos,Ron may smile
+Albus must run,pos,Albus must run
+Ron must swim,pos,Ron must swim
+Ron may giggle,pos,Ron may giggle
+Vernon may run,pos,Vernon may run
+she must run,pos,she must run
+Ron must smile,pos,Ron must smile
+Ron can walk,pos,Ron can walk
+he can jump,pos,he can jump
+she may smile,pos,she may smile
+Lily can laugh,pos,Lily can laugh
+he must smile,pos,he must smile
+she can laugh,pos,she can laugh
+she can run,pos,she can run
+Albus may walk,pos,Albus may walk
+she may laugh,pos,she may laugh
+Lupin can jump,pos,Lupin can jump
+Fred may run,pos,Fred may run
+she may smile,pos,she may smile
+Fred may smile,pos,Fred may smile
+Draco may jump,pos,Draco may jump
+Lily may walk,pos,Lily may walk
+she may smile,pos,she may smile
+Lupin can run,pos,Lupin can run
+he may giggle,pos,he may giggle
+Ron must laugh,pos,Ron must laugh
+Draco may walk,pos,Draco may walk
+Lily can walk,pos,Lily can walk
+he may giggle,pos,he may giggle
+he should run,pos,he should run
+he can run,pos,he can run
+Ron can wiggle,pos,Ron can wiggle
+she can giggle,pos,she can giggle
+Lupin can run,pos,Lupin can run
+James can swim,pos,James can swim
+she must walk,pos,she must walk
+Lily may walk,pos,Lily may walk
+James can swim,pos,James can swim
+he must wiggle,pos,he must wiggle
+she must run,pos,she must run
+he must run,pos,he must run
+Ron can jump,pos,Ron can jump
+he must swim,pos,he must swim
+she may laugh,pos,she may laugh
+Ron can party,pos,Ron can party
+Dobby may walk,pos,Dobby may walk
+he should jump,pos,he should jump
+Fred may walk,pos,Fred may walk
+Lily may smile,pos,Lily may smile
+Hagrid can run,pos,Hagrid can run
+Ginny can swim,pos,Ginny can swim
+Snape must run,pos,Snape must run
+Fred can walk,pos,Fred can walk
+he must wiggle,pos,he must wiggle
+he can wiggle,pos,he can wiggle
+Ron must jump,pos,Ron must jump
+Ron can run,pos,Ron can run
+Fred may smile,pos,Fred may smile
+Lily must jump,pos,Lily must jump
+she may smile,pos,she may smile
+Snape may run,pos,Snape may run
+Lily must run,pos,Lily must run
+Lily can party,pos,Lily can party
+he can wiggle,pos,he can wiggle
+Lupin may swim,pos,Lupin may swim
+he may laugh,pos,he may laugh
+Snape may jump,pos,Snape may jump
+he must walk,pos,he must walk
+Ron may swim,pos,Ron may swim
+Lupin can swim,pos,Lupin can swim
+James can swim,pos,James can swim
+Fred must jump,pos,Fred must jump
+he can laugh,pos,he can laugh
+he must wiggle,pos,he must wiggle
+Lily can jump,pos,Lily can jump
+he must wiggle,pos,he must wiggle
+Dobby can run,pos,Dobby can run
+James can run,pos,James can run
+she may walk,pos,she may walk
+Lily can walk,pos,Lily can walk
+he can wiggle,pos,he can wiggle
+Draco may run,pos,Draco may run
+Lily can run,pos,Lily can run
+she can walk,pos,she can walk
+he may swim,pos,he may swim
+Lily may jump,pos,Lily may jump
+Fred can laugh,pos,Fred can laugh
+he must party,pos,he must party
+she may swim,pos,she may swim
+Snape can run,pos,Snape can run
+Draco can walk,pos,Draco can walk
+Dobby may jump,pos,Dobby may jump
+Ginny may walk,pos,Ginny may walk
+she can walk,pos,she can walk
+Fred can walk,pos,Fred can walk
+she must walk,pos,she must walk
+Draco can swim,pos,Draco can swim
+Fred can jump,pos,Fred can jump
+she may laugh,pos,she may laugh
+Ron may run,pos,Ron may run
+Lupin may run,pos,Lupin may run
+Albus may run,pos,Albus may run
+she can party,pos,she can party
+Lily can swim,pos,Lily can swim
+she must party,pos,she must party
+Fred can swim,pos,Fred can swim
+Dobby can run,pos,Dobby can run
+Dobby must run,pos,Dobby must run
+he can wiggle,pos,he can wiggle
+he must hiccup,pos,he must hiccup
+he can party,pos,he can party
+Ron must swim,pos,Ron must swim
+he must walk,pos,he must walk
+Snape can jump,pos,Snape can jump
+Ron can giggle,pos,Ron can giggle
+she must swim,pos,she must swim
+Ron can laugh,pos,Ron can laugh
+he must hiccup,pos,he must hiccup
+Fred must walk,pos,Fred must walk
+Snape can swim,pos,Snape can swim
+he should jump,pos,he should jump
+Ron may run,pos,Ron may run
+Snape may run,pos,Snape may run
+Ginny may walk,pos,Ginny may walk
+Fred can smile,pos,Fred can smile
+Fred must run,pos,Fred must run
+he must smile,pos,he must smile
+she must party,pos,she must party
+Harry may swim,pos,Harry may swim
+she may wiggle,pos,she may wiggle
+she may hiccup,pos,she may hiccup
+she must party,pos,she must party
+he must run,pos,he must run
+she can laugh,pos,she can laugh
+Fred can smile,pos,Fred can smile
+George can run,pos,George can run
+Ginny can run,pos,Ginny can run
+she can walk,pos,she can walk
+she may walk,pos,she may walk
+he can wiggle,pos,he can wiggle
+he must swim,pos,he must swim
+Ginny can walk,pos,Ginny can walk
+he can run,pos,he can run
+he should run,pos,he should run
+Fred must walk,pos,Fred must walk
+he may giggle,pos,he may giggle
+she may hiccup,pos,she may hiccup
+he must giggle,pos,he must giggle
+George may run,pos,George may run
+Vernon may run,pos,Vernon may run
+he must swim,pos,he must swim
+Snape must run,pos,Snape must run
+he can laugh,pos,he can laugh
+he may walk,pos,he may walk
+Ron can jump,pos,Ron can jump
+Lily may walk,pos,Lily may walk
+he should walk,pos,he should walk
+she should run,pos,she should run
+Harry can run,pos,Harry can run
+he can jump,pos,he can jump
+she must jump,pos,she must jump
+he should walk,pos,he should walk
+she may walk,pos,she may walk
+Fred must swim,pos,Fred must swim
+Fred must run,pos,Fred must run
+Ron can laugh,pos,Ron can laugh
+Ginny may swim,pos,Ginny may swim
+she must run,pos,she must run
+Albus can run,pos,Albus can run
+she must walk,pos,she must walk
+he must giggle,pos,he must giggle
+Albus may run,pos,Albus may run
+Lupin may run,pos,Lupin may run
+he may run,pos,he may run
+Ron must swim,pos,Ron must swim
+she can smile,pos,she can smile
+she must jump,pos,she must jump
+Draco can jump,pos,Draco can jump
+Ron may jump,pos,Ron may jump
+Fred can jump,pos,Fred can jump
+Ron may swim,pos,Ron may swim
+she should run,pos,she should run
+Draco can swim,pos,Draco can swim
+Lupin may jump,pos,Lupin may jump
+Draco can jump,pos,Draco can jump
+James can jump,pos,James can jump
+Lily may jump,pos,Lily may jump
+Fred can party,pos,Fred can party
+he must jump,pos,he must jump
+she may walk,pos,she may walk
+she should run,pos,she should run
+Albus can run,pos,Albus can run
+she must smile,pos,she must smile
+Ron may party,pos,Ron may party
+she can wiggle,pos,she can wiggle
+Ron should run,pos,Ron should run
+Lily must walk,pos,Lily must walk
+Lily can laugh,pos,Lily can laugh
+he should walk,pos,he should walk
+Dobby may walk,pos,Dobby may walk
+Ginny can jump,pos,Ginny can jump
+he should swim,pos,he should swim
+Albus may swim,pos,Albus may swim
+Ron may giggle,pos,Ron may giggle
+he must giggle,pos,he must giggle
+he must wiggle,pos,he must wiggle
+he may swim,pos,he may swim
+Fred may walk,pos,Fred may walk
+Snape can walk,pos,Snape can walk
+Fred may smile,pos,Fred may smile
+Harry may walk,pos,Harry may walk
+Sirius can run,pos,Sirius can run
+she must laugh,pos,she must laugh
+Albus may run,pos,Albus may run
+he can run,pos,he can run
+James can swim,pos,James can swim
+Ron must laugh,pos,Ron must laugh
+Draco may swim,pos,Draco may swim
+she must jump,pos,she must jump
+Vernon can run,pos,Vernon can run
+he may walk,pos,he may walk
+Snape may swim,pos,Snape may swim
+Fred may walk,pos,Fred may walk
+Draco may jump,pos,Draco may jump
+Ron may party,pos,Ron may party
+he may walk,pos,he may walk
+he must jump,pos,he must jump
+Lupin may jump,pos,Lupin may jump
+Draco can swim,pos,Draco can swim
+he must hiccup,pos,he must hiccup
+she can party,pos,she can party
+Lily must swim,pos,Lily must swim
+Draco can jump,pos,Draco can jump
+she must walk,pos,she must walk
+Ginny may swim,pos,Ginny may swim
+Snape can run,pos,Snape can run
+she may smile,pos,she may smile
+Fred must jump,pos,Fred must jump
+Ron can swim,pos,Ron can swim
+she may walk,pos,she may walk
+Snape can jump,pos,Snape can jump
+he should swim,pos,he should swim
+Ron may run,pos,Ron may run
+Harry can jump,pos,Harry can jump
+Draco can jump,pos,Draco can jump
+Lily may smile,pos,Lily may smile
+Draco can jump,pos,Draco can jump
+Lily must swim,pos,Lily must swim
+she can jump,pos,she can jump
+Fred can walk,pos,Fred can walk
+he may party,pos,he may party
+he can giggle,pos,he can giggle
+he must swim,pos,he must swim
+Fred can party,pos,Fred can party
+James must run,pos,James must run
+she may hiccup,pos,she may hiccup
+Fred can laugh,pos,Fred can laugh
+Fred must walk,pos,Fred must walk
+he should swim,pos,he should swim
+he must wiggle,pos,he must wiggle
+she may smile,pos,she may smile
+he should walk,pos,he should walk
+James may swim,pos,James may swim
+she can laugh,pos,she can laugh
+he may wiggle,pos,he may wiggle
+Lily must walk,pos,Lily must walk
+she must jump,pos,she must jump
+Ron may giggle,pos,Ron may giggle
+Ginny must run,pos,Ginny must run
+she may party,pos,she may party
+he must giggle,pos,he must giggle
+she must jump,pos,she must jump
+she may hiccup,pos,she may hiccup
+Fred must run,pos,Fred must run
+Draco may walk,pos,Draco may walk
+he must hiccup,pos,he must hiccup
+Harry can jump,pos,Harry can jump
+she may walk,pos,she may walk
+Fred must run,pos,Fred must run
+he can walk,pos,he can walk
+Lily must jump,pos,Lily must jump
+Ron must run,pos,Ron must run
+Ron can walk,pos,Ron can walk
+she can walk,pos,she can walk
+Fred must jump,pos,Fred must jump
+she can swim,pos,she can swim
+Ron should run,pos,Ron should run
+she can jump,pos,she can jump
+she must jump,pos,she must jump
+she can jump,pos,she can jump
+he may wiggle,pos,he may wiggle
+Ron can run,pos,Ron can run
+Lily must swim,pos,Lily must swim
+Lily may walk,pos,Lily may walk
+Fred may jump,pos,Fred may jump
+Ron should run,pos,Ron should run
+Fred must swim,pos,Fred must swim
+Harry can run,pos,Harry can run
+Albus can swim,pos,Albus can swim
+Snape may walk,pos,Snape may walk
+she may walk,pos,she may walk
+he should jump,pos,he should jump
+he may party,pos,he may party
+Snape may walk,pos,Snape may walk
+he may party,pos,he may party
+he should walk,pos,he should walk
+Dobby may swim,pos,Dobby may swim
+she can party,pos,she can party
+Fred must swim,pos,Fred must swim
+Ginny may swim,pos,Ginny may swim
+she can swim,pos,she can swim
+she may walk,pos,she may walk
+Snape may run,pos,Snape may run
+Lupin may swim,pos,Lupin may swim
+he must jump,pos,he must jump
+Harry must run,pos,Harry must run
+Fred can walk,pos,Fred can walk
+Lily must swim,pos,Lily must swim
+she may giggle,pos,she may giggle
+she may party,pos,she may party
+he can party,pos,he can party
+Draco must run,pos,Draco must run
+Lily can run,pos,Lily can run
+he must run,pos,he must run
+he may party,pos,he may party
+he must wiggle,pos,he must wiggle
+George can run,pos,George can run
+James can run,pos,James can run
+Harry can walk,pos,Harry can walk
+Lupin can swim,pos,Lupin can swim
+Draco must run,pos,Draco must run
+James may run,pos,James may run
+she can laugh,pos,she can laugh
+Albus can jump,pos,Albus can jump
+he can swim,pos,he can swim
+she must walk,pos,she must walk
+Ron must party,pos,Ron must party
+Ron may laugh,pos,Ron may laugh
+she must run,pos,she must run
+she must smile,pos,she must smile
+she may party,pos,she may party
+she must walk,pos,she must walk
+she can hiccup,pos,she can hiccup
+she should run,pos,she should run
+Ron may smile,pos,Ron may smile
+Albus may jump,pos,Albus may jump
+he must party,pos,he must party
+Ron can swim,pos,Ron can swim
+he must swim,pos,he must swim
+Draco can run,pos,Draco can run
+Albus must run,pos,Albus must run
+he may run,pos,he may run
+he can smile,pos,he can smile
+Fred can smile,pos,Fred can smile
+he should run,pos,he should run
+Ron may smile,pos,Ron may smile
+Lily can laugh,pos,Lily can laugh
+Fred can jump,pos,Fred can jump
+Ron may smile,pos,Ron may smile
+she must swim,pos,she must swim
+Hagrid may run,pos,Hagrid may run
+James can jump,pos,James can jump
+Lily may run,pos,Lily may run
+she must swim,pos,she must swim
+Draco must run,pos,Draco must run
+James can walk,pos,James can walk
+Draco may jump,pos,Draco may jump
+she can walk,pos,she can walk
+he must swim,pos,he must swim
+she can hiccup,pos,she can hiccup
+she can swim,pos,she can swim
+she may jump,pos,she may jump
+Ron must swim,pos,Ron must swim
+Fred can jump,pos,Fred can jump
+Lily can party,pos,Lily can party
+Lily may jump,pos,Lily may jump
+Fred must run,pos,Fred must run
+he may giggle,pos,he may giggle
+she must smile,pos,she must smile
+Harry can jump,pos,Harry can jump
+Dobby may run,pos,Dobby may run
+James can walk,pos,James can walk
+he should swim,pos,he should swim
+Draco may walk,pos,Draco may walk
+she can hiccup,pos,she can hiccup
+she can party,pos,she can party
+he should swim,pos,he should swim
+she may hiccup,pos,she may hiccup
+he may jump,pos,he may jump
+Ginny must run,pos,Ginny must run
+Ron must jump,pos,Ron must jump
+Dobby may jump,pos,Dobby may jump
+she can laugh,pos,she can laugh
+Lily can run,pos,Lily can run
+James may run,pos,James may run
+Fred must swim,pos,Fred must swim
+Ron may swim,pos,Ron may swim
+he must jump,pos,he must jump
+she should run,pos,she should run
+Fred may smile,pos,Fred may smile
+Ron must smile,pos,Ron must smile
+Ginny can jump,pos,Ginny can jump
+she can walk,pos,she can walk
+he must run,pos,he must run
+Snape may jump,pos,Snape may jump
+he must wiggle,pos,he must wiggle
+she can hiccup,pos,she can hiccup
+she can smile,pos,she can smile
+she must laugh,pos,she must laugh
+he must wiggle,pos,he must wiggle
+he must giggle,pos,he must giggle
+Ron may hiccup,pos,Ron may hiccup
+he can jump,pos,he can jump
+she must jump,pos,she must jump
+he may laugh,pos,he may laugh
+she can wiggle,pos,she can wiggle
+he must hiccup,pos,he must hiccup
+Ron may jump,pos,Ron may jump
+James can walk,pos,James can walk
+Draco must run,pos,Draco must run
+Snape can walk,pos,Snape can walk
+she can walk,pos,she can walk
+Albus can walk,pos,Albus can walk
+Lily may swim,pos,Lily may swim
+she must laugh,pos,she must laugh
+James may jump,pos,James may jump
+he must laugh,pos,he must laugh
+Snape can jump,pos,Snape can jump
+he must jump,pos,he must jump
+Lily can laugh,pos,Lily can laugh
+Fred must jump,pos,Fred must jump
+James may jump,pos,James may jump
+he can walk,pos,he can walk
+Fred may party,pos,Fred may party
+she may walk,pos,she may walk
+Lily may party,pos,Lily may party
+Ron can jump,pos,Ron can jump
+Lupin can swim,pos,Lupin can swim
+Ron must laugh,pos,Ron must laugh
+George can run,pos,George can run
+she may smile,pos,she may smile
+George may run,pos,George may run
+James may run,pos,James may run
+Ron must walk,pos,Ron must walk
+Ron may run,pos,Ron may run
+Albus can walk,pos,Albus can walk
+he can run,pos,he can run
+she may hiccup,pos,she may hiccup
+Albus must run,pos,Albus must run
+he can giggle,pos,he can giggle
+she can wiggle,pos,she can wiggle
+Ron can jump,pos,Ron can jump
+James may walk,pos,James may walk
+she must smile,pos,she must smile
+he must giggle,pos,he must giggle
+he can party,pos,he can party
+she must swim,pos,she must swim
+she may party,pos,she may party
+he can laugh,pos,he can laugh
+Fred can run,pos,Fred can run
+Ron must laugh,pos,Ron must laugh
+she must run,pos,she must run
+Lupin may walk,pos,Lupin may walk
+Harry can jump,pos,Harry can jump
+Ron may jump,pos,Ron may jump
+he may walk,pos,he may walk
+he should walk,pos,he should walk
+he may giggle,pos,he may giggle
+Ron can walk,pos,Ron can walk
+Snape can walk,pos,Snape can walk
+Fred must run,pos,Fred must run
+Draco must run,pos,Draco must run
+she may walk,pos,she may walk
+she must swim,pos,she must swim
+he may giggle,pos,he may giggle
+he may giggle,pos,he may giggle
+he may walk,pos,he may walk
+Hagrid may run,pos,Hagrid may run
+he must giggle,pos,he must giggle
+Dobby can run,pos,Dobby can run
+she can giggle,pos,she can giggle
+Lily can smile,pos,Lily can smile
+Albus can swim,pos,Albus can swim
+Vernon may run,pos,Vernon may run
+Lily can jump,pos,Lily can jump
+Fred can run,pos,Fred can run
+James can swim,pos,James can swim
+Fred may smile,pos,Fred may smile
+she can walk,pos,she can walk
+Ron can smile,pos,Ron can smile
+he must walk,pos,he must walk
+James can run,pos,James can run
+he may swim,pos,he may swim
+she may swim,pos,she may swim
+Dobby can walk,pos,Dobby can walk
+Albus can run,pos,Albus can run
+Albus can swim,pos,Albus can swim
+James can jump,pos,James can jump
+she must party,pos,she must party
+Fred must walk,pos,Fred must walk
+he can wiggle,pos,he can wiggle
+Ron can swim,pos,Ron can swim
+he must swim,pos,he must swim
+she must run,pos,she must run
+Draco must run,pos,Draco must run
+Hagrid may run,pos,Hagrid may run
+Lily can swim,pos,Lily can swim
+Fred can swim,pos,Fred can swim
+Snape can run,pos,Snape can run
+she must walk,pos,she must walk
+Fred can swim,pos,Fred can swim
+he can swim,pos,he can swim
+he may smile,pos,he may smile
+Harry can walk,pos,Harry can walk
+Hagrid can run,pos,Hagrid can run
+Harry may walk,pos,Harry may walk
+Harry may run,pos,Harry may run
+he may run,pos,he may run
+Ron may swim,pos,Ron may swim
+he must laugh,pos,he must laugh
+Ron may smile,pos,Ron may smile
+he must jump,pos,he must jump
+he can swim,pos,he can swim

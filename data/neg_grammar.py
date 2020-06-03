@@ -63,12 +63,15 @@ def negation(grammar):
     neg_tree = negate(pos_tree)
     neg = ' '.join(neg_tree.leaves())
     source = pos
-    coin = random.randint(0,1)
-    if coin:
-        target = pos
-    else:
-        target = neg
-    transform = 'pos' if coin else 'neg'
+    transform = "pos"
+    target = pos
+
+    # coin = random.randint(0,1)
+    # if coin:
+    #     target = pos
+    # else:
+    #     target = neg
+    # transform = 'pos' if coin else 'neg'
     return source, transform, target        
 
 # function to negate the tree
