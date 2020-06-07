@@ -25,7 +25,7 @@ def generate(grammar, start=None, depth=None):
     tree = _generate(grammar,items, depth)
     sentence = ' '.join(tree[0].leaves())
     # condition for length of sentence. Sentence must be less than 160 (about 25-30 words)
-    if len(sentence) < 15:   
+    if len(sentence) < 1000:   
         tree = tree
     else:
         tree[0] = generate(grammar)
@@ -52,8 +52,8 @@ def _generate(grammar,items,depth=None):
 
 #function will write 10 sentences into test_file.csv
 def create_file (filename, grammar, ex_generator, n=1000):
-    with open("negation.val", mode='w') as output_file:
-        output_writer = csv.writer(output_file, delimiter=',', lineterminator ='\n', quotechar="/")
+    with open("question.val", mode='w') as output_file:
+        output_writer = csv.writer(output_file, delimiter='\t', lineterminator ='\n', quotechar="/")
 #        output_writer.writerow({'SRC', 'TRANSFORM', 'TRG'})
         output_writer.writerow(['source', 'transform', 'target'])
         for _ in range(n):
