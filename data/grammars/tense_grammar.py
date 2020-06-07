@@ -29,7 +29,7 @@ from generator import create_file
 # RP, # Relative Pronoun
 # V, # Verb that occurs at the end of an AdvP
 # Adv, # Adverb
-S, NP_Ms, NP_Mp, NP_O, N, VP_Ms, VP_Mp, RC_S, RC_P, Det, Ns, Np, VInTr, VTr, Aux_P, Aux_S,Prep, Rel = nonterminals('S, NP_Ms, NP_Mp, NP_O, N, VP_Ms, VP_Mp, RC_S, RC_P, Det, Ns, Np, VInTr, VTr, Aux_P, Aux_S,Prep, Rel')
+S, NP, MP, VP, AdvP, VPTr, RelP, NPTr, Det, N, PN, Pron, M, VInTr, VTr, NTr, PlDet,PlNTr, RP, NTand, Adv = nonterminals('S, NP, MP, VP, AdvP, VPTr, RelP, NPTr, Det, N, PN, Pron, M, VInTr, VTr, NTr, PlDet,PlNTr, RP, NTand, Adv')
 
 q_grammar = PCFG.fromstring("""
     S -> NP_Ms VP_Ms [0.5] | NP_Mp VP_Mp [0.5]
