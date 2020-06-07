@@ -33,8 +33,8 @@ S, NP_Ms, NP_Mp, NP_O, N, VP_Ms, VP_Mp, RC_S, RC_P, Det, Ns, Np, VInTr, VTr, Aux
 
 q_grammar = PCFG.fromstring("""
     S -> NP_Ms VP_Ms [0.5] | NP_Mp VP_Mp [0.5]
-    NP_Ms -> Det Ns [0] | Det Ns Prep Det N [0] | Det Ns RC_S [1]
-    NP_Mp -> Det Np [0] | Det Np Prep Det N [0] | Det Np RC_P [1]
+    NP_Ms -> Det Ns [.33] | Det Ns Prep Det N [.33] | Det Ns RC_S [.34]
+    NP_Mp -> Det Np [.33] | Det Np Prep Det N [.33] | Det Np RC_P [.34]
     NP_O -> Det Ns [.17] | Det Np [.17] | Det Ns Prep Det N [.17] | Det Np Prep Det N [.17] | Det Ns RC_S [.16] | Det Np RC_P [.16]
     N -> Ns [0.5] | Np [0.5]
     VP_Ms -> Aux_S VInTr [0.5] | Aux_S VTr NP_O [0.5]
