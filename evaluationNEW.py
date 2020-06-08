@@ -29,15 +29,17 @@ def score(val_iterator, encoder1, decoder1, vocab):
     total = 0
 
     for batch in val_iterator:
-        batch_size = len(batch)
-        pred_words = evaluate(encoder1, decoder1, batch)
+
+        pred_words = evaluate(encoder1, decoder1, batch).transpose_(0,1)
 
         all_sents = logits_to_sentence(pred_words, vocab)
         correct_sents = logits_to_sentence(batch.target, vocab)
-        # all_sents = logits_to_sentence(pred_words, index2word)
-        # correct_sents = logits_to_sentence(batch[1], index2word)
 
         for sents in zip(all_sents, correct_sents):
+            print("Prediction: ", sents[0])
+            print("Correct:    ", sents[1])
+
+            # raise(SystemError)
             if sents[0] == sents[1]:
                 right += 1
             total += 1
