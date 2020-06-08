@@ -29,63 +29,78 @@ from generator import create_file
 # RP, # Relative Pronoun
 # V, # Verb that occurs at the end of an AdvP
 # Adv, # Adverb
-S, NP, MP, VP, AdvP, VPTr, RelP, NPTr, Det, N, PN, Pron, M, VInTr, VTr, NTr, PlDet,PlNTr, RP, NTand, Adv = nonterminals('S, NP, MP, VP, AdvP, VPTr, RelP, NPTr, Det, N, PN, Pron, M, VInTr, VTr, NTr, PlDet,PlNTr, RP, NTand, Adv')
+S, NP_M_sg, NP_M_pl, NP_O_sg, NP_O_pl, VP_M_sg, VP_M_pl, RC_sg, RC_pl, Det, N_sg, N_pl, V_intrans_sg, V_trans_sg, V_intrans_pl, V_trans_pl, Prep, Rel = nonterminals('S, NP_M_sg, NP_M_pl, NP_O_sg, NP_O_pl, VP_M_sg, VP_M_pl, RC_sg, RC_pl, Det, N_sg, N_pl, V_intrans_sg, V_trans_sg, V_intrans_pl, V_trans_pl, Prep, Rel')
 
-q_grammar = PCFG.fromstring("""
-    S -> NP_Ms VP_Ms [0.5] | NP_Mp VP_Mp [0.5]
-    NP_Ms -> Det Ns [0] | Det Ns Prep Det N [0] | Det Ns RC_S [1]
-    NP_Mp -> Det Np [0] | Det Np Prep Det N [0] | Det Np RC_P [1]
-    NP_O -> Det Ns [.17] | Det Np [.17] | Det Ns Prep Det N [.17] | Det Np Prep Det N [.17] | Det Ns RC_S [.16] | Det Np RC_P [.16]
-    N -> Ns [0.5] | Np [0.5]
-    VP_Ms -> Aux_S VInTr [0.5] | Aux_S VTr NP_O [0.5]
-    VP_Mp -> Aux_P VInTr [0.5] | Aux_P VTr NP_O [0.5]
-    RC_S -> Aux_S VInTr [0.3] | Rel Det Ns Aux_S VTr [0.2] | Rel Det Np Aux_P VTr [0.2] | Rel Aux_S VTr Det N [0.3]
-    RC_P -> Rel Aux_P VInTr [0.25] | Rel Det Ns Aux_S VTr [0.25] | Rel Det Np Aux_P VTr [0.25] | Rel Aux_P VTr Det N [0.25]
-    Det -> 'the' [.16] | 'some' [.16] | 'my' [.17] | 'your' [.17] | 'our' [.17] | 'her' [.17]
-    Ns -> 'newt' [0.1] | 'orangutan' [0.1] | 'peacock' [0.1] | 'quail' [0.1] | 'raven' [0.1] | 'salamander' [0.1] | 'tyrannosaurus' [0.1] | 'unicorn' [0.05] | 'vulture' [0.05] | 'walrus' [0.05] | 'xylophone' [0.05] | 'yak' [0.05] | 'zebra' [0.05]
-    Np -> 'newts' [0.1] | 'orangutans' [0.1] | 'peacocks' [0.1] | 'quails' [0.1] | 'ravens' [0.1] | 'salamanders' [0.1] | 'tyrannosauruses' [0.1] | 'unicorns' [0.05] | 'vultures' [0.05] | 'walruses' [0.05] | 'xylophones' [0.05] | 'yaks' [0.05] | 'zebras' [0.05]
-    VInTr -> 'giggle' [.11] | 'smile' [.11] | 'sleep' [.11] | 'swim' [.11] | 'wait' [.11] | 'move' [.11] | 'change' [.11] | 'read' [.11] | 'eat' [.12]
-    VTr -> 'entertain' [.11] | 'amuse' [.11] | 'high_five' [.11] | 'applaud' [.11] | 'confuse' [.11] | 'admire' [.11] | 'accept' [.11] | 'remember' [.11] | 'comfort' [.12]
-    Aux_P -> 'do' [0.5] | 'dont' [0.5] 
-    Aux_S -> 'does' [0.5] | 'doesnt' [0.5]
-    Prep -> 'around' [0.125] | 'near' [0.125] | 'with' [0.125] | 'upon' [0.125] | 'by' [0.125] | 'behind' [0.125] | 'above' [0.125] | 'below' [0.125]
+t_grammar = PCFG.fromstring("""
+    S -> NP_M_sg VP_M_sg [0.5] | NP_M_pl VP_M_pl [0.5]
+    NP_M_sg -> Det N_sg [0.3] | Det N_sg Prep Det N_sg [0.2] | Det N_sg Prep Det N_pl [0.2] | Det N_sg RC_sg [0.3]
+    NP_M_pl -> Det N_pl [0.3] | Det N_pl Prep Det N_sg [0.2] | Det N_pl Prep Det N_pl [0.2] | Det N_pl RC_pl [0.3]
+    NP_O_sg -> Det N_sg [0.3] | Det N_sg Prep Det N_sg [0.2] | Det N_sg Prep Det N_pl [0.2] | Det N_sg RC_sg [0.3]
+    NP_O_pl -> Det N_pl [0.3] | Det N_pl Prep Det N_sg [0.2] | Det N_pl Prep Det N_pl [0.2] | Det N_pl RC_pl [0.3]
+    VP_M_sg -> V_intrans_sg [0.5] | V_trans_sg NP_O_sg [0.25] | V_trans_sg NP_O_pl [0.25]
+    VP_M_pl -> V_intrans_pl [0.5] | V_trans_pl NP_O_sg [0.25] | V_trans_pl NP_O_pl [0.25]
+    RC_sg -> Rel V_intrans_sg [0.4] | Rel Det N_sg V_trans_sg [0.15] | Rel Det N_pl V_trans_pl [0.15] | Rel V_trans_sg Det N_sg [0.15] | Rel V_trans_sg Det N_pl [0.15]
+    RC_pl -> Rel V_intrans_pl [0.4] | Rel Det N_sg V_trans_sg [0.15] | Rel Det N_pl V_trans_pl [0.15] | Rel V_trans_pl Det N_sg [0.15] | Rel V_trans_pl Det N_pl [0.15]
+    Det -> 'the'[.16] | 'some' [.16] | 'my' [0.17] | 'your' [0.17] | 'our' [0.17] | 'her' [0.17] 
+    N_sg -> 'newt' [.07] | 'orangutan' [.07] | 'peacock' [.07] | 'quail' [.07] | 'raven' [.08] | 'salamander' [.08] | 'tyrannosaurus' [.08] | 'unicorn' [.08] | 'vulture' [.08] | 'walrus' [.08] | 'xylophone' [.08] | 'yak' [.08] | 'zebra' [.08]
+    N_pl -> 'newts' [.07] | 'orangutans' [.07] | 'peacocks' [.07] | 'quails' [.07] | 'ravens' [.08] | 'salamanders' [.08] | 'tyrannosauruses' [.08] | 'unicorns' [.08] | 'vultures' [.08] | 'walruses' [.08] | 'xylophones' [.08] | 'yaks' [.08] | 'zebras' [.08]
+    V_intrans_sg -> 'giggles' [.11] | 'smiles' [.11] | 'sleeps' [.11] | 'swims' [.11] | 'waits' [.11] | 'moves' [.11] | 'changes' [.11] | 'reads' [.11] | 'eats' [.12]
+    V_trans_sg -> 'entertains' [.11] | 'amuses' [.11] | 'high_fives' [.11] | 'applauds' [.11] | 'confuses' [.11] | 'admires' [.11] | 'accepts' [.11] | 'remembers' [.11] | 'comforts' [.12]
+    V_intrans_pl -> 'giggle'  [.11] | 'smile' [.11] | 'sleep' [.11] | 'swim' [.11]| 'wait'   [.11] | 'move' [.11] | 'change' [.11] | 'read' [.11] | 'eat' [.12]
+    V_trans_pl -> 'entertain' [.11] | 'amuse' [.11] | 'high_five' [.11] | 'applaud' [.11] | 'confuse' [.11] | 'admire' [.11] | 'accept' [.11] | 'remember' [.11] | 'comfort' [.12]
+    Prep -> 'around' [.125] | 'near' [.125] | 'with' [.125] | 'upon' [.125] | 'by' [.125] | 'behind' [.125] | 'above' [.125] | 'below' [.125]
     Rel -> 'who' [0.5] | 'that' [0.5]
     """)
 
 # generate positive and negative sentences
 # return source, neg, and target to be used in create file
-def question(grammar):
-    q_tree = generate(grammar)
-    decl = ' '.join(q_tree.leaves())
-    d_tree = quest(q_tree)
-    que = ' '.join(d_tree.leaves())
-    target = que + "?"
-    source = decl + "."
+def tense(grammar):
+    pres_tree = generate(grammar)
+    pres = ' '.join(pres_tree.leaves())
+    past_tree = inflect_to_past(pres_tree)
+    past = ' '.join(past_tree.leaves())
+    target = past + "."
+    source = pres + "."
     coin = random.randint(0,1)
     if coin:
-        target = que + "?"
+        target = pres + "."
     else:
-        target = decl + "."
-    transform = 'quest' if coin else 'decl'
+        target = past + "."
+    transform = 'PRESENT' if coin else 'PAST'
     return source, transform, target        
 
 # function to transform decl to quest
-def quest(t):
-    first = t[0,0]
-    first = first[-1]
-    aux = t[1,0]
-    aux = aux[-1]
-    t[0,0] = (aux + " " + first)
-    del t[1,0]
+def inflect_to_past(t):
+    leaf = t[1,0]
+    verb = leaf[-1]
+    # catch the irregulars
+    if verb == 'swims' or verb == "swim": 
+        verb = "swam"
+    elif verb == "sleeps" or verb == "sleep":
+        verb = "slept"
+    elif verb == "eats" or verb == "eat":
+        verb = "ate"
+    elif verb == "reads" or verb ==  "read":
+        verb = "read"   
+    elif verb[-1] == 's' and verb[-2] == 'e':
+        verb = verb[0:-1] + 'd' 
+    elif verb[-1] == 's' and verb[-2] != 'e':
+        verb = verb[0:-1] + 'ed' 
+    elif verb[-1] == 'e':
+        verb = verb + 'd'
+    else:
+        verb = verb + 'ed'
+    t[1,0] = verb
     return t
 
 # uncomment the line below to run this file alongside generator.py
-create_file("test_file", q_grammar, question)
+create_file("test_file", t_grammar, tense)
 
 # def demo(N=5):
 #     for _ in range(N):
-#         sent = generate(grammars)
+#         sent = generate(t_grammar)
 #         print(" ".join(sent.leaves()))
 
 # if __name__ == "__main__":
-#     demo()
+#     # demo()
+#     inflect_to_past(generate(t_grammar))
