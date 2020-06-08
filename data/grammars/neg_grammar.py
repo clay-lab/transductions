@@ -81,9 +81,13 @@ def negate(t):
     # case 1: S -> NP MP, insert a 'not' after the modal verb
     if symbol == 'NP':
         modal = t[1,0]
+        # print(modal)
         modal = modal[-1]
+        # print(modal)
         modal = modal + ' not'
+        # print(modal)
         t[1,0] = modal
+        # print(modal)
     # case 2: S -> S AdvP, extract the MP and negate it
     elif symbol == 'S':
         MP = t[0]
@@ -94,4 +98,5 @@ def negate(t):
     return t
 
 # uncomment the line below to run this file alongside generator.py
-create_file("test_file", neg_grammar, negation)
+# create_file("test_file", neg_grammar, negation)
+negate(generate(neg_grammar))
