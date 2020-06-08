@@ -30,17 +30,17 @@ def score(val_iterator, encoder1, decoder1, vocab):
 
     for batch in val_iterator:
 
-        pred_words = evaluate(encoder1, decoder1, batch).transpose_(0,1)
+        prediction = evaluate(encoder1, decoder1, batch).transpose_(0,1)
 
-        all_sents = logits_to_sentence(pred_words, vocab)
+        all_sents = logits_to_sentence(prediction, vocab)
         correct_sents = logits_to_sentence(batch.target, vocab)
 
-        for sents in zip(all_sents, correct_sents):
+        for sents in zip(prediction, batch.target):
             # print("Prediction: ", sents[0])
             # print("Correct:    ", sents[1])
 
             # raise(SystemError)
-            if sents[0] == sents[1]:
+            if torch.equal(sents[0], sents[1]):
                 right += 1
             total += 1
 
