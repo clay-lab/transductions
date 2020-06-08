@@ -30,7 +30,7 @@ else:
     available_device = torch.device('cpu')
 
 # figure out attention
-def train_iterator(train_iterator, val_iterator, encoder, decoder, enc_recurrent_unit, dec_recurrent_unit, attention, directory, prefix, vocab, print_every=1000, learning_rate=0.01, patience=3):
+def train_iterator(train_iterator, val_iterator, encoder, decoder, enc_recurrent_unit, dec_recurrent_unit, attention, directory, prefix, vocab, print_every=1000, learning_rate=0.01, patience=3, epochs = 4):
 
     print("Training model")
 
@@ -42,46 +42,50 @@ def train_iterator(train_iterator, val_iterator, encoder, decoder, enc_recurrent
     # Loss values
     total_loss = 0.0
 
-    # Iterate through iterator
-    for index, batch in enumerate(train_iterator):
+    for epoch in range(epochs):
 
-        encoder_optimizer.zero_grad()
-        decoder_optimizer.zero_grad()
+        print("#####################################")
+        print("Epoch {:d} of {:d}".format(epoch, epochs))
 
-        # Split the target from the input
-        # print(batch)
-        target = batch.target
+        for index, batch in enumerate(train_iterator):
 
-        # Forward pass
+            encoder_optimizer.zero_grad()
+            decoder_optimizer.zero_grad()
 
-        # I have some questions about how the Encoders are structured.
-        # In particular, why return a mega-tensor of the outputs?
-        e_out, e_hid, e_outs = encoder(batch)
-        d_outs = decoder(e_hid, e_outs, batch)
+            # Split the target from the input
+            # print(batch)
+            target = batch.target
 
-        batch_loss = 0.0
-        idx = 0
-        while idx < min(len(d_outs), len(batch)): # Make this less brittle?
-            batch_loss += criterion(d_outs[idx], target[idx])
-            idx += 1
+            # Forward pass
+
+            # I have some questions about how the Encoders are structured.
+            # In particular, why return a mega-tensor of the outputs?
+            e_out, e_hid, e_outs = encoder(batch)
+            d_outs = decoder(e_hid, e_outs, batch)
+
+            batch_loss = 0.0
+            idx = 0
+            while idx < min(len(d_outs), len(batch)): # Make this less brittle?
+                batch_loss += criterion(d_outs[idx], target[idx])
+                idx += 1
 
 
-        # Backward pass
-        # batch_loss *= batch[0][0].size()[1] # Why is this necessary??
-        batch_loss.backward()
-        encoder_optimizer.step()
-        decoder_optimizer.step()
+            # Backward pass
+            # batch_loss *= batch[0][0].size()[1] # Why is this necessary??
+            batch_loss.backward()
+            encoder_optimizer.step()
+            decoder_optimizer.step()
 
-        total_loss += batch_loss / target.size()[0]
+            total_loss += batch_loss / target.size()[0]
 
-        count_since_improved = 0
-        best_loss = float('inf')
+            count_since_improved = 0
+            best_loss = float('inf')
 
-        if (index % print_every == 0):
+            if (index % print_every == 0):
 
-            dev_set_loss = 1 - score(val_iterator, encoder, decoder, vocab)
-            
-            print("Batch Loss:   {0:>2f}".format(batch_loss))
-            print("Dev-Set Loss: {0:>2f}".format(dev_set_loss))
+                dev_set_loss = 1 - score(val_iterator, encoder, decoder, vocab)
+                
+                print("Batch Loss:   {0:>2f}".format(batch_loss))
+                print("Dev-Set Loss: {0:>2f}".format(dev_set_loss))
 
-            # Deal with model saving here
+                # Deal with model saving here
