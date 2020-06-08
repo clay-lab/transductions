@@ -61,10 +61,9 @@ NUMBER -> '2' [0.25] | '3' [0.25] | '4' [0.25] | '5' [0.25]
 
 # polish notation not infix
 polish_annotated = PCFG.fromstring("""
-TRANS -> POLISH [0.5] | RPN [0.5]
-POLISH -> START [1.0]
-RPN -> START [1.0]
-START ->  OPERATOR EXPR EXPR [1.0]
+START -> POLISH [0.5] | RPN [0.5]
+POLISH -> EXPR [1.0]
+RPN -> EXPR [1.0]
 EXPR -> OPERAND [0.6] | OPERATOR EXPR EXPR [0.4]
 OPERATOR -> '+' [0.25] | '-' [0.25] | '*' [0.25] | '/' [0.25]
 OPERAND -> VARIABLE [0.5] | NUMBER [0.5]
