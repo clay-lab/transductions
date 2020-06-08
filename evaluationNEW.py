@@ -36,8 +36,8 @@ def score(val_iterator, encoder1, decoder1, vocab):
         correct_sents = logits_to_sentence(batch.target, vocab)
 
         for sents in zip(all_sents, correct_sents):
-            print("Prediction: ", sents[0])
-            print("Correct:    ", sents[1])
+            # print("Prediction: ", sents[0])
+            # print("Correct:    ", sents[1])
 
             # raise(SystemError)
             if sents[0] == sents[1]:
