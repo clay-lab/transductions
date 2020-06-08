@@ -135,7 +135,7 @@ class DecoderRNN(nn.Module):
         # content-based attention
         if attn == "content": 
                 self.v = nn.Parameter(torch.FloatTensor(hidden_size), requires_grad=True)
-                nn.init.uniform(self.v, -1, 1) # maybe need cuda
+                nn.init.uniform_(self.v, -1, 1) # maybe need cuda
                 self.attn_layer = nn.Linear(self.hidden_size * 3, self.hidden_size)
                 self.attn_combine = nn.Linear(self.hidden_size * 2, self.hidden_size)
 
@@ -171,9 +171,9 @@ class DecoderRNN(nn.Module):
 
                 for i in range(input_length):
                         if self.recurrent_unit == "LSTM"  or self.recurrent_unit == "ONLSTM" or self.recurrent_unit == "SquashedLSTM":
-                                attn_hidden = F.tanh(self.attn_layer(torch.cat((encoder_outputs[i].unsqueeze(0), hidden[0][0].unsqueeze(0), output), 2)))
+                                attn_hidden = torch.tanh(self.attn_layer(torch.cat((encoder_outputs[i].unsqueeze(0), hidden[0][0].unsqueeze(0), output), 2)))
                         else:
-                                attn_hidden = F.tanh(self.attn_layer(torch.cat((encoder_outputs[i].unsqueeze(0), hidden[0].unsqueeze(0), output), 2)))
+                                attn_hidden = torch.tanh(self.attn_layer(torch.cat((encoder_outputs[i].unsqueeze(0), hidden[0].unsqueeze(0), output), 2)))
                         u_i_j = torch.bmm(attn_hidden, self.v.unsqueeze(1).unsqueeze(0))
                         u_i[i] = u_i_j[0].view(-1)
 
@@ -258,7 +258,7 @@ class UnsquashedGRU(nn.Module):
         r_t = F.sigmoid(self.wr(input_plus_hidden))
         z_t = F.sigmoid(self.wz(input_plus_hidden))
         v_t = F.sigmoid(self.wv(input_plus_hidden))
-        h_tilde = F.tanh(self.wx(input) + self.urh(r_t * hx))
+        h_tilde = torch.tanh(self.wx(input) + self.urh(r_t * hx))
         h_t = z_t * hx + v_t * h_tilde
 
         return h_t, h_t
@@ -294,7 +294,7 @@ class ONLSTM(nn.Module):
                 f_t = F.sigmoid(self.wf(input_plus_hidden))
                 i_t = F.sigmoid(self.wi(input_plus_hidden))
                 o_t = F.sigmoid(self.wo(input_plus_hidden))
-                c_hat_t = F.tanh(self.wg(input_plus_hidden))
+                c_hat_t = torch.tanh(self.wg(input_plus_hidden))
 
                 f_tilde_t = CumMax()(self.wftilde(input_plus_hidden))
                 i_tilde_t = 1 - CumMax()(self.witilde(input_plus_hidden))
@@ -304,7 +304,7 @@ class ONLSTM(nn.Module):
                 i_hat_t = i_t * omega_t + (i_tilde_t - omega_t)
 
                 cx = f_hat_t * cx + i_hat_t * c_hat_t
-                hx = o_t * F.tanh(cx)
+                hx = o_t * torch.tanh(cx)
 
                 return hx, (hx, cx)
 
@@ -327,13 +327,13 @@ class SquashedLSTM(nn.Module):
         input_plus_hidden = torch.cat((input, hx), 2)
         i_t = F.sigmoid(self.wi(input_plus_hidden))
         f_t = F.sigmoid(self.wf(input_plus_hidden))
-        g_t = F.tanh(self.wg(input_plus_hidden))
+        g_t = torch.tanh(self.wg(input_plus_hidden))
         o_t = F.sigmoid(self.wo(input_plus_hidden))
 
         sum_fi = f_t + i_t
 
         cx = (f_t * cx + i_t * g_t)/sum_fi
-        hx = o_t * F.tanh(cx)
+        hx = o_t * torch.tanh(cx)
 
         return hx, (hx, cx)
 
