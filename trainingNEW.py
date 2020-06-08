@@ -83,7 +83,7 @@ def train_iterator(train_iterator, val_iterator, encoder, decoder, enc_recurrent
 
             if (index % print_every == 0):
 
-                dev_set_loss = 1 - score(val_iterator, encoder, decoder, vocab)
+                dev_set_loss = 1 - score(val_iterator, encoder, decoder)
                 
                 print("Batch Loss:   {0:>2f}".format(batch_loss))
                 print("Dev-Set Loss: {0:>2f}".format(dev_set_loss))
