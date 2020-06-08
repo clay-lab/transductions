@@ -24,7 +24,7 @@ import math
 #TODO: confirm that loss() and sent_remove_brackets() are never used
 
 # Get the model's full-sentence accuracy on a set of examples
-def score(val_iterator, encoder1, decoder1):
+def score(val_iterator, encoder1, decoder1, vocab):
     right = 0
     total = 0
 
@@ -32,8 +32,8 @@ def score(val_iterator, encoder1, decoder1):
         batch_size = len(batch)
         pred_words = evaluate(encoder1, decoder1, batch)
 
-        all_sents = logits_to_sentence(pred_words)
-        correct_sents = logits_to_sentence(batch.target)
+        all_sents = logits_to_sentence(pred_words, vocab)
+        correct_sents = logits_to_sentence(batch.target, vocab)
         # all_sents = logits_to_sentence(pred_words, index2word)
         # correct_sents = logits_to_sentence(batch[1], index2word)
 
@@ -66,16 +66,20 @@ def evaluate(encoder, decoder, batch, max_length=30):
     return torch.stack(output_indices)
 
 # Convert logits to a sentence
-def logits_to_sentence(pred_words, batch_size=5, end_at_punc=True):
+def logits_to_sentence(batch, vocab):
+    """
+    Returns a list of sentences [list of words] based on the supplied vocab.
+
+    It is necessary to transpose the input batch so that each tensor slice
+    represents the ith sentence and not the ith position in all sentences.
+    """
 
     batch_sents = []
-    for i in range(batch_size):
-        current_sent = []
-        for sentence in batch.source:
-            index = sentence[i]
-            word = SRC.vocab.itos[index]
-            current_sent.append(word)
-        batch_sents.append(current_sent)
+    batch.transpose_(0,1)
+
+    for s in batch:
+        batch_sents.append([vocab.vocab.itos[i] for i in s])
+
     return batch_sents
   
 
