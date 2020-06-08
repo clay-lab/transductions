@@ -38,19 +38,19 @@ class EncoderRNN(nn.Module):
         self.max_length = max_length
 
         if recurrent_unit == "SRN":
-                self.rnn = nn.RNN(hidden_size, hidden_size)
+            self.rnn = nn.RNN(hidden_size, hidden_size)
         elif recurrent_unit == "GRU":
-                self.rnn = nn.GRU(hidden_size, hidden_size)
+            self.rnn = nn.GRU(hidden_size, hidden_size)
         elif recurrent_unit == "LSTM":
-                self.rnn = nn.LSTM(hidden_size, hidden_size)
+            self.rnn = nn.LSTM(hidden_size, hidden_size)
         elif recurrent_unit == "SquashedLSTM":
-                self.rnn = SquashedLSTM(hidden_size, hidden_size)
+            self.rnn = SquashedLSTM(hidden_size, hidden_size)
         elif recurrent_unit == "ONLSTM":
-                self.rnn = ONLSTM(hidden_size, hidden_size)
+            self.rnn = ONLSTM(hidden_size, hidden_size)
         elif recurrent_unit == "UnsquashedGRU":
-                self.rnn = UnsquashedGRU(hidden_size, hidden_size)
+            self.rnn = UnsquashedGRU(hidden_size, hidden_size)
         else:
-                print("Invalid recurrent unit type")
+            print("Invalid recurrent unit type")
 
     # Creates the initial hidden state
     def initHidden(self, recurrent_unit, batch_size):
