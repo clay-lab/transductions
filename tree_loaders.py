@@ -3,27 +3,27 @@ from torchtext.data import Field, TabularDataset, Example, RawField, Dataset
 from numpy.random import default_rng
 
 class TreeField(RawField):
-    def __init__(self, tree_transformation_fun=None, read_heads=False, brackets="()", 
-                 chomsky_normalize=False, collapse_unary=True, inner_label="NULL", is_target=False):
+    def __init__(self, tree_transformation_fun=None, read_nonterminals=True, brackets="()", 
+                chomsky_normalize=False, collapse_unary=True, inner_label="UNKNOWN", is_target=False):
         # all this does is set is_target
         # we don't use the preprocess and postprocess pipelines because those expect string inputs
         super(TreeField, self).__init__(self, is_target=is_target)
         
         self.tree_transformation_fun = tree_transformation_fun
-        self.read_heads = read_heads
+        self.read_nonterminals = read_nonterminals
         self.brackets = brackets
         self.chomsky_normalize = chomsky_normalize
         self.collapse_unary = collapse_unary
         
         self.inner_label = inner_label
         
-        #self._cached_preprocessed = None
+        #self._cached_preprocessed_id = None
     
     def preprocess(self, x):
         if isinstance(x, nltk.tree.Tree):
             tree = x
         else:
-            if not self.read_heads:
+            if not self.read_nonterminals:
                 x = x.replace(self.brackets[0], "{} {} ".format(self.brackets[0], self.inner_label))
 
             tree = nltk.Tree.fromstring(x, brackets=self.brackets)
@@ -32,13 +32,22 @@ class TreeField(RawField):
             tree = self.tree_transformation_fun(tree)
         
         if self.chomsky_normalize:
+            tree = tree.copy(deep=True)
             tree.chomsky_normal_form()
             
         if self.collapse_unary:
+            tree = tree.copy(deep=True)
             tree.collapse_unary(True, True)
         
         return tree
-    
+
+class TreeExtractorField(TreeField):
+    def preprocess(self, x):
+        tree = super(TreeExtractorField, self).preprocess(x)
+        return tree.label()
+
+# TODO: SHOULD THIS USE HAVE MULTIPLE INHERITENCE TO INHERIT FROM FIELD AND TREEFIELD??
+# TODO: how do we get a regular Field to share a vocabulary with a TreeSequenceField    
 class TreeSequenceField(Field):
     def __init__(self, tree_field, inner_order=None, inner_symbol=None, **field_kwargs):
         super(TreeSequenceField, self).__init__(self, **field_kwargs)
@@ -78,7 +87,6 @@ class TreeSequenceField(Field):
     def preprocess(self, x):
         tree = self.tree_field.preprocess(x)
         seqstr = " ".join(self.tree2seq(tree))
-        #print(type(self))
         return super(TreeSequenceField, self).preprocess(seqstr)
     
 """
@@ -88,6 +96,17 @@ first production tells us which transformation to apply
 the transformation can then read 
 """
 
+# TODO: use escaped values instead of replacing: https://en.wikipedia.org/wiki/Tab-separated_values
+def write_dataset(dataset, path, sep="\t"):
+    def field2string(field):
+        # replace newlines and tabs so that each field stays on its line and in its column 
+        return str(field).replace("\n", " ").replace(sep, " ")
+
+    field_names = dataset.fields.keys()
+    with open(path, 'w') as f:
+        for eg in dataset:
+            print(sep.join(field2string(getattr(eg, field_name)) for field_name in field_names), file=f)
+
 # TODO: make it a probabilistic tree and calculate the propbability
 class PCFGDataset(Dataset):
     def __init__(self, grammar, n, fields, min_length=0, max_length=100, seed=None, **kwargs):
@@ -96,6 +115,9 @@ class PCFGDataset(Dataset):
         self.max_length = max_length
         self.seed = seed
         
+        if isinstance(fields, dict):
+            fields = [list(zip(*fields.items()))]
+
         examples = [Example.fromlist([tree], fields) for tree in self.tree_generator(self.grammar, n, min_length=min_length, max_length=max_length, seed=seed)]
         
         """rng = default_rng() if seed is None else default_rng(seed)
@@ -109,13 +131,7 @@ class PCFGDataset(Dataset):
     def tree_generator(cls, grammar, n, min_length=0, max_length=100, seed=None):
         rng = default_rng() if seed is None else default_rng(seed)
         for _ in range(n):
-            yield cls.draw_from_PCFG(grammar, rng=rng, min_length=min_length, max_length=max_length)    
-
-    @staticmethod
-    def write_trees(trees, path):
-        with open(path, 'w') as f:
-            for t in trees:
-                f.write(' '.join(str(t).split()) + '\n')
+            yield cls.draw_from_PCFG(grammar, rng=rng, min_length=min_length, max_length=max_length) 
 
     @staticmethod
     def draw_from_PCFG(grammar, rng=default_rng(), min_length=0, max_length=100):
@@ -148,7 +164,3 @@ class PCFGDataset(Dataset):
             tree, num_leaves = helper(grammar, grammar.start(), rng, max_length)
         
         return tree
-
-        
-        
-        
