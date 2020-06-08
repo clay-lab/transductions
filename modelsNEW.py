@@ -67,17 +67,17 @@ class EncoderRNN(nn.Module):
                 return result.to(device=available_device)
 
     # For succesively generating each new output and hidden layer
-    def forward(self, training_pair):
+    def forward(self, input_seq):
 
-        input_variable = training_pair[0]
-        target_variable = training_pair[1]
+        input_variable = input_seq #training_pair[0]
+        #target_variable = training_pair[1]
 
-        batch_size = training_pair[0].size()[1]
+        batch_size = input_variable.size()[1]
 
         hidden = self.initHidden(self.rnn_type, batch_size)
 
         input_length = input_variable.size()[0]
-        target_length = target_variable.size()[0]
+        #target_length = target_variable.size()[0]
 
         outputs = Variable(torch.zeros(self.max_length, batch_size, self.hidden_size))
         outputs = outputs.to(device=available_device) # to be used by attention in the decoder
@@ -89,7 +89,8 @@ class EncoderRNN(nn.Module):
                 output, hidden = self.rnn(output, hidden)
             outputs[ei] = output
 
-        return output, hidden, outputs
+        # return output, hidden, outputs
+        return output, hidden[-1, :, :], outputs
 
 # Generic sequential decoder
 class DecoderRNN(nn.Module):
@@ -474,15 +475,24 @@ class TridentDecoder(nn.Module):
     def null_ix(self):
         return 0
 
-    def forward(self, root_hidden, training_set):
+    def forward(self, root_hidden, tree=None):
+        batch_size = root_hidden.shape[0]
+        batch_outs = []
+        for eg_ix in range(batch_size):
+            batch_outs.append(self.forward_nobatch(root_hidden[eg_ix, :], tree=(None if tree is None else tree[eg_ix])))
+
+        return nn.utils.rnn.pad_sequence(batch_outs)
+
+    def forward_nobatch(self, root_hidden, tree=None):
         if self.training:
             # assumption: every non-terminal node either has 3 children which are all non-terminals, or is the parent of one terminal node
-            tree = training_set[3]
+            assert tree is not None
             raw_scores = torch.stack(list(self.forward_train_helper(root_hidden, tree)))
             return F.log_softmax(raw_scores, dim=1)
         else:
             raw_scores = torch.stack(list(self.forward_eval_helper(root_hidden)))
-            return F.log_softmax(raw_scores, dim=1)
+            #return F.log_softmax(raw_scores, dim=1)
+            return raw_scores
 
     def forward_train_helper(self, root_hidden, root):
         production = self.hidden2vocab(root_hidden)
@@ -510,6 +520,13 @@ class TridentDecoder(nn.Module):
 
     def _hidden2children(self, hidden):
         return torch.split(self.to_children(hidden), self.hidden_size, dim=-1)
+
+"""
+new decoders will take arguments
+encoding vector
+instruction token
+(optional) teacher forcing tree
+"""
 
 class GRUTridentDecoder(nn.Module):
     def __init__(self, arity, vocab_size, hidden_size, max_depth, null_placement="pre"):
@@ -625,15 +642,3 @@ class AltGRUTridentDecoder(nn.Module):
                 yield from self.forward_eval_helper(child_hidden, depth+1)
         else:
             yield production
-
-class Seq2Seq(nn.Module):
-    def __init__(self, encoder, decoder):
-        super(Seq2Seq, self).__init__()
-        self.encoder = encoder
-        self.decoder = decoder
-        
-    def forward(self, training_pair):
-        encoder_output, encoder_hidden, encoder_outputs = self.encoder(training_pair)
-        decoder_hidden = encoder_hidden[0,0,:]
-        decoder_outputs = self.decoder(decoder_hidden, training_pair)
-        return decoder_outputs
