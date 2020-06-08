@@ -93,7 +93,7 @@ class EncoderRNN(nn.Module):
 
 # Generic sequential decoder
 class DecoderRNN(nn.Module):
-    def __init__(self, hidden_size, output_size, recurrent_unit, attn=False, n_layers=1, dropout_p=0.1, max_length=30):
+    def __init__(self, output_size, hidden_size, recurrent_unit, attn=False, n_layers=1, dropout_p=0.1, max_length=30):
         super(DecoderRNN, self).__init__()
         self.hidden_size = hidden_size
         self.output_size = output_size
