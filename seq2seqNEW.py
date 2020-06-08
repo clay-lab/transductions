@@ -184,8 +184,10 @@ if __name__ == "__main__":
         args.attention, 
         directory, 
         prefix, 
+        SRC,
         learning_rate=args.lr, 
-        patience=args.patience
+        patience=args.patience,
+        print_every = 10
     )
 
 
