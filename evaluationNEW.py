@@ -18,7 +18,7 @@ import os
 import time
 import math
 
-def score(val_iterator, encoder, decoder):
+def score(iterator, encoder, decoder):
     """
     Compare validation target and prediction to get the accuracy of the
     model. If a target tensor (corresponding to a sentence) equals the 
@@ -29,7 +29,7 @@ def score(val_iterator, encoder, decoder):
         for batch in val_iterator:
     loop. Maybe there's a more efficient way to do this?
 
-    @param val_iterator: Validation iterator
+    @param iterator: Validation iterator
     @param encoder: Model encoder
     @param decoder: Model decoder
 
@@ -38,7 +38,7 @@ def score(val_iterator, encoder, decoder):
     
     right, total = 0, 0
 
-    for batch in val_iterator:
+    for batch in iterator:
 
         prediction = evaluate(encoder, decoder, batch)
         for sents in zip(prediction, batch.target.transpose_(0,1)):
@@ -59,7 +59,6 @@ def evaluate(encoder, decoder, batch, max_length=30):
     decoder_hidden = encoder_hidden
 
     decoder_outputs = decoder(decoder_hidden, encoder_outputs, batch, tf_ratio=0.0, evaluation=True)
-
 
     output_indices = []
     for logit in decoder_outputs:
