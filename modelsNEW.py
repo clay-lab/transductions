@@ -28,69 +28,38 @@ else:
 
 # Generic sequential encoder
 class EncoderRNN(nn.Module):
-    def __init__(self, input_size, hidden_size, recurrent_unit, n_layers=1, max_length=30):
+    def __init__(self, vocab_size, hidden_size, recurrent_unit, n_layers=1, max_length=30, dropout_p=0):
         super(EncoderRNN, self).__init__()
-        self.n_layers = n_layers
+        self.num_layers = n_layers
         self.hidden_size = hidden_size
-
-        self.embedding = nn.Embedding(input_size, hidden_size)
         self.rnn_type = recurrent_unit
         self.max_length = max_length
+        self.dropout = nn.Dropout(p=dropout_p)
+
+        self.embedding = nn.Embedding(vocab_size, hidden_size)
 
         if recurrent_unit == "SRN":
-                self.rnn = nn.RNN(hidden_size, hidden_size)
+                self.rnn = nn.RNN(hidden_size, hidden_size, num_layers = self.num_layers, dropout = dropout_p)
         elif recurrent_unit == "GRU":
-                self.rnn = nn.GRU(hidden_size, hidden_size)
+                self.rnn = nn.GRU(hidden_size, hidden_size, num_layers = self.num_layers, dropout = dropout_p)
         elif recurrent_unit == "LSTM":
-                self.rnn = nn.LSTM(hidden_size, hidden_size)
-        elif recurrent_unit == "SquashedLSTM":
-                self.rnn = SquashedLSTM(hidden_size, hidden_size)
-        elif recurrent_unit == "ONLSTM":
-                self.rnn = ONLSTM(hidden_size, hidden_size)
-        elif recurrent_unit == "UnsquashedGRU":
-                self.rnn = UnsquashedGRU(hidden_size, hidden_size)
+                self.rnn = nn.LSTM(hidden_size, hidden_size, num_layers = self.num_layers, dropout = dropout_p)
         else:
                 print("Invalid recurrent unit type")
 
-    # Creates the initial hidden state
-    def initHidden(self, recurrent_unit, batch_size):
-        if recurrent_unit == "SRN" or recurrent_unit == "GRU" or recurrent_unit == "UnsquashedGRU":
-                result = Variable(torch.zeros(1, batch_size, self.hidden_size))
-        elif recurrent_unit == "LSTM" or recurrent_unit == "ONLSTM" or recurrent_unit == "SquashedLSTM":
-                result = (Variable(torch.zeros(1, batch_size, self.hidden_size)), Variable(torch.zeros(1, batch_size, self.hidden_size)))
-        else:
-                print("Invalid recurrent unit type", recurrent_unit)
-
-        if recurrent_unit == "LSTM"  or recurrent_unit == "ONLSTM" or recurrent_unit == "SquashedLSTM":
-                return (result[0].to(device=available_device), result[1].to(device=available_device))
-        else:
-                return result.to(device=available_device)
 
     # For succesively generating each new output and hidden layer
-    def forward(self, input_seq):
+    def forward(self, batch):
 
-        input_variable = input_seq #training_pair[0]
-        #target_variable = training_pair[1]
+        #outputs = Variable(torch.zeros(self.max_length, batch_size, self.hidden_size))
+        #outputs = outputs.to(device=available_device) # to be used by attention in the decoder
+        embedded_source = self.dropout(self.embedding(batch))
+        outputs, final_hiddens = self.rnn(embedded_source)
+        final_output = outputs[-1]
+        #only return the last timestep's h vectors for the last encoder layer
+        final_hiddens = final_hiddens[-1]
 
-        batch_size = input_variable.size()[1]
-
-        hidden = self.initHidden(self.rnn_type, batch_size)
-
-        input_length = input_variable.size()[0]
-        #target_length = target_variable.size()[0]
-
-        outputs = Variable(torch.zeros(self.max_length, batch_size, self.hidden_size))
-        outputs = outputs.to(device=available_device) # to be used by attention in the decoder
-
-        for ei in range(input_length):
-        
-            output = self.embedding(input_variable[ei]).unsqueeze(0)
-            for i in range(self.n_layers):
-                output, hidden = self.rnn(output, hidden)
-            outputs[ei] = output
-
-        # return output, hidden, outputs
-        return output, hidden[-1, :, :], outputs
+        return final_output, final_hiddens, outputs
 
 # Generic sequential decoder
 class DecoderRNN(nn.Module):
