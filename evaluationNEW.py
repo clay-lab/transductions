@@ -41,17 +41,16 @@ def score(iterator, encoder, decoder):
     for batch in iterator:
 
         prediction = evaluate(encoder, decoder, batch)
-        for sents in zip(prediction, batch.target.transpose_(0,1)):
+        for sents in zip(prediction, batch.target):
             # print("Prediction: ", sents[0])
             # print("Correct:    ", sents[1])
             if torch.equal(sents[0], sents[1]):
                 right += 1
             total += 1
-
     # print("Total Count: ", total)
     # print("Dataset Len: ", len(val_iterator.dataset))
     return right * 1.0 / total
-    
+
 # Given a batch as input, get the decoder's outputs (as argmax indices)
 def evaluate(encoder, decoder, batch, max_length=30):
     encoder_output, encoder_hidden, encoder_outputs = encoder(batch)
@@ -59,6 +58,10 @@ def evaluate(encoder, decoder, batch, max_length=30):
     decoder_hidden = encoder_hidden
 
     decoder_outputs = decoder(decoder_hidden, encoder_outputs, batch, tf_ratio=0.0, evaluation=True)
+
+    # print(decoder_outputs)
+
+    # return torch.argmax(decoder_outputs, dim = 2)
 
     output_indices = []
     for logit in decoder_outputs:

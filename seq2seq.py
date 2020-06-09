@@ -161,7 +161,7 @@ def main():
 		args.decoder,
 		args.attention,
 		directory,
-		prefix,
+		args.task,
 		SRC,
 		learning_rate = args.learning_rate,
 		patience = args.patience,
