@@ -28,72 +28,42 @@ else:
 
 # Generic sequential encoder
 class EncoderRNN(nn.Module):
-    def __init__(self, input_size, hidden_size, recurrent_unit, n_layers=1, max_length=30):
+    def __init__(self, vocab_size, hidden_size, recurrent_unit, n_layers=1, max_length=30, dropout_p=0):
         super(EncoderRNN, self).__init__()
-        self.n_layers = n_layers
+        self.num_layers = n_layers
         self.hidden_size = hidden_size
-
-        self.embedding = nn.Embedding(input_size, hidden_size)
         self.rnn_type = recurrent_unit
         self.max_length = max_length
+        self.dropout = nn.Dropout(p=dropout_p)
+
+        self.embedding = nn.Embedding(vocab_size, hidden_size)
 
         if recurrent_unit == "SRN":
-            self.rnn = nn.RNN(hidden_size, hidden_size)
+                self.rnn = nn.RNN(hidden_size, hidden_size, num_layers = self.num_layers, dropout = dropout_p)
         elif recurrent_unit == "GRU":
-            self.rnn = nn.GRU(hidden_size, hidden_size)
+                self.rnn = nn.GRU(hidden_size, hidden_size, num_layers = self.num_layers, dropout = dropout_p)
         elif recurrent_unit == "LSTM":
-            self.rnn = nn.LSTM(hidden_size, hidden_size)
-        elif recurrent_unit == "SquashedLSTM":
-            self.rnn = SquashedLSTM(hidden_size, hidden_size)
-        elif recurrent_unit == "ONLSTM":
-            self.rnn = ONLSTM(hidden_size, hidden_size)
-        elif recurrent_unit == "UnsquashedGRU":
-            self.rnn = UnsquashedGRU(hidden_size, hidden_size)
+                self.rnn = nn.LSTM(hidden_size, hidden_size, num_layers = self.num_layers, dropout = dropout_p)
         else:
-            print("Invalid recurrent unit type")
+                print("Invalid recurrent unit type")
 
-    # Creates the initial hidden state
-    def initHidden(self, recurrent_unit, batch_size):
-        if recurrent_unit == "SRN" or recurrent_unit == "GRU" or recurrent_unit == "UnsquashedGRU":
-                result = Variable(torch.zeros(1, batch_size, self.hidden_size))
-        elif recurrent_unit == "LSTM" or recurrent_unit == "ONLSTM" or recurrent_unit == "SquashedLSTM":
-                result = (Variable(torch.zeros(1, batch_size, self.hidden_size)), Variable(torch.zeros(1, batch_size, self.hidden_size)))
-        else:
-                print("Invalid recurrent unit type", recurrent_unit)
-
-        if recurrent_unit == "LSTM"  or recurrent_unit == "ONLSTM" or recurrent_unit == "SquashedLSTM":
-                return (result[0].to(device=available_device), result[1].to(device=available_device))
-        else:
-                return result.to(device=available_device)
 
     # For succesively generating each new output and hidden layer
-    def forward(self, training_pair):
+    def forward(self, batch):
 
-        input_variable = training_pair.source
-        target_variable = training_pair.target
+        #outputs = Variable(torch.zeros(self.max_length, batch_size, self.hidden_size))
+        #outputs = outputs.to(device=available_device) # to be used by attention in the decoder
+        embedded_source = self.dropout(self.embedding(batch))
+        outputs, final_hiddens = self.rnn(embedded_source)
+        final_output = outputs[-1]
+        #only return the last timestep's h vectors for the last encoder layer
+        final_hiddens = final_hiddens[-1]
 
-        batch_size = training_pair.source.size()[1]
-
-        hidden = self.initHidden(self.rnn_type, batch_size)
-
-        input_length = input_variable.size()[0]
-        target_length = target_variable.size()[0]
-
-        outputs = Variable(torch.zeros(self.max_length, batch_size, self.hidden_size))
-        outputs = outputs.to(device=available_device) # to be used by attention in the decoder
-
-        for ei in range(input_length):
-        
-            output = self.embedding(input_variable[ei]).unsqueeze(0)
-            for i in range(self.n_layers):
-                output, hidden = self.rnn(output, hidden)
-            outputs[ei] = output
-
-        return output, hidden, outputs
+        return final_output, final_hiddens, outputs
 
 # Generic sequential decoder
 class DecoderRNN(nn.Module):
-    def __init__(self, output_size, hidden_size, recurrent_unit, attn=False, n_layers=1, dropout_p=0.1, max_length=30):
+    def __init__(self, hidden_size, output_size, recurrent_unit, attn=False, n_layers=1, dropout_p=0.1, max_length=30):
         super(DecoderRNN, self).__init__()
         self.hidden_size = hidden_size
         self.output_size = output_size
@@ -135,7 +105,7 @@ class DecoderRNN(nn.Module):
         # content-based attention
         if attn == "content": 
                 self.v = nn.Parameter(torch.FloatTensor(hidden_size), requires_grad=True)
-                nn.init.uniform_(self.v, -1, 1) # maybe need cuda
+                nn.init.uniform(self.v, -1, 1) # maybe need cuda
                 self.attn_layer = nn.Linear(self.hidden_size * 3, self.hidden_size)
                 self.attn_combine = nn.Linear(self.hidden_size * 2, self.hidden_size)
 
@@ -171,9 +141,9 @@ class DecoderRNN(nn.Module):
 
                 for i in range(input_length):
                         if self.recurrent_unit == "LSTM"  or self.recurrent_unit == "ONLSTM" or self.recurrent_unit == "SquashedLSTM":
-                                attn_hidden = torch.tanh(self.attn_layer(torch.cat((encoder_outputs[i].unsqueeze(0), hidden[0][0].unsqueeze(0), output), 2)))
+                                attn_hidden = F.tanh(self.attn_layer(torch.cat((encoder_outputs[i].unsqueeze(0), hidden[0][0].unsqueeze(0), output), 2)))
                         else:
-                                attn_hidden = torch.tanh(self.attn_layer(torch.cat((encoder_outputs[i].unsqueeze(0), hidden[0].unsqueeze(0), output), 2)))
+                                attn_hidden = F.tanh(self.attn_layer(torch.cat((encoder_outputs[i].unsqueeze(0), hidden[0].unsqueeze(0), output), 2)))
                         u_i_j = torch.bmm(attn_hidden, self.v.unsqueeze(1).unsqueeze(0))
                         u_i[i] = u_i_j[0].view(-1)
 
@@ -195,10 +165,10 @@ class DecoderRNN(nn.Module):
 
     # Perform the full forward pass
     def forward(self, hidden, encoder_outputs, training_set, tf_ratio=0.5, evaluation=False):
-        input_variable = training_set.source
-        target_variable = training_set.target
+        input_variable = training_set[0]
+        target_variable = training_set[1]
 
-        batch_size = training_set.source.size()[1]
+        batch_size = training_set[0].size()[1]
 
         decoder_input = Variable(torch.LongTensor([0] * batch_size))
         decoder_input = decoder_input.to(device=available_device)
@@ -258,7 +228,7 @@ class UnsquashedGRU(nn.Module):
         r_t = F.sigmoid(self.wr(input_plus_hidden))
         z_t = F.sigmoid(self.wz(input_plus_hidden))
         v_t = F.sigmoid(self.wv(input_plus_hidden))
-        h_tilde = torch.tanh(self.wx(input) + self.urh(r_t * hx))
+        h_tilde = F.tanh(self.wx(input) + self.urh(r_t * hx))
         h_t = z_t * hx + v_t * h_tilde
 
         return h_t, h_t
@@ -294,7 +264,7 @@ class ONLSTM(nn.Module):
                 f_t = F.sigmoid(self.wf(input_plus_hidden))
                 i_t = F.sigmoid(self.wi(input_plus_hidden))
                 o_t = F.sigmoid(self.wo(input_plus_hidden))
-                c_hat_t = torch.tanh(self.wg(input_plus_hidden))
+                c_hat_t = F.tanh(self.wg(input_plus_hidden))
 
                 f_tilde_t = CumMax()(self.wftilde(input_plus_hidden))
                 i_tilde_t = 1 - CumMax()(self.witilde(input_plus_hidden))
@@ -304,7 +274,7 @@ class ONLSTM(nn.Module):
                 i_hat_t = i_t * omega_t + (i_tilde_t - omega_t)
 
                 cx = f_hat_t * cx + i_hat_t * c_hat_t
-                hx = o_t * torch.tanh(cx)
+                hx = o_t * F.tanh(cx)
 
                 return hx, (hx, cx)
 
@@ -327,13 +297,13 @@ class SquashedLSTM(nn.Module):
         input_plus_hidden = torch.cat((input, hx), 2)
         i_t = F.sigmoid(self.wi(input_plus_hidden))
         f_t = F.sigmoid(self.wf(input_plus_hidden))
-        g_t = torch.tanh(self.wg(input_plus_hidden))
+        g_t = F.tanh(self.wg(input_plus_hidden))
         o_t = F.sigmoid(self.wo(input_plus_hidden))
 
         sum_fi = f_t + i_t
 
         cx = (f_t * cx + i_t * g_t)/sum_fi
-        hx = o_t * torch.tanh(cx)
+        hx = o_t * F.tanh(cx)
 
         return hx, (hx, cx)
 
@@ -454,3 +424,190 @@ class TreeDecoderRNN(nn.Module):
             words_out.append(nn.LogSoftmax()(self.word_out(elt).view(-1).unsqueeze(0)))
 
         return words_out
+
+
+class TridentDecoder(nn.Module):
+    def __init__(self, arity, vocab_size, hidden_size, max_depth, null_placement="pre"):
+        super(TridentDecoder, self).__init__()
+
+        self.arity = arity
+        self.null_placement = null_placement
+
+        self.hidden_size = hidden_size
+        self.vocab_size = vocab_size + 1 # first one is for null
+        self.max_depth = max_depth
+
+        self.hidden2vocab = nn.Sequential(nn.Linear(self.hidden_size, 2*self.hidden_size), nn.Sigmoid(), nn.Linear(2*self.hidden_size, self.vocab_size))
+        self.to_children = nn.Sequential(nn.Linear(self.hidden_size, 2*self.hidden_size), nn.Sigmoid(), nn.Linear(2*self.hidden_size, self.arity * self.hidden_size))
+
+    @property
+    def null_ix(self):
+        return 0
+
+    def forward(self, root_hidden, tree=None):
+        batch_size = root_hidden.shape[0]
+        batch_outs = []
+        for eg_ix in range(batch_size):
+            batch_outs.append(self.forward_nobatch(root_hidden[eg_ix, :], tree=(None if tree is None else tree[eg_ix])))
+
+        return nn.utils.rnn.pad_sequence(batch_outs)
+
+    def forward_nobatch(self, root_hidden, tree=None):
+        if self.training:
+            # assumption: every non-terminal node either has 3 children which are all non-terminals, or is the parent of one terminal node
+            assert tree is not None
+            raw_scores = torch.stack(list(self.forward_train_helper(root_hidden, tree)))
+            return F.log_softmax(raw_scores, dim=1)
+        else:
+            raw_scores = torch.stack(list(self.forward_eval_helper(root_hidden)))
+            #return F.log_softmax(raw_scores, dim=1)
+            return raw_scores
+
+    def forward_train_helper(self, root_hidden, root):
+        production = self.hidden2vocab(root_hidden)
+        if len(root) > 1:
+            assert len(root) == self.arity
+
+            assert self.null_placement == "pre"
+            yield production
+            children_hidden = self._hidden2children(root_hidden)
+            for child_ix in range(self.arity):
+                yield from self.forward_train_helper(children_hidden[child_ix], root[child_ix])
+        else:
+            yield production
+
+    def forward_eval_helper(self, root_hidden, depth=0):
+        production = self.hidden2vocab(root_hidden)
+
+        if (torch.argmax(production) == self.null_ix) and (depth <= self.max_depth):
+            # we chose NOT to output a word here... recurse more
+            children_hidden = self._hidden2children(root_hidden)
+            for child_ix in range(self.arity):
+                yield from self.forward_eval_helper(children_hidden[child_ix], depth+1)
+        else:
+            yield production
+
+    def _hidden2children(self, hidden):
+        return torch.split(self.to_children(hidden), self.hidden_size, dim=-1)
+
+"""
+new decoders will take arguments
+encoding vector
+instruction token
+(optional) teacher forcing tree
+"""
+
+class GRUTridentDecoder(nn.Module):
+    def __init__(self, arity, vocab_size, hidden_size, max_depth, null_placement="pre"):
+        super(GRUTridentDecoder, self).__init__()
+
+        self.arity = arity
+        self.null_placement = null_placement
+
+        self.hidden_size = hidden_size
+        self.vocab_size = vocab_size + 1 # first one is for null
+        self.max_depth = max_depth
+
+        self.hidden2vocab = nn.Sequential(nn.Linear(self.hidden_size, 2*self.hidden_size), nn.Sigmoid(), nn.Linear(2*self.hidden_size, self.vocab_size))
+        
+        # IDEA: in the future, have just one GRU for all the children but feed in a different input for each instead of always using this same dumb vector 
+        self.null_vector = torch.zeros(self.hidden_size, requires_grad=False).unsqueeze(0)
+        self.per_child_cell = nn.ModuleList()
+        for _ in range(self.arity):
+            self.per_child_cell.append(nn.GRUCell(self.hidden_size, self.hidden_size))
+        
+    @property
+    def null_ix(self):
+        return 0
+
+    def forward(self, root_hidden, training_set):
+        root_hidden = root_hidden.unsqueeze(0)
+        if self.training:
+            # assumption: every non-terminal node either has 3 children which are all non-terminals, or is the parent of one terminal node
+            tree = training_set[3]
+            raw_scores = torch.stack(list(self.forward_train_helper(root_hidden, tree)))
+            return F.log_softmax(raw_scores, dim=1)
+        else:
+            raw_scores = torch.stack(list(self.forward_eval_helper(root_hidden)))
+            return F.log_softmax(raw_scores, dim=1)
+
+    def forward_train_helper(self, root_hidden, root):
+        production = self.hidden2vocab(root_hidden)[0]
+        if len(root) > 1:
+            assert len(root) == self.arity
+
+            assert self.null_placement == "pre"
+            yield production
+            for child_ix in range(self.arity):
+                child_hidden = self.per_child_cell[child_ix](self.null_vector, root_hidden)
+                yield from self.forward_train_helper(child_hidden, root[child_ix])
+        else:
+            yield production
+
+    def forward_eval_helper(self, root_hidden, depth=0):
+        production = self.hidden2vocab(root_hidden)[0]
+        if (torch.argmax(production) == self.null_ix) and (depth <= self.max_depth):
+            # we chose NOT to output a word here... recurse more
+            for child_ix in range(self.arity):
+                child_hidden = self.per_child_cell[child_ix](self.null_vector, root_hidden)
+                yield from self.forward_eval_helper(child_hidden, depth+1)
+        else:
+            yield production
+
+class AltGRUTridentDecoder(nn.Module):
+    def __init__(self, arity, vocab_size, hidden_size, max_depth, null_placement="pre"):
+        super(GRUTridentDecoder, self).__init__()
+
+        self.arity = arity
+        self.null_placement = null_placement
+
+        self.hidden_size = hidden_size
+        self.vocab_size = vocab_size + 1 # first one is for null
+        self.max_depth = max_depth
+
+        self.hidden2vocab = nn.Sequential(nn.Linear(self.hidden_size, 2*self.hidden_size), nn.Sigmoid(), nn.Linear(2*self.hidden_size, self.vocab_size))
+        
+        # IDEA: in the future, have just one GRU for all the children but feed in a different input for each instead of always using this same dumb vector 
+        self.null_vector = torch.zeros(self.hidden_size, requires_grad=False).unsqueeze(0)
+        self.child_toks = nn.ModuleList()
+        for _ in range(self.arity):
+            pass
+            #self.child_toks.append()
+        
+    @property
+    def null_ix(self):
+        return 0
+
+    def forward(self, root_hidden, training_set):
+        root_hidden = root_hidden.unsqueeze(0)
+        if self.training:
+            # assumption: every non-terminal node either has 3 children which are all non-terminals, or is the parent of one terminal node
+            tree = training_set[3]
+            raw_scores = torch.stack(list(self.forward_train_helper(root_hidden, tree)))
+            return F.log_softmax(raw_scores, dim=1)
+        else:
+            raw_scores = torch.stack(list(self.forward_eval_helper(root_hidden)))
+            return F.log_softmax(raw_scores, dim=1)
+
+    def forward_train_helper(self, root_hidden, root):
+        production = self.hidden2vocab(root_hidden)[0]
+        if len(root) > 1:
+            assert len(root) == self.arity
+
+            assert self.null_placement == "pre"
+            yield production
+            for child_ix in range(self.arity):
+                child_hidden = self.per_child_cell[child_ix](self.null_vector, root_hidden)
+                yield from self.forward_train_helper(child_hidden, root[child_ix])
+        else:
+            yield production
+
+    def forward_eval_helper(self, root_hidden, depth=0):
+        production = self.hidden2vocab(root_hidden)[0]
+        if (torch.argmax(production) == self.null_ix) and (depth <= self.max_depth):
+            # we chose NOT to output a word here... recurse more
+            for child_ix in range(self.arity):
+                child_hidden = self.per_child_cell[child_ix](self.null_vector, root_hidden)
+                yield from self.forward_eval_helper(child_hidden, depth+1)
+        else:
+            yield production
