@@ -75,6 +75,7 @@ def train(iterator, model, learning_rate, num_epochs, ignore_index):
                 decoder_outputs = model(batch)
                 
                 # TODO: double check this
+                print(decoder_outputs.shape)
                 pred = decoder_outputs.permute(1, 2, 0)
                 target = batch.target_seq.permute(1, 0)
                 batch_loss = criterion(pred, target)
@@ -96,14 +97,21 @@ CKPTS_TABLE = "ckpts"
 CKPT_NAME_LATEST = "latest_ckpt.pt"
 CKPT_NAME_BEST = "best_ckpt.pt"
 
+NUM_LAYERS = 1
+MAX_LENGTH = 30
+HIDDEN_SIZE = 30
+DROPOUT = 0.1
+ENC_TYPE = 'GRU'
+DEC_TYPE = 'Tree'
+ATT_TYPE = 'multiplicative'
 
+encoder = modelsNEWBob.EncoderRNN(len(SRC_SEQ.vocab), hidden_size=HIDDEN_SIZE, recurrent_unit=ENC_TYPE, num_layers=NUM_LAYERS, max_length=MAX_LENGTH, dropout=DROPOUT)
 
-#encoder = modelsNEW.EncoderRNN(len(SRC_SEQ.vocab), hidden_size=30, recurrent_unit="GRU", n_layers=1, max_length=20)
-encoder = modelsNEWBob.EncoderRNN(len(SRC_SEQ.vocab), hidden_size=100, recurrent_unit="GRU", num_layers=1, max_length=20)
-#dec = modelsNEW.TridentDecoder(3, len(TAR_SEQ.vocab), hidden_size=30, max_depth=5)
-#s2s = seq2seq.Seq2Seq(encoder, dec, ["source_seq"], ["middle1"], decoder_train_field_names=["middle1", "source_tree"])
-
-dec = modelsNEWBob.DecoderRNN(hidden_size=100,vocab=TAR_SEQ.vocab, encoder_vocab=SRC_SEQ.vocab, recurrent_unit="GRU", num_layers=1, max_length=30, attention_type='additive', dropout=0.3)
-s2s = seq2seq.Seq2Seq(encoder, dec, ["source_seq"], ["middle1", "annotation", "middle2", "source_seq"], decoder_train_field_names=["middle1", "annotation", "middle2", "source_seq", "target_seq"])
+if DEC_TYPE == 'Tree':
+    dec = modelsNEWBob.GRUTridentDecoder(3, len(TAR_SEQ.vocab), hidden_size=HIDDEN_SIZE, max_depth=5)
+    s2s = seq2seq.Seq2Seq(encoder, dec, ["source_seq"], ["middle0"], decoder_train_field_names=["middle0", "source_tree"])
+else:
+    dec = modelsNEWBob.DecoderRNN(hidden_size=HIDDEN_SIZE,vocab=TAR_SEQ.vocab, encoder_vocab=SRC_SEQ.vocab, recurrent_unit=DEC_TYPE, num_layers=NUM_LAYERS, max_length=MAX_LENGTH, attention_type=ATT_TYPE, dropout=DROPOUT)
+    s2s = seq2seq.Seq2Seq(encoder, dec, ["source_seq"], ["middle0", "annotation", "middle1", "source_seq"], decoder_train_field_names=["middle0", "annotation", "middle1", "source_seq", "target_seq"])
 
 train(myiter, s2s, 0.01, 20, ignore_index=TAR_SEQ.vocab.stoi['<pad>'])
