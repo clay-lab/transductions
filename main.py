@@ -3,6 +3,7 @@ import tree_loaders
 import RPNTask
 import modelsNEW
 import seq2seq
+import modelsNEWBob
 
 def my_transform(t):
     if t[0].label() == "RPN":
@@ -35,7 +36,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 from torch import optim
-import cox.store
+#import cox.store
 
 from tqdm import tqdm
 
@@ -97,9 +98,12 @@ CKPT_NAME_BEST = "best_ckpt.pt"
 
 
 
-encoder = modelsNEW.EncoderRNN(len(SRC_SEQ.vocab), hidden_size=30, recurrent_unit="GRU", n_layers=1, max_length=20)
-dec = modelsNEW.TridentDecoder(3, len(TAR_SEQ.vocab), hidden_size=30, max_depth=5)
-s2s = seq2seq.Seq2Seq(encoder, dec, ["source_seq"], ["middle1"], decoder_train_field_names=["middle1", "source_tree"])
+#encoder = modelsNEW.EncoderRNN(len(SRC_SEQ.vocab), hidden_size=30, recurrent_unit="GRU", n_layers=1, max_length=20)
+encoder = modelsNEWBob.EncoderRNN(len(SRC_SEQ.vocab), hidden_size=100, recurrent_unit="GRU", num_layers=1, max_length=20)
+#dec = modelsNEW.TridentDecoder(3, len(TAR_SEQ.vocab), hidden_size=30, max_depth=5)
+#s2s = seq2seq.Seq2Seq(encoder, dec, ["source_seq"], ["middle1"], decoder_train_field_names=["middle1", "source_tree"])
 
+dec = modelsNEWBob.DecoderRNN(hidden_size=100,vocab=TAR_SEQ.vocab, encoder_vocab=SRC_SEQ.vocab, recurrent_unit="GRU", num_layers=1, max_length=30, attention_type='additive', dropout=0.3)
+s2s = seq2seq.Seq2Seq(encoder, dec, ["source_seq"], ["middle1", "annotation", "middle2", "source_seq"], decoder_train_field_names=["middle1", "annotation", "middle2", "source_seq", "target_seq"])
 
 train(myiter, s2s, 0.01, 20, ignore_index=TAR_SEQ.vocab.stoi['<pad>'])
