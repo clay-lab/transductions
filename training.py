@@ -1,3 +1,5 @@
+#from __future__ import unicode_literals, print_function, division
+
 # Imports
 import os.path
 
@@ -10,11 +12,6 @@ import nltk.grammar
 
 import RPNTask
 
-import models
-import modelsNEW
-import modelsNEWBob
-
-from __future__ import unicode_literals, print_function, division
 from io import open
 import unicodedata
 import string
@@ -43,7 +40,7 @@ class AverageMeter:
 
     def reset(self):
         # self.val = 0
-        self.avg = np.nan
+        self.avg = -1
         self.sum = 0.0
         self.count = 0.0
 
@@ -61,7 +58,7 @@ def train(model, train_iterator, store, args, validation_iter=None, ignore_index
     criterion = nn.CrossEntropyLoss(weight=None, ignore_index=ignore_index)
     
     # if we DON"T want to organize by epochs, go to this tutorial and CMD-F "epoch": <http://anie.me/On-Torchtext/>
-    for epoch in range(args.num_epochs):
+    for epoch in range(args.epochs):
     
         loss_meter = AverageMeter()
         model.train()

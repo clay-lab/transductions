@@ -1,6 +1,12 @@
+import torch.nn as nn
+from attention import *
+
 # DECODERS FROM MODELS.PY, MODELSNEW.PY, BOB_MODELS.PY, MODELSNEWBOB.PY (MASTER), AND MODELSNEWBOB.PY (NEW-MODELS)
 # Generic sequential decoder
-class DecoderRNN(nn.Module): # FROM MODELS.PY -- MASTER
+
+# FROM MODELS.PY -- MASTER
+"""
+class DecoderRNN(nn.Module): 
     def __init__(self, hidden_size, output_size, recurrent_unit, attn=False, n_layers=1, dropout_p=0.1, max_length=30):
         super(DecoderRNN, self).__init__()
         self.hidden_size = hidden_size
@@ -144,9 +150,11 @@ class DecoderRNN(nn.Module): # FROM MODELS.PY -- MASTER
                     break
 
         return decoder_outputs 
-
+"""
+# FROM MODELSNEW.PY
+"""
 # Generic sequential decoder
-class DecoderRNN(nn.Module): # FROM MODELSNEW.PY
+class DecoderRNN(nn.Module): 
     def __init__(self, hidden_size, output_size, recurrent_unit, attn=False, n_layers=1, dropout_p=0.1, max_length=30):
         super(DecoderRNN, self).__init__()
         self.hidden_size = hidden_size
@@ -290,9 +298,10 @@ class DecoderRNN(nn.Module): # FROM MODELSNEW.PY
                     break
 
         return decoder_outputs 
+"""
 
-
-class Decoder(nn.Module): # FROM BOB_MODELS.PY
+# FROM BOB_MODELS.PY
+class Decoder(nn.Module): 
     def __init__(self, vocab, embedding_size, hidden_size, input_vocab,
                  attention):
         super(Decoder, self).__init__()
@@ -358,8 +367,10 @@ class Decoder(nn.Module): # FROM BOB_MODELS.PY
         return y, h, a.squeeze(1)
 
 
+# MODELSNEWBOB.PY -- MASTER
+"""
 # Generic sequential decoder
-class DecoderRNN(nn.Module): # MODELSNEWBOB.PY -- MASTER
+class DecoderRNN(nn.Module): 
     def __init__(self, hidden_size, vocab, encoder_vocab, recurrent_unit, embedding_size=None, attention_type=None, num_layers=1, dropout=0, max_length=30):
         super(DecoderRNN, self).__init__()
         self.vocab = vocab
@@ -474,10 +485,11 @@ class DecoderRNN(nn.Module): # MODELSNEWBOB.PY -- MASTER
             if all(output_complete_flag):
                 break
         return outputs[:gen_length]#, decoder_hiddens[:i+1], attention[:i+1]
+"""
 
-
+# FROM MODELSNEWBOB.PY IN MODELS-NEW BRANCH
 # Generic sequential decoder
-class DecoderRNN(nn.Module): # FROM MODELSNEWBOB.PY IN MODELS-NEW BRANCH
+class DecoderRNN(nn.Module): 
     def __init__(self, hidden_size, vocab, encoder_vocab, recurrent_unit, embedding_size=None, attention_type=None, num_layers=1, dropout=0.1, max_length=30):
         super(DecoderRNN, self).__init__()
         self.vocab = vocab
