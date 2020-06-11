@@ -138,5 +138,6 @@ dmypy.json
 cython_debug/
 
 .DS_Store
+logs/
 demo_savefile.txt
 sandbox.ipynb

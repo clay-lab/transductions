@@ -7,9 +7,11 @@ import numpy as np
 import torch
 import torch.nn as nn
 from torch import optim
-#import cox.store
+import cox.store
 
 from tqdm import tqdm
+
+import os.path
 
 from torchtext.data import RawField, Field, TabularDataset, BucketIterator
 from tree_loaders import TreeField, TreeSequenceField
@@ -69,7 +71,8 @@ def train(model, train_iterator, store, args, validation_iter=None, ignore_index
                 loss_meter.update(batch_loss.item())
                 T.set_postfix(avg_train_loss=loss_meter.avg)
 
-        eval_stats = evaluate(model, validation_iter)
+        # TODO: SHAYNA
+        eval_stats = evaluate(model, validation_iter, store=store)
 
         torch.save(model.state_dict(), os.path.join(store.path, CKPT_NAME_LATEST))
 
@@ -77,7 +80,7 @@ def train(model, train_iterator, store, args, validation_iter=None, ignore_index
 
 
 # this is being nixed until cox gets fixed for pandas 1.0
-"""
+
 def setup_store(args):
     store = cox.store.Store(args.out_dir, args.exp_name)
 
@@ -92,7 +95,7 @@ def setup_store(args):
     store.add_table(LOGS_TABLE, logs_schema)
 
     return store
-"""
+
 
 if __name__ == "__main__":
     # args is just a blank object.
@@ -104,14 +107,13 @@ if __name__ == "__main__":
     args.out_dir = "logs/default"
     args.learning_rate = 0.01
     args.num_epochs = 20
-    """
+
     args.logging_meters = {
         "sentence_accuracy": None,
         "token_accuracy": None,
         "length_accuracy": None,
     }
-    """
-    # args.exp_name = None
+    args.exp_name = None
 
     if args.read_tree_format:
         SRC_TREE = TreeField(collapse_unary=True)
@@ -137,8 +139,12 @@ if __name__ == "__main__":
 
     encoder = modelsNEW.EncoderRNN(len(SRC.vocab), hidden_size=30, recurrent_unit="GRU", n_layers=1, max_length=20)
     dec = modelsNEW.TridentDecoder(3, len(TAR.vocab), hidden_size=30, max_depth=5)
+    #dec = modelsNEWBob.DecoderRNN(hidden_size=100,vocab=TAR_SEQ.vocab, encoder_vocab=SRC_SEQ.vocab, recurrent_unit="GRU", num_layers=1, max_length=30, attention_type='additive', dropout=0.3)
     s2s = seq2seq.Seq2Seq(encoder, dec, ["source"], ["middle1"], decoder_train_field_names=["middle1", "source_tree"])
 
-    #store = setup_store(args)
+    store = setup_store(args)
 
     train(s2s, train_iter, store, args, ignore_index=TAR.vocab.stoi['<pad>'])
+
+# IF YOU HAVE PANDAS 1.0 YOU MUST MAKE THIS CHANGE MANUALLY
+# https://github.com/MadryLab/cox/pull/3/files
