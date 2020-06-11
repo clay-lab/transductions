@@ -1,5 +1,19 @@
-
 # Imports
+import os.path
+
+import torch
+from torch import optim
+from tqdm import tqdm
+
+from nltk.parse import ViterbiParser
+import nltk.grammar
+
+import RPNTask
+
+import models
+import modelsNEW
+import modelsNEWBob
+
 from __future__ import unicode_literals, print_function, division
 from io import open
 import unicodedata
@@ -22,70 +36,55 @@ import math
 
 from evaluationNEW import *
 
-use_cuda = torch.cuda.is_available()
+class AverageMeter:
+    """Computes and stores the average and current value"""
+    def __init__(self):
+        self.reset()
 
-if use_cuda:
-    available_device = torch.device('cuda')
-else:
-    available_device = torch.device('cpu')
+    def reset(self):
+        # self.val = 0
+        self.avg = np.nan
+        self.sum = 0.0
+        self.count = 0.0
 
-# figure out attention
-def train_iterator(train_iterator, val_iterator, encoder, decoder, enc_recurrent_unit, dec_recurrent_unit, attention, directory, prefix, vocab, print_every=1000, learning_rate=0.01, patience=3, epochs = 4):
+    def update(self, val):
+        # self.val = val
+        self.sum += val
+        self.count += 1
+        self.avg = self.sum / self.count
 
-    print("Training model")
+def train(model, train_iterator, store, args, validation_iter=None, ignore_index=None):
+    if validation_iter is None:
+        validation_iter = train_iterator
 
-    # Construct optimizers and loss function
-    encoder_optimizer = optim.SGD(encoder.parameters(), lr=learning_rate)
-    decoder_optimizer = optim.SGD(decoder.parameters(), lr=learning_rate)
-    criterion = nn.NLLLoss()
+    optimizer = optim.SGD(model.parameters(), lr=args.learning_rate)
+    criterion = nn.CrossEntropyLoss(weight=None, ignore_index=ignore_index)
+    
+    # if we DON"T want to organize by epochs, go to this tutorial and CMD-F "epoch": <http://anie.me/On-Torchtext/>
+    for epoch in range(args.num_epochs):
+    
+        loss_meter = AverageMeter()
+        model.train()
+        with tqdm(train_iterator) as T:
+            for batch in T:
+                optimizer.zero_grad()
 
-    # Loss values
-    total_loss = 0.0
-
-    for epoch in range(epochs):
-
-        print("#####################################")
-        print("Epoch {:d} of {:d}".format(epoch, epochs))
-
-        for index, batch in enumerate(train_iterator):
-
-            encoder_optimizer.zero_grad()
-            decoder_optimizer.zero_grad()
-
-            # Split the target from the input
-            # print(batch)
-            target = batch.target
-
-            # Forward pass
-
-            # I have some questions about how the Encoders are structured.
-            # In particular, why return a mega-tensor of the outputs?
-            e_out, e_hid, e_outs = encoder(batch)
-            d_outs = decoder(e_hid, e_outs, batch)
-
-            batch_loss = 0.0
-            idx = 0
-            while idx < min(len(d_outs), len(batch)): # Make this less brittle?
-                batch_loss += criterion(d_outs[idx], target[idx])
-                idx += 1
-
-
-            # Backward pass
-            # batch_loss *= batch[0][0].size()[1] # Why is this necessary??
-            batch_loss.backward()
-            encoder_optimizer.step()
-            decoder_optimizer.step()
-
-            total_loss += batch_loss / target.size()[0]
-
-            count_since_improved = 0
-            best_loss = float('inf')
-
-            if (index % print_every == 0):
-
-                dev_set_loss = 1 - score(val_iterator, encoder, decoder)
+                decoder_outputs = model(batch)
                 
-                print("Batch Loss:   {0:>2f}".format(batch_loss))
-                print("Dev-Set Loss: {0:>2f}".format(dev_set_loss))
+                # TODO: double check this
+                pred = decoder_outputs.permute(1, 2, 0)
+                target = batch.target.permute(1, 0)
+                batch_loss = criterion(pred, target)
 
-                # Deal with model saving here
+                batch_loss.backward()
+                optimizer.step()
+
+                # item() to turn a 0-dimensional tensor into a regular float
+                loss_meter.update(batch_loss.item())
+                T.set_postfix(avg_train_loss=loss_meter.avg)
+
+        # TODO: SHAYNA
+        eval_stats = evaluate(model, validation_iter, store=store)
+
+        torch.save(model.state_dict(), os.path.join(store.path, CKPT_NAME_LATEST))
+
