@@ -12,6 +12,8 @@ from torch.autograd import Variable
 from torch import optim
 import torch.nn.functional as F
 
+from attention import create_mask, MultiplicativeAttention, AdditiveAttention, DotproductAttention, PositionAttention
+
 import sys
 import os
 
@@ -28,184 +30,155 @@ else:
 
 # Generic sequential encoder
 class EncoderRNN(nn.Module):
-    def __init__(self, vocab_size, hidden_size, recurrent_unit, n_layers=1, max_length=30, dropout_p=0):
+    def __init__(self, vocab_size, hidden_size, recurrent_unit, num_layers=1, max_length=30, dropout=0):
         super(EncoderRNN, self).__init__()
-        self.num_layers = n_layers
+        self.num_layers = num_layers
         self.hidden_size = hidden_size
         self.rnn_type = recurrent_unit
         self.max_length = max_length
-        self.dropout = nn.Dropout(p=dropout_p)
+        self.dropout = nn.Dropout(p=dropout)
 
         self.embedding = nn.Embedding(vocab_size, hidden_size)
 
         if recurrent_unit == "SRN":
-                self.rnn = nn.RNN(hidden_size, hidden_size, num_layers = self.num_layers, dropout = dropout_p)
+                self.rnn = nn.RNN(hidden_size, hidden_size, num_layers = num_layers, dropout = dropout)
         elif recurrent_unit == "GRU":
-                self.rnn = nn.GRU(hidden_size, hidden_size, num_layers = self.num_layers, dropout = dropout_p)
+                self.rnn = nn.GRU(hidden_size, hidden_size, num_layers = num_layers, dropout = dropout)
         elif recurrent_unit == "LSTM":
-                self.rnn = nn.LSTM(hidden_size, hidden_size, num_layers = self.num_layers, dropout = dropout_p)
+                self.rnn = nn.LSTM(hidden_size, hidden_size, num_layers = num_layers, dropout = dropout)
         else:
                 print("Invalid recurrent unit type")
 
-
-    # For succesively generating each new output and hidden layer
     def forward(self, batch):
 
-        #outputs = Variable(torch.zeros(self.max_length, batch_size, self.hidden_size))
-        #outputs = outputs.to(device=available_device) # to be used by attention in the decoder
         embedded_source = self.dropout(self.embedding(batch))
         outputs, final_hiddens = self.rnn(embedded_source)
+        if self.rnn_type == 'LSTM':
+            final_hiddens = final_hiddens[0] # ignore cell state
         final_output = outputs[-1]
-        #only return the last timestep's h vectors for the last encoder layer
+        #only return the last timestep's h vectors for the last encoder layer 
+        #Note that doing this should make the values of final_output and final_hiddens the same!
         final_hiddens = final_hiddens[-1]
 
         return final_output, final_hiddens, outputs
 
 # Generic sequential decoder
 class DecoderRNN(nn.Module):
-    def __init__(self, hidden_size, output_size, recurrent_unit, attn=False, n_layers=1, dropout_p=0.1, max_length=30):
+    def __init__(self, hidden_size, vocab, encoder_vocab, recurrent_unit, embedding_size=None, attention_type=None, num_layers=1, dropout=0, max_length=30):
         super(DecoderRNN, self).__init__()
+        self.vocab = vocab
+        self.vocab_size = len(vocab)
+        self.eos_index = self.vocab.stoi['<eos>']
+        self.pad_index = self.vocab.stoi['<pad>']
+        self.encoder_vocab = encoder_vocab
         self.hidden_size = hidden_size
-        self.output_size = output_size
-        self.n_layers = n_layers
-        self.dropout_p = dropout_p
+        self.embedding_size = hidden_size if embedding_size == None else embedding_size
+        self.embedding = nn.Embedding(self.vocab_size, hidden_size)
+        self.num_layers = num_layers
         self.max_length = max_length
-        self.attention = attn
+        self.attention_type = attention_type
+        self.recurrent_unit_type = recurrent_unit
 
-        self.embedding = nn.Embedding(self.output_size, self.hidden_size)
-        self.dropout = nn.Dropout(self.dropout_p)
+        self.embedding = nn.Embedding(self.vocab_size, self.hidden_size)
+        self.dropout = nn.Dropout(dropout)
+        self.out = nn.Linear(self.hidden_size, self.vocab_size)
 
         if recurrent_unit == "SRN":
-                self.rnn = nn.RNN(self.hidden_size, self.hidden_size)
+                self.rnn = nn.RNNCell(self.embedding_size + (hidden_size if attention_type else 0), 
+                                      hidden_size)
         elif recurrent_unit == "GRU":
-                self.rnn = nn.GRU(self.hidden_size, self.hidden_size)
+                self.rnn = nn.GRUCell(self.embedding_size + (hidden_size if attention_type else 0),
+                                      hidden_size)
         elif recurrent_unit == "LSTM":
-                self.rnn = nn.LSTM(self.hidden_size, self.hidden_size)
-        elif recurrent_unit == "SquashedLSTM":
-                self.rnn = SquashedLSTM(self.hidden_size, self.hidden_size)
-        elif recurrent_unit == "ONLSTM":
-                self.rnn = ONLSTM(self.hidden_size, self.hidden_size)
-        elif recurrent_unit == "UnsquashedGRU":
-                self.rnn = UnsquashedGRU(hidden_size, hidden_size)
+                self.rnn = nn.LSTMCell(self.embedding_size + (hidden_size if attention_type else 0),
+                                      hidden_size)
         else:
                 print("Invalid recurrent unit type")
 
-        self.out = nn.Linear(self.hidden_size, self.output_size)
-
-        self.recurrent_unit = recurrent_unit
-
         # location-based attention
-        if attn == "location":
-                # Attention vector
-                self.attn = nn.Linear(self.hidden_size * 2, self.max_length)
+        if attention_type == "location":
+                self.attn = PositionAttention(hidden_size, max_length = self.max_length)
+        # additive/content-based (Bahdanau) attention
+        if attention_type == "additive": 
+                self.attn = AdditiveAttention(hidden_size)
+        #multiplicative (key-value) attention
+        if attention_type == "multiplicative":
+                self.attn = MultiplicativeAttention(hidden_size)
+        #dot product attention
+        if attention_type == "dotproduct":
+                self.attn = DotproductAttention()
 
-                # Context vector made by combining the attentions
-                self.attn_combine = nn.Linear(self.hidden_size * 2, self.hidden_size)
-
-        # content-based attention
-        if attn == "content": 
-                self.v = nn.Parameter(torch.FloatTensor(hidden_size), requires_grad=True)
-                nn.init.uniform(self.v, -1, 1) # maybe need cuda
-                self.attn_layer = nn.Linear(self.hidden_size * 3, self.hidden_size)
-                self.attn_combine = nn.Linear(self.hidden_size * 2, self.hidden_size)
-
-    # Perform one step of the forward pass
-    def forward_step(self, input, hidden, encoder_outputs, input_variable):
-        output = self.embedding(input).unsqueeze(0)
-        output = self.dropout(output)
-
-        attn_weights = None
-
-        batch_size = input_variable.size()[1]
-
-        # Determine attention weights using location-based attention
-        if self.attention == "location":
-                if self.recurrent_unit == "LSTM" or self.recurrent_unit == "ONLSTM" or self.recurrent_unit == "SquashedLSTM":
-                    attn_weights = F.softmax(self.attn(torch.cat((output[0], hidden[0][0]), 1)))
-                else:
-                    attn_weights = F.softmax(self.attn(torch.cat((output[0], hidden[0]), 1)))
-
-                attn_applied = torch.bmm(attn_weights.unsqueeze(1), encoder_outputs.transpose(0,1))
-                attn_applied = attn_applied.transpose(0,1)
-
-                output = torch.cat((output[0], attn_applied[0]), 1)
-                output = self.attn_combine(output).unsqueeze(0)
-
-        # Determine attention weights using content-based attention
-        if self.attention == "content": 
-                input_length = input_variable.size()[0] 
-                u_i = Variable(torch.zeros(len(encoder_outputs), batch_size))
-
-                u_i = u_i.to(device=available_device)
-
-
-                for i in range(input_length):
-                        if self.recurrent_unit == "LSTM"  or self.recurrent_unit == "ONLSTM" or self.recurrent_unit == "SquashedLSTM":
-                                attn_hidden = F.tanh(self.attn_layer(torch.cat((encoder_outputs[i].unsqueeze(0), hidden[0][0].unsqueeze(0), output), 2)))
-                        else:
-                                attn_hidden = F.tanh(self.attn_layer(torch.cat((encoder_outputs[i].unsqueeze(0), hidden[0].unsqueeze(0), output), 2)))
-                        u_i_j = torch.bmm(attn_hidden, self.v.unsqueeze(1).unsqueeze(0))
-                        u_i[i] = u_i_j[0].view(-1)
-
-
-                a_i = F.softmax(u_i.transpose(0,1)) 
-                attn_applied = torch.bmm(a_i.unsqueeze(1), encoder_outputs.transpose(0,1))
-
-                attn_applied = attn_applied.transpose(0,1)
-
-                output = torch.cat((output[0], attn_applied[0]), 1)
-                output = self.attn_combine(output).unsqueeze(0)
-
-        for i in range(self.n_layers):
-            output = F.relu(output)
-            output, hidden = self.rnn(output, hidden)
-
-        output = F.log_softmax(self.out(output[0]))
-        return output, hidden, attn_weights
+    def forwardStep(self, x, h, encoder_outputs, source_mask):
+        x = self.embedding(x)
+        #Apply ReLU to embedded input?
+        rnn_input = F.relu(x)
+        
+        if self.attention_type:
+            #use h alone for attention key in case we're dealing with LSTM
+            if isinstance(h,tuple):
+                hidden = h[0]
+            else:
+                hidden = h
+            a = self.attn(encoder_outputs, hidden, source_mask) 
+            #attn_weights = [batch size, src len]
+            a = a.unsqueeze(1)
+            #a = [batch size, 1, src len]
+            encoder_outputs = encoder_outputs.permute(1,0,2)
+            #encoder_hiddens = [batch size, src len, enc hid dim]
+            weighted_encoder_outputs = torch.bmm(a, encoder_outputs)
+            #weighted_encoder_outputs = [batch size, 1, enc hid dim]
+            weighted_encoder_outputs = weighted_encoder_outputs.squeeze(1)
+            #weighted_encoder_rep = [batch size, enc hid dim]
+            rnn_input = torch.cat((rnn_input, weighted_encoder_outputs), dim=1)
+        else:
+             a = torch.zeros(encoder_outputs.shape[1], 1, encoder_outputs.shape[0])
+        
+        batch_size = rnn_input.shape[0] 
+        state = self.rnn(rnn_input, h)
+        h = state[0] if isinstance(state,tuple) else state #For LSTM pass only h to output
+        y = self.out(h)
+        return y, state, a.squeeze(1)
 
     # Perform the full forward pass
-    def forward(self, hidden, encoder_outputs, training_set, tf_ratio=0.5, evaluation=False):
-        input_variable = training_set[0]
-        target_variable = training_set[1]
+    def forward(self, h0, x0, encoder_outputs, source, target=None, tf_ratio=0.5, evaluation=False):
+        batch_size = encoder_outputs.shape[1]
+        outputs = torch.zeros(self.max_length, batch_size, self.vocab_size)
+        decoder_hiddens = torch.zeros(self.max_length, batch_size, self.hidden_size)
+        attention = torch.zeros(self.max_length, batch_size, encoder_outputs.shape[0])
 
-        batch_size = training_set[0].size()[1]
-
-        decoder_input = Variable(torch.LongTensor([0] * batch_size))
-        decoder_input = decoder_input.to(device=available_device)
-
-        decoder_hidden = hidden
+        #if we're evaluating, never use teacher forcing
+        if (evaluation or not(torch.is_tensor(target))):
+            tf_ratio=0.0
+            gen_length = self.max_length
+        else: 
+            #if we're doing teacher forcing, don't generate past the length of the target
+            gen_length = target.shape[0]
         
-        decoder_outputs = []
-
-        use_tf = True if random.random() < tf_ratio else False
-
-        if use_tf: # Using teacher forcing
-            for di in range(target_variable.size()[0]):
-                decoder_output, decoder_hidden, decoder_attention = self.forward_step(
-                                decoder_input, decoder_hidden, encoder_outputs, input_variable)
-                decoder_input = target_variable[di]
-                decoder_outputs.append(decoder_output)
-
-        else: # Not using teacher forcing
-            if evaluation:
-                end_num = 100
+        source_mask = create_mask(source, self.encoder_vocab)
+        
+        #initialize x and h to given initial values. 
+        # Assumes that the first position in target is <bos> and can be ignored.
+        x, h = torch.tensor([self.vocab.stoi[x] for x in x0]), h0
+        output_complete_flag = torch.zeros(batch_size, dtype=torch.bool)
+        for i in range(gen_length): 
+            if self.recurrent_unit_type == "LSTM":
+                if not(isinstance(h0,tuple)):
+                    c0 = torch.zeros(batch_size, self.hidden_size)
+                    h = (h0, c0)
+            y, h, a = self.forwardStep(x, h, encoder_outputs, source_mask)
+            outputs[i] = y
+            attention[i] = a
+            decoder_hiddens[i] = h if self.recurrent_unit_type is not "LSTM" else h[0]
+            if (evaluation | (random.random() > tf_ratio)):
+                x = y.argmax(dim=1)
             else:
-                end_num = target_variable.size()[0]
+                x = target[i]  
+            #stop if all of the examples in the batch include eos or pad
+            output_complete_flag += ((x == self.eos_index) | (x == self.pad_index))
+            if all(output_complete_flag):
+                break
+        return outputs[:gen_length]#, decoder_hiddens[:i+1], attention[:i+1]
 
-            for di in range(end_num): 
-                decoder_output, decoder_hidden, decoder_attention = self.forward_step(
-                            decoder_input, decoder_hidden, encoder_outputs, input_variable) 
-
-                topv, topi = decoder_output.data.topk(1)
-                decoder_input = Variable(topi.view(-1))
-                decoder_input = decoder_input.to(device=available_device)
-
-                decoder_outputs.append(decoder_output)
-
-                if 1 in topi[0] or 2 in topi[0]:
-                    break
-
-        return decoder_outputs 
 
 # GRU modified such that its hidden states are not bounded
 class UnsquashedGRU(nn.Module):
@@ -444,24 +417,15 @@ class TridentDecoder(nn.Module):
     def null_ix(self):
         return 0
 
-    def forward(self, root_hidden, tree=None):
-        batch_size = root_hidden.shape[0]
-        batch_outs = []
-        for eg_ix in range(batch_size):
-            batch_outs.append(self.forward_nobatch(root_hidden[eg_ix, :], tree=(None if tree is None else tree[eg_ix])))
-
-        return nn.utils.rnn.pad_sequence(batch_outs)
-
-    def forward_nobatch(self, root_hidden, tree=None):
+    def forward(self, root_hidden, training_set):
         if self.training:
             # assumption: every non-terminal node either has 3 children which are all non-terminals, or is the parent of one terminal node
-            assert tree is not None
+            tree = training_set[3]
             raw_scores = torch.stack(list(self.forward_train_helper(root_hidden, tree)))
             return F.log_softmax(raw_scores, dim=1)
         else:
             raw_scores = torch.stack(list(self.forward_eval_helper(root_hidden)))
-            #return F.log_softmax(raw_scores, dim=1)
-            return raw_scores
+            return F.log_softmax(raw_scores, dim=1)
 
     def forward_train_helper(self, root_hidden, root):
         production = self.hidden2vocab(root_hidden)
@@ -489,13 +453,6 @@ class TridentDecoder(nn.Module):
 
     def _hidden2children(self, hidden):
         return torch.split(self.to_children(hidden), self.hidden_size, dim=-1)
-
-"""
-new decoders will take arguments
-encoding vector
-instruction token
-(optional) teacher forcing tree
-"""
 
 class GRUTridentDecoder(nn.Module):
     def __init__(self, arity, vocab_size, hidden_size, max_depth, null_placement="pre"):
@@ -611,3 +568,15 @@ class AltGRUTridentDecoder(nn.Module):
                 yield from self.forward_eval_helper(child_hidden, depth+1)
         else:
             yield production
+
+class Seq2Seq(nn.Module):
+    def __init__(self, encoder, decoder):
+        super(Seq2Seq, self).__init__()
+        self.encoder = encoder
+        self.decoder = decoder
+        
+    def forward(self, training_pair):
+        encoder_output, encoder_hidden, encoder_outputs = self.encoder(training_pair)
+        decoder_hidden = encoder_hidden[0,0,:]
+        decoder_outputs = self.decoder(decoder_hidden, training_pair)
+        return decoder_outputs

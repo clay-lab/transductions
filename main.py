@@ -1,6 +1,7 @@
 import RPNTask
 import modelsNEW
 import seq2seq
+import modelsNEWBob
 
 import numpy as np
 import torch
