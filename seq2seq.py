@@ -1,9 +1,14 @@
-import torch.nn as nn
+import numpy as np
+import torch
 
 """
 assume encoder and decoder outputs do NOT have softmax yet
 """
-class Seq2Seq(nn.Module):
+"""
+output from decoder should always be of shape: max sequence length x batch size x size of vocab
+target tensor should be of shape: max sequence length x batch size
+"""
+class Seq2Seq(torch.nn.Module):
     def __init__(self, encoder, decoder, encoder_field_names, decoder_field_names, encoder_train_field_names=None, decoder_train_field_names=None, middle_field_name="middle"):
         super(Seq2Seq, self).__init__()
         self.encoder = encoder
@@ -39,3 +44,31 @@ class Seq2Seq(nn.Module):
         return self.decoder(*(getattr(batch, fieldname) for fieldname in dec_fields))
 
         # delattr(batch, self.middle_field_names)
+
+    def scores2sentence(self, scores, vocab):
+        ix2word = np.array(vocab.itos)
+        word_ixs = scores.argmax(dim=2)
+        word_ixs = word_ixs.detach().numpy()
+        return ix2word[word_ixs]
+
+    def to_sentence(self, batch):
+        assert len(batch.target_fields) == 1
+        target_vocab = batch.dataset.fields[batch.target_fields[0]].vocab
+
+        output = self(batch)    # shape: sequence length x batch size x vocab size
+        pred_words = output.argmax(2)
+
+        return reverse_tokenization(pred_words, target_vocab)
+
+
+def reverse_tokenization(batch_ixs, vocab):
+    ix2word = np.array(vocab.itos)
+    
+    if isinstance(batch_ixs, torch.Tensor):
+        batch_ixs = batch_ixs.detach().numpy()
+        
+    words = ix2word[batch_ixs]
+    
+    sentences = [" ".join(words[:, eg]) for eg in range(words.shape[1])]
+    
+    return sentences

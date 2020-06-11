@@ -71,7 +71,13 @@ VARIABLE -> 'a' [0.25] | 'b' [0.25] | 'x' [0.25] | 'y' [0.25]
 NUMBER -> '2' [0.25] | '3' [0.25] | '4' [0.25] | '5' [0.25]
 """)
 
-
+def reversePolish2polishANNOTATED(t):
+    if t[0].label() == "RPN":
+        return RPNTask.polish2reversePolish(t)
+    elif t[0].label() == "POLISH":
+        return t
+    else:
+        assert False, "tree not annotated as expected"
 
 
 def tree2index_form(tree):
