@@ -144,7 +144,7 @@ def main():
         ckpt_path = os.path.join(store.path, CKPT_NAME_LATEST)
         s2s.load_state_dict(torch.load(ckpt_path))
 
-    training.train(s2s, train_iter, store, args, ignore_index=TRG.vocab.stoi['<pad>'])
+    training.train(s2s, train_iter, val_iter, store, args, ignore_index=TRG.vocab.stoi['<pad>'])
 
 import warnings
 warnings.warn("""If you have Pandas 1.0 you must make the following change manually for cox to work:
