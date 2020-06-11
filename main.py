@@ -154,9 +154,10 @@ def main():
     #dec = modelsNEWBob.DecoderRNN(hidden_size=100,vocab=TAR_SEQ.vocab, encoder_vocab=SRC_SEQ.vocab, recurrent_unit="GRU", num_layers=1, max_length=30, attention_type='additive', dropout=0.3)
     s2s = seq2seq.Seq2Seq(encoder, dec, ["source"], ["middle1"], decoder_train_field_names=["middle1", "source_tree"])
 
-    store = setup_store(parse_arguments())
+    store = setup_store(args)
 
-    training.train(s2s, train_iter, store, args, ignore_index=TAR.vocab.stoi['<pad>'])
+
+    training.train(s2s, train_iter, val_iter, store, args, ignore_index=TAR.vocab.stoi['<pad>'])
 
     # IF YOU HAVE PANDAS 1.0 YOU MUST MAKE THIS CHANGE MANUALLY
     # https://github.com/MadryLab/cox/pull/3/files
