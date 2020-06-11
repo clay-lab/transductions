@@ -80,9 +80,9 @@ class AverageMeter:
         self.count += 1
         self.avg = self.sum / self.count
 
-def train(model, train_iterator, store, args, validation_iter=None, ignore_index=None):
-    if validation_iter is None:
-        validation_iter = train_iterator
+def train(model, train_iterator, validation_iter, store, args, ignore_index=None):
+    # if validation_iter is None:
+    #     validation_iter = train_iterator
 
     optimizer = optim.SGD(model.parameters(), lr=args.learning_rate)
     criterion = nn.CrossEntropyLoss(weight=None, ignore_index=ignore_index)
