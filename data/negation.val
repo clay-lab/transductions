@@ -1,1001 +1,1001 @@
-source,transform,target
-she must swim,pos,she must swim
-Fred can smile,pos,Fred can smile
-she can swim,pos,she can swim
-Fred must jump,pos,Fred must jump
-Ron may jump,pos,Ron may jump
-Draco can run,pos,Draco can run
-she may jump,pos,she may jump
-Hagrid may run,pos,Hagrid may run
-she can smile,pos,she can smile
-he should swim,pos,he should swim
-Lily can swim,pos,Lily can swim
-Ginny may run,pos,Ginny may run
-he can laugh,pos,he can laugh
-Lily may walk,pos,Lily may walk
-she must laugh,pos,she must laugh
-Fred may laugh,pos,Fred may laugh
-he may run,pos,he may run
-she may wiggle,pos,she may wiggle
-he must giggle,pos,he must giggle
-Ginny may swim,pos,Ginny may swim
-Dobby may run,pos,Dobby may run
-Hagrid can run,pos,Hagrid can run
-he can giggle,pos,he can giggle
-Ron must jump,pos,Ron must jump
-she can party,pos,she can party
-Draco can walk,pos,Draco can walk
-Ginny may jump,pos,Ginny may jump
-he should walk,pos,he should walk
-Draco must run,pos,Draco must run
-she should run,pos,she should run
-he must smile,pos,he must smile
-she must laugh,pos,she must laugh
-she may wiggle,pos,she may wiggle
-Ginny can run,pos,Ginny can run
-Lupin must run,pos,Lupin must run
-he may run,pos,he may run
-Lupin must run,pos,Lupin must run
-Ron must party,pos,Ron must party
-she should run,pos,she should run
-Lily can party,pos,Lily can party
-he can swim,pos,he can swim
-Draco must run,pos,Draco must run
-Lupin must run,pos,Lupin must run
-Ron may walk,pos,Ron may walk
-Albus can jump,pos,Albus can jump
-George may run,pos,George may run
-she must smile,pos,she must smile
-Dobby may walk,pos,Dobby may walk
-he may jump,pos,he may jump
-she can smile,pos,she can smile
-Fred can swim,pos,Fred can swim
-Fred must walk,pos,Fred must walk
-she can walk,pos,she can walk
-she can swim,pos,she can swim
-Ron may giggle,pos,Ron may giggle
-Lily must walk,pos,Lily must walk
-she must party,pos,she must party
-Ron must walk,pos,Ron must walk
-she must smile,pos,she must smile
-Ron may swim,pos,Ron may swim
-Dobby can jump,pos,Dobby can jump
-he must wiggle,pos,he must wiggle
-Harry may run,pos,Harry may run
-she must party,pos,she must party
-he can smile,pos,he can smile
-Dobby must run,pos,Dobby must run
-he must run,pos,he must run
-Fred may party,pos,Fred may party
-Snape may walk,pos,Snape may walk
-Lily may run,pos,Lily may run
-Ginny must run,pos,Ginny must run
-Lily must swim,pos,Lily must swim
-Ginny can swim,pos,Ginny can swim
-Harry may jump,pos,Harry may jump
-Lily may jump,pos,Lily may jump
-James can run,pos,James can run
-Lily can party,pos,Lily can party
-Ron can laugh,pos,Ron can laugh
-James may run,pos,James may run
-James may jump,pos,James may jump
-she may hiccup,pos,she may hiccup
-Ron must jump,pos,Ron must jump
-he should swim,pos,he should swim
-Harry must run,pos,Harry must run
-she must jump,pos,she must jump
-Snape may jump,pos,Snape may jump
-Sirius can run,pos,Sirius can run
-Draco can run,pos,Draco can run
-Dobby may run,pos,Dobby may run
-Fred must walk,pos,Fred must walk
-he must hiccup,pos,he must hiccup
-she can swim,pos,she can swim
-he must jump,pos,he must jump
-Lily may swim,pos,Lily may swim
-he should swim,pos,he should swim
-she can laugh,pos,she can laugh
-Lupin may jump,pos,Lupin may jump
-Ron may swim,pos,Ron may swim
-he should swim,pos,he should swim
-she can hiccup,pos,she can hiccup
-Lupin may swim,pos,Lupin may swim
-Lily may run,pos,Lily may run
-Albus may jump,pos,Albus may jump
-she can run,pos,she can run
-he may wiggle,pos,he may wiggle
-Ron may giggle,pos,Ron may giggle
-Ron must jump,pos,Ron must jump
-Ron may laugh,pos,Ron may laugh
-he should jump,pos,he should jump
-Lily may laugh,pos,Lily may laugh
-he must laugh,pos,he must laugh
-Fred can run,pos,Fred can run
-Dobby may swim,pos,Dobby may swim
-Ron can party,pos,Ron can party
-he must laugh,pos,he must laugh
-she can swim,pos,she can swim
-Lupin may run,pos,Lupin may run
-Ron may hiccup,pos,Ron may hiccup
-she may smile,pos,she may smile
-Hagrid may run,pos,Hagrid may run
-Fred may jump,pos,Fred may jump
-Dobby may jump,pos,Dobby may jump
-Ron can walk,pos,Ron can walk
-she must party,pos,she must party
-he can walk,pos,he can walk
-she can smile,pos,she can smile
-Fred can smile,pos,Fred can smile
-Fred may walk,pos,Fred may walk
-Ron may swim,pos,Ron may swim
-Fred must walk,pos,Fred must walk
-Ron may swim,pos,Ron may swim
-George may run,pos,George may run
-Fred may swim,pos,Fred may swim
-she may party,pos,she may party
-he must party,pos,he must party
-Ginny may swim,pos,Ginny may swim
-Lily can smile,pos,Lily can smile
-he may giggle,pos,he may giggle
-she must run,pos,she must run
-he can walk,pos,he can walk
-Harry may run,pos,Harry may run
-Snape can swim,pos,Snape can swim
-Snape must run,pos,Snape must run
-she must laugh,pos,she must laugh
-he may party,pos,he may party
-he can laugh,pos,he can laugh
-Lily may laugh,pos,Lily may laugh
-she can swim,pos,she can swim
-he should jump,pos,he should jump
-she may walk,pos,she may walk
-Lupin may run,pos,Lupin may run
-Lupin can swim,pos,Lupin can swim
-Ron may smile,pos,Ron may smile
-Ron must run,pos,Ron must run
-Lupin can walk,pos,Lupin can walk
-she must walk,pos,she must walk
-Ron can jump,pos,Ron can jump
-she must swim,pos,she must swim
-Ron can walk,pos,Ron can walk
-Lily can run,pos,Lily can run
-Lily must run,pos,Lily must run
-Dobby can run,pos,Dobby can run
-Fred can smile,pos,Fred can smile
-Draco must run,pos,Draco must run
-he may run,pos,he may run
-James may jump,pos,James may jump
-she must run,pos,she must run
-she can smile,pos,she can smile
-Draco may walk,pos,Draco may walk
-Fred may jump,pos,Fred may jump
-she may giggle,pos,she may giggle
-Fred must run,pos,Fred must run
-Lily can smile,pos,Lily can smile
-Ron should run,pos,Ron should run
-she may swim,pos,she may swim
-Ginny can walk,pos,Ginny can walk
-Fred may laugh,pos,Fred may laugh
-James can swim,pos,James can swim
-Dobby may run,pos,Dobby may run
-Fred must swim,pos,Fred must swim
-Ginny must run,pos,Ginny must run
-he can smile,pos,he can smile
-he should walk,pos,he should walk
-Lily may party,pos,Lily may party
-he must giggle,pos,he must giggle
-Albus may jump,pos,Albus may jump
-he must run,pos,he must run
-Lily can laugh,pos,Lily can laugh
-Ron can swim,pos,Ron can swim
-Lily can run,pos,Lily can run
-he must walk,pos,he must walk
-he should walk,pos,he should walk
-Draco can swim,pos,Draco can swim
-he may smile,pos,he may smile
-he can laugh,pos,he can laugh
-he must jump,pos,he must jump
-he must smile,pos,he must smile
-Vernon may run,pos,Vernon may run
-Ron must laugh,pos,Ron must laugh
-Dobby may run,pos,Dobby may run
-he may hiccup,pos,he may hiccup
-he must walk,pos,he must walk
-he can party,pos,he can party
-Lupin may run,pos,Lupin may run
-he must party,pos,he must party
-Ron may jump,pos,Ron may jump
-Lily may jump,pos,Lily may jump
-Fred must swim,pos,Fred must swim
-Albus can run,pos,Albus can run
-Albus can run,pos,Albus can run
-he may walk,pos,he may walk
-he must giggle,pos,he must giggle
-Ron can jump,pos,Ron can jump
-he must jump,pos,he must jump
-Lily can swim,pos,Lily can swim
-she can party,pos,she can party
-Lily must walk,pos,Lily must walk
-Lily must swim,pos,Lily must swim
-Ron must jump,pos,Ron must jump
-he must giggle,pos,he must giggle
-Ron may wiggle,pos,Ron may wiggle
-she must party,pos,she must party
-he can swim,pos,he can swim
-he must smile,pos,he must smile
-Ron may laugh,pos,Ron may laugh
-she can walk,pos,she can walk
-Ron may swim,pos,Ron may swim
-Draco may run,pos,Draco may run
-she may party,pos,she may party
-he can laugh,pos,he can laugh
-he may swim,pos,he may swim
-Ron must jump,pos,Ron must jump
-Ron can wiggle,pos,Ron can wiggle
-Ron can party,pos,Ron can party
-he must smile,pos,he must smile
-Ron can smile,pos,Ron can smile
-Sirius may run,pos,Sirius may run
-she must smile,pos,she must smile
-Albus may swim,pos,Albus may swim
-he may hiccup,pos,he may hiccup
-he may swim,pos,he may swim
-she must swim,pos,she must swim
-he can laugh,pos,he can laugh
-Ron can swim,pos,Ron can swim
-Harry may walk,pos,Harry may walk
-he must giggle,pos,he must giggle
-Lily must jump,pos,Lily must jump
-Lily may party,pos,Lily may party
-Sirius may run,pos,Sirius may run
-Snape can jump,pos,Snape can jump
-Ron may swim,pos,Ron may swim
-she may laugh,pos,she may laugh
-Snape can jump,pos,Snape can jump
-he may run,pos,he may run
-Fred can walk,pos,Fred can walk
-Albus may walk,pos,Albus may walk
-he should swim,pos,he should swim
-Ron must walk,pos,Ron must walk
-Dobby may jump,pos,Dobby may jump
-Ginny can jump,pos,Ginny can jump
-she can party,pos,she can party
-Snape may walk,pos,Snape may walk
-he may wiggle,pos,he may wiggle
-he must walk,pos,he must walk
-Snape may jump,pos,Snape may jump
-she may wiggle,pos,she may wiggle
-she can jump,pos,she can jump
-she can run,pos,she can run
-he must laugh,pos,he must laugh
-she may wiggle,pos,she may wiggle
-Lupin may run,pos,Lupin may run
-Dobby may swim,pos,Dobby may swim
-Albus may run,pos,Albus may run
-she must jump,pos,she must jump
-Ron can party,pos,Ron can party
-she may hiccup,pos,she may hiccup
-Ginny may jump,pos,Ginny may jump
-Draco can walk,pos,Draco can walk
-Harry must run,pos,Harry must run
-Harry can swim,pos,Harry can swim
-she can laugh,pos,she can laugh
-Dobby can run,pos,Dobby can run
-Sirius can run,pos,Sirius can run
-Lily can walk,pos,Lily can walk
-she may giggle,pos,she may giggle
-she may giggle,pos,she may giggle
-Ginny can jump,pos,Ginny can jump
-he must laugh,pos,he must laugh
-Draco can run,pos,Draco can run
-Fred may jump,pos,Fred may jump
-Lily must jump,pos,Lily must jump
-he must jump,pos,he must jump
-Fred can swim,pos,Fred can swim
-he can giggle,pos,he can giggle
-she can party,pos,she can party
-he can wiggle,pos,he can wiggle
-Albus can swim,pos,Albus can swim
-he must jump,pos,he must jump
-Harry must run,pos,Harry must run
-Ron can hiccup,pos,Ron can hiccup
-Draco may walk,pos,Draco may walk
-she can hiccup,pos,she can hiccup
-Ron may walk,pos,Ron may walk
-Vernon can run,pos,Vernon can run
-he should jump,pos,he should jump
-Fred may swim,pos,Fred may swim
-Ron must laugh,pos,Ron must laugh
-Dobby can walk,pos,Dobby can walk
-Ron may party,pos,Ron may party
-Fred may party,pos,Fred may party
-Albus may walk,pos,Albus may walk
-he may jump,pos,he may jump
-Draco must run,pos,Draco must run
-he can smile,pos,he can smile
-Lily must walk,pos,Lily must walk
-he must party,pos,he must party
-Ginny may run,pos,Ginny may run
-he can swim,pos,he can swim
-Lupin can run,pos,Lupin can run
-Ron must run,pos,Ron must run
-he can giggle,pos,he can giggle
-Dobby must run,pos,Dobby must run
-Snape may swim,pos,Snape may swim
-she can laugh,pos,she can laugh
-Ron may hiccup,pos,Ron may hiccup
-Ginny may jump,pos,Ginny may jump
-Albus must run,pos,Albus must run
-Dobby can walk,pos,Dobby can walk
-he may wiggle,pos,he may wiggle
-Harry must run,pos,Harry must run
-Lily can walk,pos,Lily can walk
-she may smile,pos,she may smile
-he can hiccup,pos,he can hiccup
-she must laugh,pos,she must laugh
-he can smile,pos,he can smile
-she can walk,pos,she can walk
-he must wiggle,pos,he must wiggle
-she may laugh,pos,she may laugh
-Ginny must run,pos,Ginny must run
-Snape can swim,pos,Snape can swim
-she may run,pos,she may run
-Dobby may walk,pos,Dobby may walk
-Ron may walk,pos,Ron may walk
-he can run,pos,he can run
-Ron can wiggle,pos,Ron can wiggle
-she can run,pos,she can run
-Lily can jump,pos,Lily can jump
-Snape can run,pos,Snape can run
-James must run,pos,James must run
-Fred can jump,pos,Fred can jump
-Harry can swim,pos,Harry can swim
-Draco may swim,pos,Draco may swim
-Lily must swim,pos,Lily must swim
-Ron can smile,pos,Ron can smile
-Dobby can walk,pos,Dobby can walk
-Lily must jump,pos,Lily must jump
-James can run,pos,James can run
-Draco may run,pos,Draco may run
-Ron must walk,pos,Ron must walk
-Fred may jump,pos,Fred may jump
-Ron can walk,pos,Ron can walk
-he should swim,pos,he should swim
-Snape may run,pos,Snape may run
-Snape may swim,pos,Snape may swim
-Ginny must run,pos,Ginny must run
-Snape can jump,pos,Snape can jump
-Snape may run,pos,Snape may run
-Fred can run,pos,Fred can run
-he must smile,pos,he must smile
-she must smile,pos,she must smile
-James can run,pos,James can run
-Sirius can run,pos,Sirius can run
-Vernon can run,pos,Vernon can run
-Lily must run,pos,Lily must run
-he must hiccup,pos,he must hiccup
-he can run,pos,he can run
-Hagrid can run,pos,Hagrid can run
-Fred must swim,pos,Fred must swim
-Lily may smile,pos,Lily may smile
-Lily may jump,pos,Lily may jump
-he can party,pos,he can party
-Draco may walk,pos,Draco may walk
-he should run,pos,he should run
-Harry can run,pos,Harry can run
-she may giggle,pos,she may giggle
-he may giggle,pos,he may giggle
-Ron may walk,pos,Ron may walk
-he may giggle,pos,he may giggle
-she must jump,pos,she must jump
-George may run,pos,George may run
-Fred must run,pos,Fred must run
-he can swim,pos,he can swim
-Dobby may jump,pos,Dobby may jump
-Lupin may swim,pos,Lupin may swim
-Snape can walk,pos,Snape can walk
-she must jump,pos,she must jump
-Lily may walk,pos,Lily may walk
-he can jump,pos,he can jump
-Fred must swim,pos,Fred must swim
-she must laugh,pos,she must laugh
-Draco may jump,pos,Draco may jump
-she can smile,pos,she can smile
-Ron must walk,pos,Ron must walk
-he can laugh,pos,he can laugh
-Snape may jump,pos,Snape may jump
-Draco can walk,pos,Draco can walk
-Ron must laugh,pos,Ron must laugh
-Albus must run,pos,Albus must run
-she must walk,pos,she must walk
-Draco may swim,pos,Draco may swim
-Hagrid can run,pos,Hagrid can run
-he can run,pos,he can run
-she must smile,pos,she must smile
-Ginny must run,pos,Ginny must run
-he should jump,pos,he should jump
-Ginny may jump,pos,Ginny may jump
-Albus may jump,pos,Albus may jump
-Snape can jump,pos,Snape can jump
-Harry can run,pos,Harry can run
-he must laugh,pos,he must laugh
-Lily may run,pos,Lily may run
-Fred may walk,pos,Fred may walk
-he must giggle,pos,he must giggle
-Lily can swim,pos,Lily can swim
-Ron must smile,pos,Ron must smile
-she may wiggle,pos,she may wiggle
-Draco can walk,pos,Draco can walk
-Ron must smile,pos,Ron must smile
-James must run,pos,James must run
-Lily may smile,pos,Lily may smile
-she should run,pos,she should run
-he must wiggle,pos,he must wiggle
-James can swim,pos,James can swim
-Dobby may jump,pos,Dobby may jump
-he must jump,pos,he must jump
-Dobby can walk,pos,Dobby can walk
-Draco can run,pos,Draco can run
-Fred may swim,pos,Fred may swim
-Ron can hiccup,pos,Ron can hiccup
-Lily must walk,pos,Lily must walk
-she can run,pos,she can run
-Ron can wiggle,pos,Ron can wiggle
-he should jump,pos,he should jump
-Harry may swim,pos,Harry may swim
-Lupin may swim,pos,Lupin may swim
-she can walk,pos,she can walk
-Fred must swim,pos,Fred must swim
-Snape may jump,pos,Snape may jump
-he may smile,pos,he may smile
-he may jump,pos,he may jump
-he must laugh,pos,he must laugh
-Draco must run,pos,Draco must run
-Harry can jump,pos,Harry can jump
-Fred can laugh,pos,Fred can laugh
-Albus may jump,pos,Albus may jump
-Lily can jump,pos,Lily can jump
-he must hiccup,pos,he must hiccup
-Fred can swim,pos,Fred can swim
-she may walk,pos,she may walk
-he must laugh,pos,he must laugh
-Ginny may jump,pos,Ginny may jump
-Ron must laugh,pos,Ron must laugh
-Ron can jump,pos,Ron can jump
-he must smile,pos,he must smile
-Harry must run,pos,Harry must run
-Lupin can walk,pos,Lupin can walk
-Lupin may walk,pos,Lupin may walk
-Lily can smile,pos,Lily can smile
-Lily may swim,pos,Lily may swim
-Ginny must run,pos,Ginny must run
-James may jump,pos,James may jump
-Ginny can swim,pos,Ginny can swim
-she can jump,pos,she can jump
-she must laugh,pos,she must laugh
-he must smile,pos,he must smile
-James may swim,pos,James may swim
-James may walk,pos,James may walk
-Ron may smile,pos,Ron may smile
-Albus must run,pos,Albus must run
-Ron must swim,pos,Ron must swim
-Ron may giggle,pos,Ron may giggle
-Vernon may run,pos,Vernon may run
-she must run,pos,she must run
-Ron must smile,pos,Ron must smile
-Ron can walk,pos,Ron can walk
-he can jump,pos,he can jump
-she may smile,pos,she may smile
-Lily can laugh,pos,Lily can laugh
-he must smile,pos,he must smile
-she can laugh,pos,she can laugh
-she can run,pos,she can run
-Albus may walk,pos,Albus may walk
-she may laugh,pos,she may laugh
-Lupin can jump,pos,Lupin can jump
-Fred may run,pos,Fred may run
-she may smile,pos,she may smile
-Fred may smile,pos,Fred may smile
-Draco may jump,pos,Draco may jump
-Lily may walk,pos,Lily may walk
-she may smile,pos,she may smile
-Lupin can run,pos,Lupin can run
-he may giggle,pos,he may giggle
-Ron must laugh,pos,Ron must laugh
-Draco may walk,pos,Draco may walk
-Lily can walk,pos,Lily can walk
-he may giggle,pos,he may giggle
-he should run,pos,he should run
-he can run,pos,he can run
-Ron can wiggle,pos,Ron can wiggle
-she can giggle,pos,she can giggle
-Lupin can run,pos,Lupin can run
-James can swim,pos,James can swim
-she must walk,pos,she must walk
-Lily may walk,pos,Lily may walk
-James can swim,pos,James can swim
-he must wiggle,pos,he must wiggle
-she must run,pos,she must run
-he must run,pos,he must run
-Ron can jump,pos,Ron can jump
-he must swim,pos,he must swim
-she may laugh,pos,she may laugh
-Ron can party,pos,Ron can party
-Dobby may walk,pos,Dobby may walk
-he should jump,pos,he should jump
-Fred may walk,pos,Fred may walk
-Lily may smile,pos,Lily may smile
-Hagrid can run,pos,Hagrid can run
-Ginny can swim,pos,Ginny can swim
-Snape must run,pos,Snape must run
-Fred can walk,pos,Fred can walk
-he must wiggle,pos,he must wiggle
-he can wiggle,pos,he can wiggle
-Ron must jump,pos,Ron must jump
-Ron can run,pos,Ron can run
-Fred may smile,pos,Fred may smile
-Lily must jump,pos,Lily must jump
-she may smile,pos,she may smile
-Snape may run,pos,Snape may run
-Lily must run,pos,Lily must run
-Lily can party,pos,Lily can party
-he can wiggle,pos,he can wiggle
-Lupin may swim,pos,Lupin may swim
-he may laugh,pos,he may laugh
-Snape may jump,pos,Snape may jump
-he must walk,pos,he must walk
-Ron may swim,pos,Ron may swim
-Lupin can swim,pos,Lupin can swim
-James can swim,pos,James can swim
-Fred must jump,pos,Fred must jump
-he can laugh,pos,he can laugh
-he must wiggle,pos,he must wiggle
-Lily can jump,pos,Lily can jump
-he must wiggle,pos,he must wiggle
-Dobby can run,pos,Dobby can run
-James can run,pos,James can run
-she may walk,pos,she may walk
-Lily can walk,pos,Lily can walk
-he can wiggle,pos,he can wiggle
-Draco may run,pos,Draco may run
-Lily can run,pos,Lily can run
-she can walk,pos,she can walk
-he may swim,pos,he may swim
-Lily may jump,pos,Lily may jump
-Fred can laugh,pos,Fred can laugh
-he must party,pos,he must party
-she may swim,pos,she may swim
-Snape can run,pos,Snape can run
-Draco can walk,pos,Draco can walk
-Dobby may jump,pos,Dobby may jump
-Ginny may walk,pos,Ginny may walk
-she can walk,pos,she can walk
-Fred can walk,pos,Fred can walk
-she must walk,pos,she must walk
-Draco can swim,pos,Draco can swim
-Fred can jump,pos,Fred can jump
-she may laugh,pos,she may laugh
-Ron may run,pos,Ron may run
-Lupin may run,pos,Lupin may run
-Albus may run,pos,Albus may run
-she can party,pos,she can party
-Lily can swim,pos,Lily can swim
-she must party,pos,she must party
-Fred can swim,pos,Fred can swim
-Dobby can run,pos,Dobby can run
-Dobby must run,pos,Dobby must run
-he can wiggle,pos,he can wiggle
-he must hiccup,pos,he must hiccup
-he can party,pos,he can party
-Ron must swim,pos,Ron must swim
-he must walk,pos,he must walk
-Snape can jump,pos,Snape can jump
-Ron can giggle,pos,Ron can giggle
-she must swim,pos,she must swim
-Ron can laugh,pos,Ron can laugh
-he must hiccup,pos,he must hiccup
-Fred must walk,pos,Fred must walk
-Snape can swim,pos,Snape can swim
-he should jump,pos,he should jump
-Ron may run,pos,Ron may run
-Snape may run,pos,Snape may run
-Ginny may walk,pos,Ginny may walk
-Fred can smile,pos,Fred can smile
-Fred must run,pos,Fred must run
-he must smile,pos,he must smile
-she must party,pos,she must party
-Harry may swim,pos,Harry may swim
-she may wiggle,pos,she may wiggle
-she may hiccup,pos,she may hiccup
-she must party,pos,she must party
-he must run,pos,he must run
-she can laugh,pos,she can laugh
-Fred can smile,pos,Fred can smile
-George can run,pos,George can run
-Ginny can run,pos,Ginny can run
-she can walk,pos,she can walk
-she may walk,pos,she may walk
-he can wiggle,pos,he can wiggle
-he must swim,pos,he must swim
-Ginny can walk,pos,Ginny can walk
-he can run,pos,he can run
-he should run,pos,he should run
-Fred must walk,pos,Fred must walk
-he may giggle,pos,he may giggle
-she may hiccup,pos,she may hiccup
-he must giggle,pos,he must giggle
-George may run,pos,George may run
-Vernon may run,pos,Vernon may run
-he must swim,pos,he must swim
-Snape must run,pos,Snape must run
-he can laugh,pos,he can laugh
-he may walk,pos,he may walk
-Ron can jump,pos,Ron can jump
-Lily may walk,pos,Lily may walk
-he should walk,pos,he should walk
-she should run,pos,she should run
-Harry can run,pos,Harry can run
-he can jump,pos,he can jump
-she must jump,pos,she must jump
-he should walk,pos,he should walk
-she may walk,pos,she may walk
-Fred must swim,pos,Fred must swim
-Fred must run,pos,Fred must run
-Ron can laugh,pos,Ron can laugh
-Ginny may swim,pos,Ginny may swim
-she must run,pos,she must run
-Albus can run,pos,Albus can run
-she must walk,pos,she must walk
-he must giggle,pos,he must giggle
-Albus may run,pos,Albus may run
-Lupin may run,pos,Lupin may run
-he may run,pos,he may run
-Ron must swim,pos,Ron must swim
-she can smile,pos,she can smile
-she must jump,pos,she must jump
-Draco can jump,pos,Draco can jump
-Ron may jump,pos,Ron may jump
-Fred can jump,pos,Fred can jump
-Ron may swim,pos,Ron may swim
-she should run,pos,she should run
-Draco can swim,pos,Draco can swim
-Lupin may jump,pos,Lupin may jump
-Draco can jump,pos,Draco can jump
-James can jump,pos,James can jump
-Lily may jump,pos,Lily may jump
-Fred can party,pos,Fred can party
-he must jump,pos,he must jump
-she may walk,pos,she may walk
-she should run,pos,she should run
-Albus can run,pos,Albus can run
-she must smile,pos,she must smile
-Ron may party,pos,Ron may party
-she can wiggle,pos,she can wiggle
-Ron should run,pos,Ron should run
-Lily must walk,pos,Lily must walk
-Lily can laugh,pos,Lily can laugh
-he should walk,pos,he should walk
-Dobby may walk,pos,Dobby may walk
-Ginny can jump,pos,Ginny can jump
-he should swim,pos,he should swim
-Albus may swim,pos,Albus may swim
-Ron may giggle,pos,Ron may giggle
-he must giggle,pos,he must giggle
-he must wiggle,pos,he must wiggle
-he may swim,pos,he may swim
-Fred may walk,pos,Fred may walk
-Snape can walk,pos,Snape can walk
-Fred may smile,pos,Fred may smile
-Harry may walk,pos,Harry may walk
-Sirius can run,pos,Sirius can run
-she must laugh,pos,she must laugh
-Albus may run,pos,Albus may run
-he can run,pos,he can run
-James can swim,pos,James can swim
-Ron must laugh,pos,Ron must laugh
-Draco may swim,pos,Draco may swim
-she must jump,pos,she must jump
-Vernon can run,pos,Vernon can run
-he may walk,pos,he may walk
-Snape may swim,pos,Snape may swim
-Fred may walk,pos,Fred may walk
-Draco may jump,pos,Draco may jump
-Ron may party,pos,Ron may party
-he may walk,pos,he may walk
-he must jump,pos,he must jump
-Lupin may jump,pos,Lupin may jump
-Draco can swim,pos,Draco can swim
-he must hiccup,pos,he must hiccup
-she can party,pos,she can party
-Lily must swim,pos,Lily must swim
-Draco can jump,pos,Draco can jump
-she must walk,pos,she must walk
-Ginny may swim,pos,Ginny may swim
-Snape can run,pos,Snape can run
-she may smile,pos,she may smile
-Fred must jump,pos,Fred must jump
-Ron can swim,pos,Ron can swim
-she may walk,pos,she may walk
-Snape can jump,pos,Snape can jump
-he should swim,pos,he should swim
-Ron may run,pos,Ron may run
-Harry can jump,pos,Harry can jump
-Draco can jump,pos,Draco can jump
-Lily may smile,pos,Lily may smile
-Draco can jump,pos,Draco can jump
-Lily must swim,pos,Lily must swim
-she can jump,pos,she can jump
-Fred can walk,pos,Fred can walk
-he may party,pos,he may party
-he can giggle,pos,he can giggle
-he must swim,pos,he must swim
-Fred can party,pos,Fred can party
-James must run,pos,James must run
-she may hiccup,pos,she may hiccup
-Fred can laugh,pos,Fred can laugh
-Fred must walk,pos,Fred must walk
-he should swim,pos,he should swim
-he must wiggle,pos,he must wiggle
-she may smile,pos,she may smile
-he should walk,pos,he should walk
-James may swim,pos,James may swim
-she can laugh,pos,she can laugh
-he may wiggle,pos,he may wiggle
-Lily must walk,pos,Lily must walk
-she must jump,pos,she must jump
-Ron may giggle,pos,Ron may giggle
-Ginny must run,pos,Ginny must run
-she may party,pos,she may party
-he must giggle,pos,he must giggle
-she must jump,pos,she must jump
-she may hiccup,pos,she may hiccup
-Fred must run,pos,Fred must run
-Draco may walk,pos,Draco may walk
-he must hiccup,pos,he must hiccup
-Harry can jump,pos,Harry can jump
-she may walk,pos,she may walk
-Fred must run,pos,Fred must run
-he can walk,pos,he can walk
-Lily must jump,pos,Lily must jump
-Ron must run,pos,Ron must run
-Ron can walk,pos,Ron can walk
-she can walk,pos,she can walk
-Fred must jump,pos,Fred must jump
-she can swim,pos,she can swim
-Ron should run,pos,Ron should run
-she can jump,pos,she can jump
-she must jump,pos,she must jump
-she can jump,pos,she can jump
-he may wiggle,pos,he may wiggle
-Ron can run,pos,Ron can run
-Lily must swim,pos,Lily must swim
-Lily may walk,pos,Lily may walk
-Fred may jump,pos,Fred may jump
-Ron should run,pos,Ron should run
-Fred must swim,pos,Fred must swim
-Harry can run,pos,Harry can run
-Albus can swim,pos,Albus can swim
-Snape may walk,pos,Snape may walk
-she may walk,pos,she may walk
-he should jump,pos,he should jump
-he may party,pos,he may party
-Snape may walk,pos,Snape may walk
-he may party,pos,he may party
-he should walk,pos,he should walk
-Dobby may swim,pos,Dobby may swim
-she can party,pos,she can party
-Fred must swim,pos,Fred must swim
-Ginny may swim,pos,Ginny may swim
-she can swim,pos,she can swim
-she may walk,pos,she may walk
-Snape may run,pos,Snape may run
-Lupin may swim,pos,Lupin may swim
-he must jump,pos,he must jump
-Harry must run,pos,Harry must run
-Fred can walk,pos,Fred can walk
-Lily must swim,pos,Lily must swim
-she may giggle,pos,she may giggle
-she may party,pos,she may party
-he can party,pos,he can party
-Draco must run,pos,Draco must run
-Lily can run,pos,Lily can run
-he must run,pos,he must run
-he may party,pos,he may party
-he must wiggle,pos,he must wiggle
-George can run,pos,George can run
-James can run,pos,James can run
-Harry can walk,pos,Harry can walk
-Lupin can swim,pos,Lupin can swim
-Draco must run,pos,Draco must run
-James may run,pos,James may run
-she can laugh,pos,she can laugh
-Albus can jump,pos,Albus can jump
-he can swim,pos,he can swim
-she must walk,pos,she must walk
-Ron must party,pos,Ron must party
-Ron may laugh,pos,Ron may laugh
-she must run,pos,she must run
-she must smile,pos,she must smile
-she may party,pos,she may party
-she must walk,pos,she must walk
-she can hiccup,pos,she can hiccup
-she should run,pos,she should run
-Ron may smile,pos,Ron may smile
-Albus may jump,pos,Albus may jump
-he must party,pos,he must party
-Ron can swim,pos,Ron can swim
-he must swim,pos,he must swim
-Draco can run,pos,Draco can run
-Albus must run,pos,Albus must run
-he may run,pos,he may run
-he can smile,pos,he can smile
-Fred can smile,pos,Fred can smile
-he should run,pos,he should run
-Ron may smile,pos,Ron may smile
-Lily can laugh,pos,Lily can laugh
-Fred can jump,pos,Fred can jump
-Ron may smile,pos,Ron may smile
-she must swim,pos,she must swim
-Hagrid may run,pos,Hagrid may run
-James can jump,pos,James can jump
-Lily may run,pos,Lily may run
-she must swim,pos,she must swim
-Draco must run,pos,Draco must run
-James can walk,pos,James can walk
-Draco may jump,pos,Draco may jump
-she can walk,pos,she can walk
-he must swim,pos,he must swim
-she can hiccup,pos,she can hiccup
-she can swim,pos,she can swim
-she may jump,pos,she may jump
-Ron must swim,pos,Ron must swim
-Fred can jump,pos,Fred can jump
-Lily can party,pos,Lily can party
-Lily may jump,pos,Lily may jump
-Fred must run,pos,Fred must run
-he may giggle,pos,he may giggle
-she must smile,pos,she must smile
-Harry can jump,pos,Harry can jump
-Dobby may run,pos,Dobby may run
-James can walk,pos,James can walk
-he should swim,pos,he should swim
-Draco may walk,pos,Draco may walk
-she can hiccup,pos,she can hiccup
-she can party,pos,she can party
-he should swim,pos,he should swim
-she may hiccup,pos,she may hiccup
-he may jump,pos,he may jump
-Ginny must run,pos,Ginny must run
-Ron must jump,pos,Ron must jump
-Dobby may jump,pos,Dobby may jump
-she can laugh,pos,she can laugh
-Lily can run,pos,Lily can run
-James may run,pos,James may run
-Fred must swim,pos,Fred must swim
-Ron may swim,pos,Ron may swim
-he must jump,pos,he must jump
-she should run,pos,she should run
-Fred may smile,pos,Fred may smile
-Ron must smile,pos,Ron must smile
-Ginny can jump,pos,Ginny can jump
-she can walk,pos,she can walk
-he must run,pos,he must run
-Snape may jump,pos,Snape may jump
-he must wiggle,pos,he must wiggle
-she can hiccup,pos,she can hiccup
-she can smile,pos,she can smile
-she must laugh,pos,she must laugh
-he must wiggle,pos,he must wiggle
-he must giggle,pos,he must giggle
-Ron may hiccup,pos,Ron may hiccup
-he can jump,pos,he can jump
-she must jump,pos,she must jump
-he may laugh,pos,he may laugh
-she can wiggle,pos,she can wiggle
-he must hiccup,pos,he must hiccup
-Ron may jump,pos,Ron may jump
-James can walk,pos,James can walk
-Draco must run,pos,Draco must run
-Snape can walk,pos,Snape can walk
-she can walk,pos,she can walk
-Albus can walk,pos,Albus can walk
-Lily may swim,pos,Lily may swim
-she must laugh,pos,she must laugh
-James may jump,pos,James may jump
-he must laugh,pos,he must laugh
-Snape can jump,pos,Snape can jump
-he must jump,pos,he must jump
-Lily can laugh,pos,Lily can laugh
-Fred must jump,pos,Fred must jump
-James may jump,pos,James may jump
-he can walk,pos,he can walk
-Fred may party,pos,Fred may party
-she may walk,pos,she may walk
-Lily may party,pos,Lily may party
-Ron can jump,pos,Ron can jump
-Lupin can swim,pos,Lupin can swim
-Ron must laugh,pos,Ron must laugh
-George can run,pos,George can run
-she may smile,pos,she may smile
-George may run,pos,George may run
-James may run,pos,James may run
-Ron must walk,pos,Ron must walk
-Ron may run,pos,Ron may run
-Albus can walk,pos,Albus can walk
-he can run,pos,he can run
-she may hiccup,pos,she may hiccup
-Albus must run,pos,Albus must run
-he can giggle,pos,he can giggle
-she can wiggle,pos,she can wiggle
-Ron can jump,pos,Ron can jump
-James may walk,pos,James may walk
-she must smile,pos,she must smile
-he must giggle,pos,he must giggle
-he can party,pos,he can party
-she must swim,pos,she must swim
-she may party,pos,she may party
-he can laugh,pos,he can laugh
-Fred can run,pos,Fred can run
-Ron must laugh,pos,Ron must laugh
-she must run,pos,she must run
-Lupin may walk,pos,Lupin may walk
-Harry can jump,pos,Harry can jump
-Ron may jump,pos,Ron may jump
-he may walk,pos,he may walk
-he should walk,pos,he should walk
-he may giggle,pos,he may giggle
-Ron can walk,pos,Ron can walk
-Snape can walk,pos,Snape can walk
-Fred must run,pos,Fred must run
-Draco must run,pos,Draco must run
-she may walk,pos,she may walk
-she must swim,pos,she must swim
-he may giggle,pos,he may giggle
-he may giggle,pos,he may giggle
-he may walk,pos,he may walk
-Hagrid may run,pos,Hagrid may run
-he must giggle,pos,he must giggle
-Dobby can run,pos,Dobby can run
-she can giggle,pos,she can giggle
-Lily can smile,pos,Lily can smile
-Albus can swim,pos,Albus can swim
-Vernon may run,pos,Vernon may run
-Lily can jump,pos,Lily can jump
-Fred can run,pos,Fred can run
-James can swim,pos,James can swim
-Fred may smile,pos,Fred may smile
-she can walk,pos,she can walk
-Ron can smile,pos,Ron can smile
-he must walk,pos,he must walk
-James can run,pos,James can run
-he may swim,pos,he may swim
-she may swim,pos,she may swim
-Dobby can walk,pos,Dobby can walk
-Albus can run,pos,Albus can run
-Albus can swim,pos,Albus can swim
-James can jump,pos,James can jump
-she must party,pos,she must party
-Fred must walk,pos,Fred must walk
-he can wiggle,pos,he can wiggle
-Ron can swim,pos,Ron can swim
-he must swim,pos,he must swim
-she must run,pos,she must run
-Draco must run,pos,Draco must run
-Hagrid may run,pos,Hagrid may run
-Lily can swim,pos,Lily can swim
-Fred can swim,pos,Fred can swim
-Snape can run,pos,Snape can run
-she must walk,pos,she must walk
-Fred can swim,pos,Fred can swim
-he can swim,pos,he can swim
-he may smile,pos,he may smile
-Harry can walk,pos,Harry can walk
-Hagrid can run,pos,Hagrid can run
-Harry may walk,pos,Harry may walk
-Harry may run,pos,Harry may run
-he may run,pos,he may run
-Ron may swim,pos,Ron may swim
-he must laugh,pos,he must laugh
-Ron may smile,pos,Ron may smile
-he must jump,pos,he must jump
-he can swim,pos,he can swim
+source	transform	target
+she must swim	pos	she must swim
+Fred can smile	pos	Fred can smile
+she can swim	pos	she can swim
+Fred must jump	pos	Fred must jump
+Ron may jump	pos	Ron may jump
+Draco can run	pos	Draco can run
+she may jump	pos	she may jump
+Hagrid may run	pos	Hagrid may run
+she can smile	pos	she can smile
+he should swim	pos	he should swim
+Lily can swim	pos	Lily can swim
+Ginny may run	pos	Ginny may run
+he can laugh	pos	he can laugh
+Lily may walk	pos	Lily may walk
+she must laugh	pos	she must laugh
+Fred may laugh	pos	Fred may laugh
+he may run	pos	he may run
+she may wiggle	pos	she may wiggle
+he must giggle	pos	he must giggle
+Ginny may swim	pos	Ginny may swim
+Dobby may run	pos	Dobby may run
+Hagrid can run	pos	Hagrid can run
+he can giggle	pos	he can giggle
+Ron must jump	pos	Ron must jump
+she can party	pos	she can party
+Draco can walk	pos	Draco can walk
+Ginny may jump	pos	Ginny may jump
+he should walk	pos	he should walk
+Draco must run	pos	Draco must run
+she should run	pos	she should run
+he must smile	pos	he must smile
+she must laugh	pos	she must laugh
+she may wiggle	pos	she may wiggle
+Ginny can run	pos	Ginny can run
+Lupin must run	pos	Lupin must run
+he may run	pos	he may run
+Lupin must run	pos	Lupin must run
+Ron must party	pos	Ron must party
+she should run	pos	she should run
+Lily can party	pos	Lily can party
+he can swim	pos	he can swim
+Draco must run	pos	Draco must run
+Lupin must run	pos	Lupin must run
+Ron may walk	pos	Ron may walk
+Albus can jump	pos	Albus can jump
+George may run	pos	George may run
+she must smile	pos	she must smile
+Dobby may walk	pos	Dobby may walk
+he may jump	pos	he may jump
+she can smile	pos	she can smile
+Fred can swim	pos	Fred can swim
+Fred must walk	pos	Fred must walk
+she can walk	pos	she can walk
+she can swim	pos	she can swim
+Ron may giggle	pos	Ron may giggle
+Lily must walk	pos	Lily must walk
+she must party	pos	she must party
+Ron must walk	pos	Ron must walk
+she must smile	pos	she must smile
+Ron may swim	pos	Ron may swim
+Dobby can jump	pos	Dobby can jump
+he must wiggle	pos	he must wiggle
+Harry may run	pos	Harry may run
+she must party	pos	she must party
+he can smile	pos	he can smile
+Dobby must run	pos	Dobby must run
+he must run	pos	he must run
+Fred may party	pos	Fred may party
+Snape may walk	pos	Snape may walk
+Lily may run	pos	Lily may run
+Ginny must run	pos	Ginny must run
+Lily must swim	pos	Lily must swim
+Ginny can swim	pos	Ginny can swim
+Harry may jump	pos	Harry may jump
+Lily may jump	pos	Lily may jump
+James can run	pos	James can run
+Lily can party	pos	Lily can party
+Ron can laugh	pos	Ron can laugh
+James may run	pos	James may run
+James may jump	pos	James may jump
+she may hiccup	pos	she may hiccup
+Ron must jump	pos	Ron must jump
+he should swim	pos	he should swim
+Harry must run	pos	Harry must run
+she must jump	pos	she must jump
+Snape may jump	pos	Snape may jump
+Sirius can run	pos	Sirius can run
+Draco can run	pos	Draco can run
+Dobby may run	pos	Dobby may run
+Fred must walk	pos	Fred must walk
+he must hiccup	pos	he must hiccup
+she can swim	pos	she can swim
+he must jump	pos	he must jump
+Lily may swim	pos	Lily may swim
+he should swim	pos	he should swim
+she can laugh	pos	she can laugh
+Lupin may jump	pos	Lupin may jump
+Ron may swim	pos	Ron may swim
+he should swim	pos	he should swim
+she can hiccup	pos	she can hiccup
+Lupin may swim	pos	Lupin may swim
+Lily may run	pos	Lily may run
+Albus may jump	pos	Albus may jump
+she can run	pos	she can run
+he may wiggle	pos	he may wiggle
+Ron may giggle	pos	Ron may giggle
+Ron must jump	pos	Ron must jump
+Ron may laugh	pos	Ron may laugh
+he should jump	pos	he should jump
+Lily may laugh	pos	Lily may laugh
+he must laugh	pos	he must laugh
+Fred can run	pos	Fred can run
+Dobby may swim	pos	Dobby may swim
+Ron can party	pos	Ron can party
+he must laugh	pos	he must laugh
+she can swim	pos	she can swim
+Lupin may run	pos	Lupin may run
+Ron may hiccup	pos	Ron may hiccup
+she may smile	pos	she may smile
+Hagrid may run	pos	Hagrid may run
+Fred may jump	pos	Fred may jump
+Dobby may jump	pos	Dobby may jump
+Ron can walk	pos	Ron can walk
+she must party	pos	she must party
+he can walk	pos	he can walk
+she can smile	pos	she can smile
+Fred can smile	pos	Fred can smile
+Fred may walk	pos	Fred may walk
+Ron may swim	pos	Ron may swim
+Fred must walk	pos	Fred must walk
+Ron may swim	pos	Ron may swim
+George may run	pos	George may run
+Fred may swim	pos	Fred may swim
+she may party	pos	she may party
+he must party	pos	he must party
+Ginny may swim	pos	Ginny may swim
+Lily can smile	pos	Lily can smile
+he may giggle	pos	he may giggle
+she must run	pos	she must run
+he can walk	pos	he can walk
+Harry may run	pos	Harry may run
+Snape can swim	pos	Snape can swim
+Snape must run	pos	Snape must run
+she must laugh	pos	she must laugh
+he may party	pos	he may party
+he can laugh	pos	he can laugh
+Lily may laugh	pos	Lily may laugh
+she can swim	pos	she can swim
+he should jump	pos	he should jump
+she may walk	pos	she may walk
+Lupin may run	pos	Lupin may run
+Lupin can swim	pos	Lupin can swim
+Ron may smile	pos	Ron may smile
+Ron must run	pos	Ron must run
+Lupin can walk	pos	Lupin can walk
+she must walk	pos	she must walk
+Ron can jump	pos	Ron can jump
+she must swim	pos	she must swim
+Ron can walk	pos	Ron can walk
+Lily can run	pos	Lily can run
+Lily must run	pos	Lily must run
+Dobby can run	pos	Dobby can run
+Fred can smile	pos	Fred can smile
+Draco must run	pos	Draco must run
+he may run	pos	he may run
+James may jump	pos	James may jump
+she must run	pos	she must run
+she can smile	pos	she can smile
+Draco may walk	pos	Draco may walk
+Fred may jump	pos	Fred may jump
+she may giggle	pos	she may giggle
+Fred must run	pos	Fred must run
+Lily can smile	pos	Lily can smile
+Ron should run	pos	Ron should run
+she may swim	pos	she may swim
+Ginny can walk	pos	Ginny can walk
+Fred may laugh	pos	Fred may laugh
+James can swim	pos	James can swim
+Dobby may run	pos	Dobby may run
+Fred must swim	pos	Fred must swim
+Ginny must run	pos	Ginny must run
+he can smile	pos	he can smile
+he should walk	pos	he should walk
+Lily may party	pos	Lily may party
+he must giggle	pos	he must giggle
+Albus may jump	pos	Albus may jump
+he must run	pos	he must run
+Lily can laugh	pos	Lily can laugh
+Ron can swim	pos	Ron can swim
+Lily can run	pos	Lily can run
+he must walk	pos	he must walk
+he should walk	pos	he should walk
+Draco can swim	pos	Draco can swim
+he may smile	pos	he may smile
+he can laugh	pos	he can laugh
+he must jump	pos	he must jump
+he must smile	pos	he must smile
+Vernon may run	pos	Vernon may run
+Ron must laugh	pos	Ron must laugh
+Dobby may run	pos	Dobby may run
+he may hiccup	pos	he may hiccup
+he must walk	pos	he must walk
+he can party	pos	he can party
+Lupin may run	pos	Lupin may run
+he must party	pos	he must party
+Ron may jump	pos	Ron may jump
+Lily may jump	pos	Lily may jump
+Fred must swim	pos	Fred must swim
+Albus can run	pos	Albus can run
+Albus can run	pos	Albus can run
+he may walk	pos	he may walk
+he must giggle	pos	he must giggle
+Ron can jump	pos	Ron can jump
+he must jump	pos	he must jump
+Lily can swim	pos	Lily can swim
+she can party	pos	she can party
+Lily must walk	pos	Lily must walk
+Lily must swim	pos	Lily must swim
+Ron must jump	pos	Ron must jump
+he must giggle	pos	he must giggle
+Ron may wiggle	pos	Ron may wiggle
+she must party	pos	she must party
+he can swim	pos	he can swim
+he must smile	pos	he must smile
+Ron may laugh	pos	Ron may laugh
+she can walk	pos	she can walk
+Ron may swim	pos	Ron may swim
+Draco may run	pos	Draco may run
+she may party	pos	she may party
+he can laugh	pos	he can laugh
+he may swim	pos	he may swim
+Ron must jump	pos	Ron must jump
+Ron can wiggle	pos	Ron can wiggle
+Ron can party	pos	Ron can party
+he must smile	pos	he must smile
+Ron can smile	pos	Ron can smile
+Sirius may run	pos	Sirius may run
+she must smile	pos	she must smile
+Albus may swim	pos	Albus may swim
+he may hiccup	pos	he may hiccup
+he may swim	pos	he may swim
+she must swim	pos	she must swim
+he can laugh	pos	he can laugh
+Ron can swim	pos	Ron can swim
+Harry may walk	pos	Harry may walk
+he must giggle	pos	he must giggle
+Lily must jump	pos	Lily must jump
+Lily may party	pos	Lily may party
+Sirius may run	pos	Sirius may run
+Snape can jump	pos	Snape can jump
+Ron may swim	pos	Ron may swim
+she may laugh	pos	she may laugh
+Snape can jump	pos	Snape can jump
+he may run	pos	he may run
+Fred can walk	pos	Fred can walk
+Albus may walk	pos	Albus may walk
+he should swim	pos	he should swim
+Ron must walk	pos	Ron must walk
+Dobby may jump	pos	Dobby may jump
+Ginny can jump	pos	Ginny can jump
+she can party	pos	she can party
+Snape may walk	pos	Snape may walk
+he may wiggle	pos	he may wiggle
+he must walk	pos	he must walk
+Snape may jump	pos	Snape may jump
+she may wiggle	pos	she may wiggle
+she can jump	pos	she can jump
+she can run	pos	she can run
+he must laugh	pos	he must laugh
+she may wiggle	pos	she may wiggle
+Lupin may run	pos	Lupin may run
+Dobby may swim	pos	Dobby may swim
+Albus may run	pos	Albus may run
+she must jump	pos	she must jump
+Ron can party	pos	Ron can party
+she may hiccup	pos	she may hiccup
+Ginny may jump	pos	Ginny may jump
+Draco can walk	pos	Draco can walk
+Harry must run	pos	Harry must run
+Harry can swim	pos	Harry can swim
+she can laugh	pos	she can laugh
+Dobby can run	pos	Dobby can run
+Sirius can run	pos	Sirius can run
+Lily can walk	pos	Lily can walk
+she may giggle	pos	she may giggle
+she may giggle	pos	she may giggle
+Ginny can jump	pos	Ginny can jump
+he must laugh	pos	he must laugh
+Draco can run	pos	Draco can run
+Fred may jump	pos	Fred may jump
+Lily must jump	pos	Lily must jump
+he must jump	pos	he must jump
+Fred can swim	pos	Fred can swim
+he can giggle	pos	he can giggle
+she can party	pos	she can party
+he can wiggle	pos	he can wiggle
+Albus can swim	pos	Albus can swim
+he must jump	pos	he must jump
+Harry must run	pos	Harry must run
+Ron can hiccup	pos	Ron can hiccup
+Draco may walk	pos	Draco may walk
+she can hiccup	pos	she can hiccup
+Ron may walk	pos	Ron may walk
+Vernon can run	pos	Vernon can run
+he should jump	pos	he should jump
+Fred may swim	pos	Fred may swim
+Ron must laugh	pos	Ron must laugh
+Dobby can walk	pos	Dobby can walk
+Ron may party	pos	Ron may party
+Fred may party	pos	Fred may party
+Albus may walk	pos	Albus may walk
+he may jump	pos	he may jump
+Draco must run	pos	Draco must run
+he can smile	pos	he can smile
+Lily must walk	pos	Lily must walk
+he must party	pos	he must party
+Ginny may run	pos	Ginny may run
+he can swim	pos	he can swim
+Lupin can run	pos	Lupin can run
+Ron must run	pos	Ron must run
+he can giggle	pos	he can giggle
+Dobby must run	pos	Dobby must run
+Snape may swim	pos	Snape may swim
+she can laugh	pos	she can laugh
+Ron may hiccup	pos	Ron may hiccup
+Ginny may jump	pos	Ginny may jump
+Albus must run	pos	Albus must run
+Dobby can walk	pos	Dobby can walk
+he may wiggle	pos	he may wiggle
+Harry must run	pos	Harry must run
+Lily can walk	pos	Lily can walk
+she may smile	pos	she may smile
+he can hiccup	pos	he can hiccup
+she must laugh	pos	she must laugh
+he can smile	pos	he can smile
+she can walk	pos	she can walk
+he must wiggle	pos	he must wiggle
+she may laugh	pos	she may laugh
+Ginny must run	pos	Ginny must run
+Snape can swim	pos	Snape can swim
+she may run	pos	she may run
+Dobby may walk	pos	Dobby may walk
+Ron may walk	pos	Ron may walk
+he can run	pos	he can run
+Ron can wiggle	pos	Ron can wiggle
+she can run	pos	she can run
+Lily can jump	pos	Lily can jump
+Snape can run	pos	Snape can run
+James must run	pos	James must run
+Fred can jump	pos	Fred can jump
+Harry can swim	pos	Harry can swim
+Draco may swim	pos	Draco may swim
+Lily must swim	pos	Lily must swim
+Ron can smile	pos	Ron can smile
+Dobby can walk	pos	Dobby can walk
+Lily must jump	pos	Lily must jump
+James can run	pos	James can run
+Draco may run	pos	Draco may run
+Ron must walk	pos	Ron must walk
+Fred may jump	pos	Fred may jump
+Ron can walk	pos	Ron can walk
+he should swim	pos	he should swim
+Snape may run	pos	Snape may run
+Snape may swim	pos	Snape may swim
+Ginny must run	pos	Ginny must run
+Snape can jump	pos	Snape can jump
+Snape may run	pos	Snape may run
+Fred can run	pos	Fred can run
+he must smile	pos	he must smile
+she must smile	pos	she must smile
+James can run	pos	James can run
+Sirius can run	pos	Sirius can run
+Vernon can run	pos	Vernon can run
+Lily must run	pos	Lily must run
+he must hiccup	pos	he must hiccup
+he can run	pos	he can run
+Hagrid can run	pos	Hagrid can run
+Fred must swim	pos	Fred must swim
+Lily may smile	pos	Lily may smile
+Lily may jump	pos	Lily may jump
+he can party	pos	he can party
+Draco may walk	pos	Draco may walk
+he should run	pos	he should run
+Harry can run	pos	Harry can run
+she may giggle	pos	she may giggle
+he may giggle	pos	he may giggle
+Ron may walk	pos	Ron may walk
+he may giggle	pos	he may giggle
+she must jump	pos	she must jump
+George may run	pos	George may run
+Fred must run	pos	Fred must run
+he can swim	pos	he can swim
+Dobby may jump	pos	Dobby may jump
+Lupin may swim	pos	Lupin may swim
+Snape can walk	pos	Snape can walk
+she must jump	pos	she must jump
+Lily may walk	pos	Lily may walk
+he can jump	pos	he can jump
+Fred must swim	pos	Fred must swim
+she must laugh	pos	she must laugh
+Draco may jump	pos	Draco may jump
+she can smile	pos	she can smile
+Ron must walk	pos	Ron must walk
+he can laugh	pos	he can laugh
+Snape may jump	pos	Snape may jump
+Draco can walk	pos	Draco can walk
+Ron must laugh	pos	Ron must laugh
+Albus must run	pos	Albus must run
+she must walk	pos	she must walk
+Draco may swim	pos	Draco may swim
+Hagrid can run	pos	Hagrid can run
+he can run	pos	he can run
+she must smile	pos	she must smile
+Ginny must run	pos	Ginny must run
+he should jump	pos	he should jump
+Ginny may jump	pos	Ginny may jump
+Albus may jump	pos	Albus may jump
+Snape can jump	pos	Snape can jump
+Harry can run	pos	Harry can run
+he must laugh	pos	he must laugh
+Lily may run	pos	Lily may run
+Fred may walk	pos	Fred may walk
+he must giggle	pos	he must giggle
+Lily can swim	pos	Lily can swim
+Ron must smile	pos	Ron must smile
+she may wiggle	pos	she may wiggle
+Draco can walk	pos	Draco can walk
+Ron must smile	pos	Ron must smile
+James must run	pos	James must run
+Lily may smile	pos	Lily may smile
+she should run	pos	she should run
+he must wiggle	pos	he must wiggle
+James can swim	pos	James can swim
+Dobby may jump	pos	Dobby may jump
+he must jump	pos	he must jump
+Dobby can walk	pos	Dobby can walk
+Draco can run	pos	Draco can run
+Fred may swim	pos	Fred may swim
+Ron can hiccup	pos	Ron can hiccup
+Lily must walk	pos	Lily must walk
+she can run	pos	she can run
+Ron can wiggle	pos	Ron can wiggle
+he should jump	pos	he should jump
+Harry may swim	pos	Harry may swim
+Lupin may swim	pos	Lupin may swim
+she can walk	pos	she can walk
+Fred must swim	pos	Fred must swim
+Snape may jump	pos	Snape may jump
+he may smile	pos	he may smile
+he may jump	pos	he may jump
+he must laugh	pos	he must laugh
+Draco must run	pos	Draco must run
+Harry can jump	pos	Harry can jump
+Fred can laugh	pos	Fred can laugh
+Albus may jump	pos	Albus may jump
+Lily can jump	pos	Lily can jump
+he must hiccup	pos	he must hiccup
+Fred can swim	pos	Fred can swim
+she may walk	pos	she may walk
+he must laugh	pos	he must laugh
+Ginny may jump	pos	Ginny may jump
+Ron must laugh	pos	Ron must laugh
+Ron can jump	pos	Ron can jump
+he must smile	pos	he must smile
+Harry must run	pos	Harry must run
+Lupin can walk	pos	Lupin can walk
+Lupin may walk	pos	Lupin may walk
+Lily can smile	pos	Lily can smile
+Lily may swim	pos	Lily may swim
+Ginny must run	pos	Ginny must run
+James may jump	pos	James may jump
+Ginny can swim	pos	Ginny can swim
+she can jump	pos	she can jump
+she must laugh	pos	she must laugh
+he must smile	pos	he must smile
+James may swim	pos	James may swim
+James may walk	pos	James may walk
+Ron may smile	pos	Ron may smile
+Albus must run	pos	Albus must run
+Ron must swim	pos	Ron must swim
+Ron may giggle	pos	Ron may giggle
+Vernon may run	pos	Vernon may run
+she must run	pos	she must run
+Ron must smile	pos	Ron must smile
+Ron can walk	pos	Ron can walk
+he can jump	pos	he can jump
+she may smile	pos	she may smile
+Lily can laugh	pos	Lily can laugh
+he must smile	pos	he must smile
+she can laugh	pos	she can laugh
+she can run	pos	she can run
+Albus may walk	pos	Albus may walk
+she may laugh	pos	she may laugh
+Lupin can jump	pos	Lupin can jump
+Fred may run	pos	Fred may run
+she may smile	pos	she may smile
+Fred may smile	pos	Fred may smile
+Draco may jump	pos	Draco may jump
+Lily may walk	pos	Lily may walk
+she may smile	pos	she may smile
+Lupin can run	pos	Lupin can run
+he may giggle	pos	he may giggle
+Ron must laugh	pos	Ron must laugh
+Draco may walk	pos	Draco may walk
+Lily can walk	pos	Lily can walk
+he may giggle	pos	he may giggle
+he should run	pos	he should run
+he can run	pos	he can run
+Ron can wiggle	pos	Ron can wiggle
+she can giggle	pos	she can giggle
+Lupin can run	pos	Lupin can run
+James can swim	pos	James can swim
+she must walk	pos	she must walk
+Lily may walk	pos	Lily may walk
+James can swim	pos	James can swim
+he must wiggle	pos	he must wiggle
+she must run	pos	she must run
+he must run	pos	he must run
+Ron can jump	pos	Ron can jump
+he must swim	pos	he must swim
+she may laugh	pos	she may laugh
+Ron can party	pos	Ron can party
+Dobby may walk	pos	Dobby may walk
+he should jump	pos	he should jump
+Fred may walk	pos	Fred may walk
+Lily may smile	pos	Lily may smile
+Hagrid can run	pos	Hagrid can run
+Ginny can swim	pos	Ginny can swim
+Snape must run	pos	Snape must run
+Fred can walk	pos	Fred can walk
+he must wiggle	pos	he must wiggle
+he can wiggle	pos	he can wiggle
+Ron must jump	pos	Ron must jump
+Ron can run	pos	Ron can run
+Fred may smile	pos	Fred may smile
+Lily must jump	pos	Lily must jump
+she may smile	pos	she may smile
+Snape may run	pos	Snape may run
+Lily must run	pos	Lily must run
+Lily can party	pos	Lily can party
+he can wiggle	pos	he can wiggle
+Lupin may swim	pos	Lupin may swim
+he may laugh	pos	he may laugh
+Snape may jump	pos	Snape may jump
+he must walk	pos	he must walk
+Ron may swim	pos	Ron may swim
+Lupin can swim	pos	Lupin can swim
+James can swim	pos	James can swim
+Fred must jump	pos	Fred must jump
+he can laugh	pos	he can laugh
+he must wiggle	pos	he must wiggle
+Lily can jump	pos	Lily can jump
+he must wiggle	pos	he must wiggle
+Dobby can run	pos	Dobby can run
+James can run	pos	James can run
+she may walk	pos	she may walk
+Lily can walk	pos	Lily can walk
+he can wiggle	pos	he can wiggle
+Draco may run	pos	Draco may run
+Lily can run	pos	Lily can run
+she can walk	pos	she can walk
+he may swim	pos	he may swim
+Lily may jump	pos	Lily may jump
+Fred can laugh	pos	Fred can laugh
+he must party	pos	he must party
+she may swim	pos	she may swim
+Snape can run	pos	Snape can run
+Draco can walk	pos	Draco can walk
+Dobby may jump	pos	Dobby may jump
+Ginny may walk	pos	Ginny may walk
+she can walk	pos	she can walk
+Fred can walk	pos	Fred can walk
+she must walk	pos	she must walk
+Draco can swim	pos	Draco can swim
+Fred can jump	pos	Fred can jump
+she may laugh	pos	she may laugh
+Ron may run	pos	Ron may run
+Lupin may run	pos	Lupin may run
+Albus may run	pos	Albus may run
+she can party	pos	she can party
+Lily can swim	pos	Lily can swim
+she must party	pos	she must party
+Fred can swim	pos	Fred can swim
+Dobby can run	pos	Dobby can run
+Dobby must run	pos	Dobby must run
+he can wiggle	pos	he can wiggle
+he must hiccup	pos	he must hiccup
+he can party	pos	he can party
+Ron must swim	pos	Ron must swim
+he must walk	pos	he must walk
+Snape can jump	pos	Snape can jump
+Ron can giggle	pos	Ron can giggle
+she must swim	pos	she must swim
+Ron can laugh	pos	Ron can laugh
+he must hiccup	pos	he must hiccup
+Fred must walk	pos	Fred must walk
+Snape can swim	pos	Snape can swim
+he should jump	pos	he should jump
+Ron may run	pos	Ron may run
+Snape may run	pos	Snape may run
+Ginny may walk	pos	Ginny may walk
+Fred can smile	pos	Fred can smile
+Fred must run	pos	Fred must run
+he must smile	pos	he must smile
+she must party	pos	she must party
+Harry may swim	pos	Harry may swim
+she may wiggle	pos	she may wiggle
+she may hiccup	pos	she may hiccup
+she must party	pos	she must party
+he must run	pos	he must run
+she can laugh	pos	she can laugh
+Fred can smile	pos	Fred can smile
+George can run	pos	George can run
+Ginny can run	pos	Ginny can run
+she can walk	pos	she can walk
+she may walk	pos	she may walk
+he can wiggle	pos	he can wiggle
+he must swim	pos	he must swim
+Ginny can walk	pos	Ginny can walk
+he can run	pos	he can run
+he should run	pos	he should run
+Fred must walk	pos	Fred must walk
+he may giggle	pos	he may giggle
+she may hiccup	pos	she may hiccup
+he must giggle	pos	he must giggle
+George may run	pos	George may run
+Vernon may run	pos	Vernon may run
+he must swim	pos	he must swim
+Snape must run	pos	Snape must run
+he can laugh	pos	he can laugh
+he may walk	pos	he may walk
+Ron can jump	pos	Ron can jump
+Lily may walk	pos	Lily may walk
+he should walk	pos	he should walk
+she should run	pos	she should run
+Harry can run	pos	Harry can run
+he can jump	pos	he can jump
+she must jump	pos	she must jump
+he should walk	pos	he should walk
+she may walk	pos	she may walk
+Fred must swim	pos	Fred must swim
+Fred must run	pos	Fred must run
+Ron can laugh	pos	Ron can laugh
+Ginny may swim	pos	Ginny may swim
+she must run	pos	she must run
+Albus can run	pos	Albus can run
+she must walk	pos	she must walk
+he must giggle	pos	he must giggle
+Albus may run	pos	Albus may run
+Lupin may run	pos	Lupin may run
+he may run	pos	he may run
+Ron must swim	pos	Ron must swim
+she can smile	pos	she can smile
+she must jump	pos	she must jump
+Draco can jump	pos	Draco can jump
+Ron may jump	pos	Ron may jump
+Fred can jump	pos	Fred can jump
+Ron may swim	pos	Ron may swim
+she should run	pos	she should run
+Draco can swim	pos	Draco can swim
+Lupin may jump	pos	Lupin may jump
+Draco can jump	pos	Draco can jump
+James can jump	pos	James can jump
+Lily may jump	pos	Lily may jump
+Fred can party	pos	Fred can party
+he must jump	pos	he must jump
+she may walk	pos	she may walk
+she should run	pos	she should run
+Albus can run	pos	Albus can run
+she must smile	pos	she must smile
+Ron may party	pos	Ron may party
+she can wiggle	pos	she can wiggle
+Ron should run	pos	Ron should run
+Lily must walk	pos	Lily must walk
+Lily can laugh	pos	Lily can laugh
+he should walk	pos	he should walk
+Dobby may walk	pos	Dobby may walk
+Ginny can jump	pos	Ginny can jump
+he should swim	pos	he should swim
+Albus may swim	pos	Albus may swim
+Ron may giggle	pos	Ron may giggle
+he must giggle	pos	he must giggle
+he must wiggle	pos	he must wiggle
+he may swim	pos	he may swim
+Fred may walk	pos	Fred may walk
+Snape can walk	pos	Snape can walk
+Fred may smile	pos	Fred may smile
+Harry may walk	pos	Harry may walk
+Sirius can run	pos	Sirius can run
+she must laugh	pos	she must laugh
+Albus may run	pos	Albus may run
+he can run	pos	he can run
+James can swim	pos	James can swim
+Ron must laugh	pos	Ron must laugh
+Draco may swim	pos	Draco may swim
+she must jump	pos	she must jump
+Vernon can run	pos	Vernon can run
+he may walk	pos	he may walk
+Snape may swim	pos	Snape may swim
+Fred may walk	pos	Fred may walk
+Draco may jump	pos	Draco may jump
+Ron may party	pos	Ron may party
+he may walk	pos	he may walk
+he must jump	pos	he must jump
+Lupin may jump	pos	Lupin may jump
+Draco can swim	pos	Draco can swim
+he must hiccup	pos	he must hiccup
+she can party	pos	she can party
+Lily must swim	pos	Lily must swim
+Draco can jump	pos	Draco can jump
+she must walk	pos	she must walk
+Ginny may swim	pos	Ginny may swim
+Snape can run	pos	Snape can run
+she may smile	pos	she may smile
+Fred must jump	pos	Fred must jump
+Ron can swim	pos	Ron can swim
+she may walk	pos	she may walk
+Snape can jump	pos	Snape can jump
+he should swim	pos	he should swim
+Ron may run	pos	Ron may run
+Harry can jump	pos	Harry can jump
+Draco can jump	pos	Draco can jump
+Lily may smile	pos	Lily may smile
+Draco can jump	pos	Draco can jump
+Lily must swim	pos	Lily must swim
+she can jump	pos	she can jump
+Fred can walk	pos	Fred can walk
+he may party	pos	he may party
+he can giggle	pos	he can giggle
+he must swim	pos	he must swim
+Fred can party	pos	Fred can party
+James must run	pos	James must run
+she may hiccup	pos	she may hiccup
+Fred can laugh	pos	Fred can laugh
+Fred must walk	pos	Fred must walk
+he should swim	pos	he should swim
+he must wiggle	pos	he must wiggle
+she may smile	pos	she may smile
+he should walk	pos	he should walk
+James may swim	pos	James may swim
+she can laugh	pos	she can laugh
+he may wiggle	pos	he may wiggle
+Lily must walk	pos	Lily must walk
+she must jump	pos	she must jump
+Ron may giggle	pos	Ron may giggle
+Ginny must run	pos	Ginny must run
+she may party	pos	she may party
+he must giggle	pos	he must giggle
+she must jump	pos	she must jump
+she may hiccup	pos	she may hiccup
+Fred must run	pos	Fred must run
+Draco may walk	pos	Draco may walk
+he must hiccup	pos	he must hiccup
+Harry can jump	pos	Harry can jump
+she may walk	pos	she may walk
+Fred must run	pos	Fred must run
+he can walk	pos	he can walk
+Lily must jump	pos	Lily must jump
+Ron must run	pos	Ron must run
+Ron can walk	pos	Ron can walk
+she can walk	pos	she can walk
+Fred must jump	pos	Fred must jump
+she can swim	pos	she can swim
+Ron should run	pos	Ron should run
+she can jump	pos	she can jump
+she must jump	pos	she must jump
+she can jump	pos	she can jump
+he may wiggle	pos	he may wiggle
+Ron can run	pos	Ron can run
+Lily must swim	pos	Lily must swim
+Lily may walk	pos	Lily may walk
+Fred may jump	pos	Fred may jump
+Ron should run	pos	Ron should run
+Fred must swim	pos	Fred must swim
+Harry can run	pos	Harry can run
+Albus can swim	pos	Albus can swim
+Snape may walk	pos	Snape may walk
+she may walk	pos	she may walk
+he should jump	pos	he should jump
+he may party	pos	he may party
+Snape may walk	pos	Snape may walk
+he may party	pos	he may party
+he should walk	pos	he should walk
+Dobby may swim	pos	Dobby may swim
+she can party	pos	she can party
+Fred must swim	pos	Fred must swim
+Ginny may swim	pos	Ginny may swim
+she can swim	pos	she can swim
+she may walk	pos	she may walk
+Snape may run	pos	Snape may run
+Lupin may swim	pos	Lupin may swim
+he must jump	pos	he must jump
+Harry must run	pos	Harry must run
+Fred can walk	pos	Fred can walk
+Lily must swim	pos	Lily must swim
+she may giggle	pos	she may giggle
+she may party	pos	she may party
+he can party	pos	he can party
+Draco must run	pos	Draco must run
+Lily can run	pos	Lily can run
+he must run	pos	he must run
+he may party	pos	he may party
+he must wiggle	pos	he must wiggle
+George can run	pos	George can run
+James can run	pos	James can run
+Harry can walk	pos	Harry can walk
+Lupin can swim	pos	Lupin can swim
+Draco must run	pos	Draco must run
+James may run	pos	James may run
+she can laugh	pos	she can laugh
+Albus can jump	pos	Albus can jump
+he can swim	pos	he can swim
+she must walk	pos	she must walk
+Ron must party	pos	Ron must party
+Ron may laugh	pos	Ron may laugh
+she must run	pos	she must run
+she must smile	pos	she must smile
+she may party	pos	she may party
+she must walk	pos	she must walk
+she can hiccup	pos	she can hiccup
+she should run	pos	she should run
+Ron may smile	pos	Ron may smile
+Albus may jump	pos	Albus may jump
+he must party	pos	he must party
+Ron can swim	pos	Ron can swim
+he must swim	pos	he must swim
+Draco can run	pos	Draco can run
+Albus must run	pos	Albus must run
+he may run	pos	he may run
+he can smile	pos	he can smile
+Fred can smile	pos	Fred can smile
+he should run	pos	he should run
+Ron may smile	pos	Ron may smile
+Lily can laugh	pos	Lily can laugh
+Fred can jump	pos	Fred can jump
+Ron may smile	pos	Ron may smile
+she must swim	pos	she must swim
+Hagrid may run	pos	Hagrid may run
+James can jump	pos	James can jump
+Lily may run	pos	Lily may run
+she must swim	pos	she must swim
+Draco must run	pos	Draco must run
+James can walk	pos	James can walk
+Draco may jump	pos	Draco may jump
+she can walk	pos	she can walk
+he must swim	pos	he must swim
+she can hiccup	pos	she can hiccup
+she can swim	pos	she can swim
+she may jump	pos	she may jump
+Ron must swim	pos	Ron must swim
+Fred can jump	pos	Fred can jump
+Lily can party	pos	Lily can party
+Lily may jump	pos	Lily may jump
+Fred must run	pos	Fred must run
+he may giggle	pos	he may giggle
+she must smile	pos	she must smile
+Harry can jump	pos	Harry can jump
+Dobby may run	pos	Dobby may run
+James can walk	pos	James can walk
+he should swim	pos	he should swim
+Draco may walk	pos	Draco may walk
+she can hiccup	pos	she can hiccup
+she can party	pos	she can party
+he should swim	pos	he should swim
+she may hiccup	pos	she may hiccup
+he may jump	pos	he may jump
+Ginny must run	pos	Ginny must run
+Ron must jump	pos	Ron must jump
+Dobby may jump	pos	Dobby may jump
+she can laugh	pos	she can laugh
+Lily can run	pos	Lily can run
+James may run	pos	James may run
+Fred must swim	pos	Fred must swim
+Ron may swim	pos	Ron may swim
+he must jump	pos	he must jump
+she should run	pos	she should run
+Fred may smile	pos	Fred may smile
+Ron must smile	pos	Ron must smile
+Ginny can jump	pos	Ginny can jump
+she can walk	pos	she can walk
+he must run	pos	he must run
+Snape may jump	pos	Snape may jump
+he must wiggle	pos	he must wiggle
+she can hiccup	pos	she can hiccup
+she can smile	pos	she can smile
+she must laugh	pos	she must laugh
+he must wiggle	pos	he must wiggle
+he must giggle	pos	he must giggle
+Ron may hiccup	pos	Ron may hiccup
+he can jump	pos	he can jump
+she must jump	pos	she must jump
+he may laugh	pos	he may laugh
+she can wiggle	pos	she can wiggle
+he must hiccup	pos	he must hiccup
+Ron may jump	pos	Ron may jump
+James can walk	pos	James can walk
+Draco must run	pos	Draco must run
+Snape can walk	pos	Snape can walk
+she can walk	pos	she can walk
+Albus can walk	pos	Albus can walk
+Lily may swim	pos	Lily may swim
+she must laugh	pos	she must laugh
+James may jump	pos	James may jump
+he must laugh	pos	he must laugh
+Snape can jump	pos	Snape can jump
+he must jump	pos	he must jump
+Lily can laugh	pos	Lily can laugh
+Fred must jump	pos	Fred must jump
+James may jump	pos	James may jump
+he can walk	pos	he can walk
+Fred may party	pos	Fred may party
+she may walk	pos	she may walk
+Lily may party	pos	Lily may party
+Ron can jump	pos	Ron can jump
+Lupin can swim	pos	Lupin can swim
+Ron must laugh	pos	Ron must laugh
+George can run	pos	George can run
+she may smile	pos	she may smile
+George may run	pos	George may run
+James may run	pos	James may run
+Ron must walk	pos	Ron must walk
+Ron may run	pos	Ron may run
+Albus can walk	pos	Albus can walk
+he can run	pos	he can run
+she may hiccup	pos	she may hiccup
+Albus must run	pos	Albus must run
+he can giggle	pos	he can giggle
+she can wiggle	pos	she can wiggle
+Ron can jump	pos	Ron can jump
+James may walk	pos	James may walk
+she must smile	pos	she must smile
+he must giggle	pos	he must giggle
+he can party	pos	he can party
+she must swim	pos	she must swim
+she may party	pos	she may party
+he can laugh	pos	he can laugh
+Fred can run	pos	Fred can run
+Ron must laugh	pos	Ron must laugh
+she must run	pos	she must run
+Lupin may walk	pos	Lupin may walk
+Harry can jump	pos	Harry can jump
+Ron may jump	pos	Ron may jump
+he may walk	pos	he may walk
+he should walk	pos	he should walk
+he may giggle	pos	he may giggle
+Ron can walk	pos	Ron can walk
+Snape can walk	pos	Snape can walk
+Fred must run	pos	Fred must run
+Draco must run	pos	Draco must run
+she may walk	pos	she may walk
+she must swim	pos	she must swim
+he may giggle	pos	he may giggle
+he may giggle	pos	he may giggle
+he may walk	pos	he may walk
+Hagrid may run	pos	Hagrid may run
+he must giggle	pos	he must giggle
+Dobby can run	pos	Dobby can run
+she can giggle	pos	she can giggle
+Lily can smile	pos	Lily can smile
+Albus can swim	pos	Albus can swim
+Vernon may run	pos	Vernon may run
+Lily can jump	pos	Lily can jump
+Fred can run	pos	Fred can run
+James can swim	pos	James can swim
+Fred may smile	pos	Fred may smile
+she can walk	pos	she can walk
+Ron can smile	pos	Ron can smile
+he must walk	pos	he must walk
+James can run	pos	James can run
+he may swim	pos	he may swim
+she may swim	pos	she may swim
+Dobby can walk	pos	Dobby can walk
+Albus can run	pos	Albus can run
+Albus can swim	pos	Albus can swim
+James can jump	pos	James can jump
+she must party	pos	she must party
+Fred must walk	pos	Fred must walk
+he can wiggle	pos	he can wiggle
+Ron can swim	pos	Ron can swim
+he must swim	pos	he must swim
+she must run	pos	she must run
+Draco must run	pos	Draco must run
+Hagrid may run	pos	Hagrid may run
+Lily can swim	pos	Lily can swim
+Fred can swim	pos	Fred can swim
+Snape can run	pos	Snape can run
+she must walk	pos	she must walk
+Fred can swim	pos	Fred can swim
+he can swim	pos	he can swim
+he may smile	pos	he may smile
+Harry can walk	pos	Harry can walk
+Hagrid can run	pos	Hagrid can run
+Harry may walk	pos	Harry may walk
+Harry may run	pos	Harry may run
+he may run	pos	he may run
+Ron may swim	pos	Ron may swim
+he must laugh	pos	he must laugh
+Ron may smile	pos	Ron may smile
+he must jump	pos	he must jump
+he can swim	pos	he can swim
