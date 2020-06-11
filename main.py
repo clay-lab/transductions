@@ -19,7 +19,6 @@ import torch.nn as nn
 from torch import optim
 import cox.store
 from tqdm import tqdm
-import os.path
 from tree_loaders import TreeField, TreeSequenceField
 
 # these are as good as constants
@@ -30,20 +29,25 @@ CKPT_NAME_BEST = "best_ckpt.pt"
 def setup_store(args):
     store = cox.store.Store(args.outdir, args.expname)
 
-    # store metadata
-    args_dict = args.__dict__
-    meta_schema = cox.store.schema_from_dict(args_dict)
-    store.add_table(META_TABLE, meta_schema)
-    store[META_TABLE].append_row(args_dict)
-    # NEW FROM NA
-    logging_meters = {
-        args.sentacc: None,
-        args.tokenacc: None,
-        args.lenacc: None,
-    }
-    # TODO: support columns that aren't float
-    logs_schema = {name: float for name, meter in logging_meters.items()}
-    store.add_table(LOGS_TABLE, logs_schema)
+    if args.expname is None:
+        # store metadata
+        args_dict = args.__dict__
+        meta_schema = cox.store.schema_from_dict(args_dict)
+        store.add_table(META_TABLE, meta_schema)
+        store[META_TABLE].append_row(args_dict)
+        # NEW FROM NA
+        logging_meters = {
+            args.sentacc: None,
+            args.tokenacc: None,
+            args.lenacc: None,
+        }
+        # TODO: support columns that aren't float
+        logs_schema = {name: float for name, meter in logging_meters.items()}
+        store.add_table(LOGS_TABLE, logs_schema)
+    else:
+        # TODO: check that the parameters match
+        old_meta_schema = store[META_TABLE].schema
+        old_args = dict(store[META_TABLE].df.loc[0, :])
 
     return store
 
@@ -82,6 +86,8 @@ def parse_arguments():
 def main():
     args = parse_arguments()
  
+    store = setup_store(parse_arguments())
+
     # Device specification
     available_device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
@@ -133,12 +139,17 @@ def main():
     #dec = DecoderRNN(hidden_size=HIDDEN_SIZE,vocab=TAR_SEQ.vocab, encoder_vocab=SRC_SEQ.vocab, recurrent_unit=DEC_TYPE, num_layers=NUM_LAYERS, max_length=MAX_LENGTH, attention_type=ATT_TYPE, dropout=DROPOUT)
     dec = DecoderRNN(hidden_size=args.hidden_size, vocab=TRG.vocab, encoder_vocab=SRC.vocab, recurrent_unit=args.decoder, num_layers=1, max_length=30, attention_type='additive', dropout=0.3)
     s2s = seq2seq.Seq2Seq(encoder, dec, ["source"], ["middle0", "annotation", "middle1", "source"], decoder_train_field_names=["middle0", "annotation", "middle1", "source", "target"])
-    store = setup_store(parse_arguments())
+    
+    if CKPT_NAME_LATEST in os.listdir(store.path):
+        ckpt_path = os.path.join(store.path, CKPT_NAME_LATEST)
+        s2s.load_state_dict(torch.load(ckpt_path))
 
     training.train(s2s, train_iter, store, args, ignore_index=TRG.vocab.stoi['<pad>'])
 
-    # IF YOU HAVE PANDAS 1.0 YOU MUST MAKE THIS CHANGE MANUALLY
-    # https://github.com/MadryLab/cox/pull/3/files
+import warnings
+warnings.warn("""If you have Pandas 1.0 you must make the following change manually for cox to work:
+https://github.com/MadryLab/cox/pull/3/files
+Use cox.__files__ to find where cox is installed""")
 
 if __name__ == '__main__':
     main()

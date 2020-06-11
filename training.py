@@ -31,7 +31,37 @@ import os
 import time
 import math
 
-from evaluationNEW import *
+#from evaluationNEW import *
+
+from abc import ABC, abstractmethod
+ 
+class AbstractMetric(ABC):
+    @abstractmethod
+    def process_batch(self, prediction, target):
+        pass
+ 
+    @abstractmethod
+    def result(self):
+        pass
+
+class AverageMetric(AbstractMetric):
+    def __init__(self):
+        self.sum = 0
+        self.n_total = 0
+
+    def result(self):
+        return self.n_correct / self.n_total 
+
+class SentenceLevelAccuracy(AverageMetric):
+    def process_batch(self, prediction, target):
+        #pred_target = torch.nn.utils.rnn.pad_sequence([pred, target], padding_value=-1)
+        pass
+
+def evaluate(model, val_iter, store=None):
+    model.eval()
+
+    stats_dict = {}
+    store[LOGS_TABLE].append_row(stats_dict)
 
 class AverageMeter:
     """Computes and stores the average and current value"""
