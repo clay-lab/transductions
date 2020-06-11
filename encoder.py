@@ -1,3 +1,5 @@
+# TODO: DO WE USE THE TREE ENCODER/DECODER ANYMORE?
+# ENCODERS FROM MODELS.PY, MODELSNEW.PY, BOB_MODELS.PY, MODELSNEWBOB.PY (MASTER), AND MODELSNEWBOB.PY (NEW-MODELS)
 # Generic sequential encoder
 class EncoderRNN(nn.Module): # FROM MODELS.PY --MASTER
     def __init__(self, vocab_size, hidden_size, recurrent_unit, n_layers=1, max_length=30, dropout_p=0):
