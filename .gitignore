@@ -141,3 +141,5 @@ cython_debug/
 logs/
 demo_savefile.txt
 sandbox.ipynb
+.vscode/
+
