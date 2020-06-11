@@ -133,7 +133,7 @@ def main():
         repeat = False
     )
 
-    encoder = EncoderRNN(len(SRC.vocab), hidden_size=args.hidden_size, recurrent_unit=args.encoder, num_layers=1, max_length=20)
+    encoder = EncoderRNN(len(SRC.vocab), hidden_size=args.hidden_size, recurrent_unit=args.encoder, num_layers=1, max_length=30)
     #dec = modelsNEW.TridentDecoder(3, len(TAR.vocab), hidden_size=30, max_depth=5)
     #s2s = seq2seq.Seq2Seq(encoder, dec, ["source"], ["middle1"], decoder_train_field_names=["middle1", "source_tree"])
     #dec = DecoderRNN(hidden_size=HIDDEN_SIZE,vocab=TAR_SEQ.vocab, encoder_vocab=SRC_SEQ.vocab, recurrent_unit=DEC_TYPE, num_layers=NUM_LAYERS, max_length=MAX_LENGTH, attention_type=ATT_TYPE, dropout=DROPOUT)
