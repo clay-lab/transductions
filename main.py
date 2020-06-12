@@ -6,9 +6,7 @@ import argparse
 
 from torchtext.data import Field, TabularDataset, BucketIterator, RawField
 
-#from models import EncoderRNN, TreeEncoderRNN, DecoderRNN, TreeDecoderRNN
-from decoder import DecoderRNN
-from encoder import EncoderRNN
+from models import EncoderRNN, DecoderRNN #, TreeDecoderRNN, TreeEncoderRNN
 import training
 import RPNTask
 import seq2seq
@@ -26,6 +24,7 @@ LOGS_TABLE = "logs"
 META_TABLE = "metadata"
 CKPT_NAME_LATEST = "latest_ckpt.pt"
 CKPT_NAME_BEST = "best_ckpt.pt"
+
 def setup_store(args):
     store = cox.store.Store(args.outdir, args.expname)
 
@@ -35,58 +34,61 @@ def setup_store(args):
         meta_schema = cox.store.schema_from_dict(args_dict)
         store.add_table(META_TABLE, meta_schema)
         store[META_TABLE].append_row(args_dict)
-        # NEW FROM NA
-        logging_meters = {
-            args.sentacc: None,
-            args.tokenacc: None,
-            args.lenacc: None,
-        }
+
+        logging_meters = dict()
+        if args.sentacc: logging['sentence-level-accuracy'] = SentenceAccuracyLogger()
+        if args.tokenacc: logging['token-level-accuracy'] = TokenAccuracyLogger()
+        if args.lenacc: logging['length-accuracy'] = LengthAccuracyLogger()
+
         # TODO: support columns that aren't float
         logs_schema = {name: float for name, meter in logging_meters.items()}
         store.add_table(LOGS_TABLE, logs_schema)
     else:
         # TODO: check that the parameters match
+        # TODO: load logging meters
         old_meta_schema = store[META_TABLE].schema
         old_args = dict(store[META_TABLE].df.loc[0, :])
 
-    return store
+    return store, logging_meters
 
 def parse_arguments():
 
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('-e', '--encoder', help = 'type of encoder used', choices = ['GRU', 'Tree'], type = str, default = 'GRU')
-    parser.add_argument('-d', '--decoder', help = 'type of decoder used', choices = ['GRU', 'Tree'], type = str, default = 'GRU')
-    parser.add_argument('-t', '--task', help = 'task model is trained to perform', choices = ['negation'], type = str, default = None, required = True)
-    parser.add_argument('-a', '--attention', help = 'type of attention used', choices = ['content'], type = str, default = 'content', required = False)
-    parser.add_argument('-lr', '--learning-rate', help = 'learning rate', type = float, default = 0.001)
+    parser.add_argument('-e', '--encoder', help = 'type of encoder used', choices = ['GRU', 'LSTM', 'SRN', 'Tree'], type = str, default = 'GRU')
+    parser.add_argument('-d', '--decoder', help = 'type of decoder used', choices = ['GRU', 'LSTM', 'SRN', 'Tree'], type = str, default = 'GRU')
+    parser.add_argument('-t', '--task', help = 'task model is trained to perform', type = str, default = 'negation', required = False)
+    parser.add_argument('-a', '--attention', help = 'type of attention used', choices = ['location', 'additive', 'multiplicative', 'dotproduct'], type = str, default = None, required = False)
+    parser.add_argument('-lr', '--learning-rate', help = 'learning rate', type = float, default = 0.01)
     parser.add_argument('-hs', '--hidden-size', help = 'hidden size', type = int, default = 256)
-    #parser.add_argument('-rs', '--random-seed', help='random seed', type=float, default=None)
-    #parser.add_argument('-ps', '--parse-strategy', help = 'how to parse (WHAT IS IT PARSING??)', type = str, choices = ['correct', 'right-branching'], default = 'correct')
+    parser.add_argument('-l', '--layers', help='number of layers for encoder and decoder', type = int, default=1)
+    parser.add_argument('--max-length', help='limits the length of decoded sequecnes', type = int, default=30)
+    parser.add_argument('-rs', '--random-seed', help='random seed', type=float, default=None)
     parser.add_argument('-p', '--patience', help = 'parience', type = int, default = 3)
-    parser.add_argument('-v', '--vocab', help = 'vocabulary used ?? (THIS SHOULD BE CLARIFIED)', type = str, choices = ['SRC', 'TRG'], default = 'SRC')
-    parser.add_argument('-pr', '--print-every',	help = 'print training data out after N iterations', metavar = 'N', type = int, default = 1000)
-    parser.add_argument('--tree', help='parse sequences as string representations of tree', type=bool, default=False)
+    parser.add_argument('-v', '--vocab', help = 'which vocabulary contains the transformation annotation', type = str, choices = ['SRC', 'TRG'], default = 'TRG')
+    parser.add_argument('-do', '--dropout', help = 'how much dropout to use', type = float, default=0.0)
+    # parser.add_argument('-pr', '--print-every',	help = 'print training data out after N iterations', metavar = 'N', type = int, default = 1000)
+    parser.add_argument('--input-format', help='input files could contain string representations of trees or just plain sequences', type=str, choices = ['sequences', 'trees'], default='sequences')
     parser.add_argument('-ep', '--epochs', help="num epochs", type=int, default=20)
-    parser.add_argument('-b', '--batches', help='batch size', type=int, default=5)
+    parser.add_argument('-b', '--batch-size', help='batch size', type=int, default=5)
     #     args.logging_meters = { NA
     #     "sentence_accuracy": None,
     #     "token_accuracy": None,
     #     "length_accuracy": None,
     # }
     # args.exp_name = None
-    parser.add_argument('-SA', '--sentacc', help='sentence accuracy', type=None, default=None)
-    parser.add_argument('-TA', '--tokenacc', help='token accuracy', type=None, default=None)
-    parser.add_argument('-LA', '--lenacc', help='length accuracy', type=None, default=None)
-    parser.add_argument('-exp', '--expname', help='exp_name', type=None, default=None)
+    parser.add_argument('-sa', '--sentacc', help='sentence accuracy', type=bool, default=True)
+    parser.add_argument('-ta', '--tokenacc', help='token accuracy', type=bool, default=True)
+    parser.add_argument('-la', '--lenacc', help='length accuracy', type=bool, default=True)
 
+    parser.add_argument('-exp', '--expname', help='exp_name', type=None, default=None)
     parser.add_argument('-out', '--outdir', help='directory in which to place cox store', type=None, default='logs/default')
     return parser.parse_args()
 
 def main():
     args = parse_arguments()
  
-    store = setup_store(parse_arguments())
+    store, logging_meters = setup_store(parse_arguments())
 
     # Device specification
     available_device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
@@ -96,7 +98,7 @@ def main():
     validationdata = args.task + '.val'
     testingdata = args.task + '.test'
     # NA 80-93
-    if args.tree:
+    if args.input_format == 'trees':
         SRC_TREE = TreeField(collapse_unary=True)
         SRC = TreeSequenceField(SRC_TREE)
         TRANS = RawField()
@@ -116,7 +118,7 @@ def main():
         train = trainingdata,
         validation = validationdata,
         test = testingdata,
-        format = 'csv',
+        format = 'tsv',
         skip_header = True,
         fields = datafields
     )
@@ -133,13 +135,14 @@ def main():
         repeat = False
     )
 
-    encoder = EncoderRNN(len(SRC.vocab), hidden_size=args.hidden_size, recurrent_unit=args.encoder, num_layers=1, max_length=30)
-    #dec = modelsNEW.TridentDecoder(3, len(TAR.vocab), hidden_size=30, max_depth=5)
-    #s2s = seq2seq.Seq2Seq(encoder, dec, ["source"], ["middle1"], decoder_train_field_names=["middle1", "source_tree"])
-    #dec = DecoderRNN(hidden_size=HIDDEN_SIZE,vocab=TAR_SEQ.vocab, encoder_vocab=SRC_SEQ.vocab, recurrent_unit=DEC_TYPE, num_layers=NUM_LAYERS, max_length=MAX_LENGTH, attention_type=ATT_TYPE, dropout=DROPOUT)
-    dec = DecoderRNN(hidden_size=args.hidden_size, vocab=TRG.vocab, encoder_vocab=SRC.vocab, recurrent_unit=args.decoder, num_layers=1, max_length=30, attention_type='additive', dropout=0.3)
-    s2s = seq2seq.Seq2Seq(encoder, dec, ["source"], ["middle0", "annotation", "middle1", "source"], decoder_train_field_names=["middle0", "annotation", "middle1", "source", "target"])
-    
+    encoder = EncoderRNN(len(SRC.vocab), hidden_size=args.hidden_size, recurrent_unit=args.encoder, num_layers=args.layers, dropout=args.dropout)
+    tree_decoder_names = ['Tree']
+    if args.decoder not in tree_decoder_names:
+        dec = DecoderRNN(hidden_size=args.hidden_size, vocab=TRG.vocab, encoder_vocab=SRC.vocab, recurrent_unit=args.decoder, num_layers=args.layers, max_length=args.max_length, attention_type=args.attention, dropout=args.dropout)
+        s2s = seq2seq.Seq2Seq(encoder, dec, ["source"], ["middle0", "annotation", "middle1", "source"], decoder_train_field_names=["middle0", "annotation", "middle1", "source", "target"])
+    else:
+        assert False
+
     if CKPT_NAME_LATEST in os.listdir(store.path):
         ckpt_path = os.path.join(store.path, CKPT_NAME_LATEST)
         s2s.load_state_dict(torch.load(ckpt_path))

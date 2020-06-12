@@ -30,12 +30,11 @@ else:
 
 # Generic sequential encoder
 class EncoderRNN(nn.Module):
-    def __init__(self, vocab_size, hidden_size, recurrent_unit, num_layers=1, max_length=30, dropout=0):
+    def __init__(self, vocab_size, hidden_size, recurrent_unit, num_layers=1, dropout=0):
         super(EncoderRNN, self).__init__()
         self.num_layers = num_layers
         self.hidden_size = hidden_size
         self.rnn_type = recurrent_unit
-        self.max_length = max_length
         self.dropout = nn.Dropout(p=dropout)
 
         self.embedding = nn.Embedding(vocab_size, hidden_size)
@@ -161,7 +160,7 @@ class DecoderRNN(nn.Module):
         
         source_mask = create_mask(source, self.encoder_vocab)
         #initialize x and h to given initial values. 
-        x, h = torch.tensor([self.vocab.stoi[x] for x in x0]), h0
+        x, h = x0.squeeze(0), h0
         #print('x before', x, x0, self.vocab.stoi)
         output_complete_flag = torch.zeros(batch_size, dtype=torch.bool)
         if self.recurrent_unit_type == "LSTM": #Non-LSTM encoder, LSTM decoder: create c

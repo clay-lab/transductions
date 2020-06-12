@@ -53,32 +53,67 @@ class AverageMetric(AbstractMetric):
         return self.n_correct / self.n_total 
 
 class SentenceLevelAccuracy(AverageMetric):
-    def process_batch(self, prediction, target):
-        #pred_target = torch.nn.utils.rnn.pad_sequence([pred, target], padding_value=-1)
-        pass
+    def process_batch(self, prediction, target):        
+        # TODO: PSEUDOCODE: please fix
+        # 1 if correct, 0 if incorrect
+        self.sum += (prediction == target).prod(axis=1).sum()
+        self.n_total += batch_size
 
-def evaluate(model, val_iter, store=None):
-    model.eval()
+class TokenAccuracyLogger(AverageMetric):
+    pass
 
-    stats_dict = {}
-    store[LOGS_TABLE].append_row(stats_dict)
-
+# TODO: can we work this into the Metric hierarchy ^
 class AverageMeter:
     """Computes and stores the average and current value"""
     def __init__(self):
-        self.reset()
-
-    def reset(self):
-        # self.val = 0
-        self.avg = -1
         self.sum = 0.0
-        self.count = 0.0
+        self.count = 0
 
     def update(self, val):
         # self.val = val
         self.sum += val
         self.count += 1
-        self.avg = self.sum / self.count
+    
+    def result(self):
+        return self.sum / self.count if self.count > 0 else np.nan
+
+def evaluate(model, val_iter, criterion=None, logging_meters=None, store=None):
+    return
+
+    model.eval()
+    stats_dict = dict()
+
+    loss_meter = AverageMeter()
+
+    with torch.no_grad():
+
+        for batch in val_iter:
+            # run the model
+            logits = model(batch) # seq length (of pred) x batch_size x vocab
+            pred = logits.argmax(2) # seq length (of pred) x batch_size 
+            target = batch.target # seq length (of target) x batch_size
+
+            batch_loss = criterion(logits, target)
+            loss_meter.update(batch_loss)
+
+            # pred = [The dog runs <pad> <pad> <pad>]
+            # target = [The dog and the cat run]
+
+            pred == target
+
+            # helpful utility
+            # pred_target = torch.nn.utils.rnn.pad_sequence([pred, target], padding_value=-1)
+
+            for meter in logging_meters:
+                meter.process_batch(pred, target)
+
+        for name, meter in logging_meters.items():
+            stats_dict[stat_name] = meter.result()
+        stats_dict['loss'] = loss_meter.result()
+
+        store["logs"].append_row(stats_dict)
+
+    return stats_dict
 
 def train(model, train_iterator, validation_iter, store, args, ignore_index=None):
     # if validation_iter is None:
@@ -110,8 +145,8 @@ def train(model, train_iterator, validation_iter, store, args, ignore_index=None
                 loss_meter.update(batch_loss.item())
                 T.set_postfix(avg_train_loss=loss_meter.avg)
 
-        # TODO: SHAYNA
-        eval_stats = evaluate(model, validation_iter, store=store)
+        # dictionary of stat_name => value
+        eval_stats = evaluate(model, validation_iter, criterion, logging_meters=logging_meters, store=store)
 
         torch.save(model.state_dict(), os.path.join(store.path, CKPT_NAME_LATEST))
 
