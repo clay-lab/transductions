@@ -1,11 +1,11 @@
 # transductions
-Pytorch/Torchtext implementation of seq2seq transductions
+## Pytorch/Torchtext implementation of seq2seq transductions
 
-The following argument is required:
+### The following argument is required:
 
 file name from which data will be accessed (-t, --task): Example: negation
 
-The following arguments are optional:
+### The following arguments are optional:
 
 encoder (-e, --encoder): Default: GRU. Options: GRU, LSTM, SRN, Tree  
 decoder (-e, --decoder): Default: GRU. Options: GRU, LSTM, SRN, Tree  
@@ -23,16 +23,16 @@ number of epochs (-ep, --epochs): Default: 20.
 batch size (-b, --batch-size): Default: 5.  
 
 
-Required Command: 
+### Required Command: 
 ```bash
 python main.py --task negation
 ```
 
-Optional Command: 
+### Optional Command: 
 ```bash
 python main.py --task negation --encoder LSTM --decoder LSTM -a location -lr 0.001 --hidden-size 256 -l 3  --max-length 35 -rs 0.43 -p 4 --vocab SRC -do 0.01 --input-format trees -ep 25 -b 4
 ```
 
-If an optional command is not provided, the default value will be used.
+### If an optional command is not provided, the default value will be used.
 
 
