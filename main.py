@@ -57,7 +57,7 @@ def parse_arguments():
 
     parser.add_argument('-e', '--encoder', help = 'type of encoder used', choices = ['GRU', 'LSTM', 'SRN', 'Tree'], type = str, default = 'GRU')
     parser.add_argument('-d', '--decoder', help = 'type of decoder used', choices = ['GRU', 'LSTM', 'SRN', 'Tree'], type = str, default = 'GRU')
-    parser.add_argument('-t', '--task', help = 'task model is trained to perform', type = str, default = 'negation', required = False)
+    parser.add_argument('-t', '--task', help = 'task model is trained to perform', type = str, required = True)
     parser.add_argument('-a', '--attention', help = 'type of attention used', choices = ['location', 'additive', 'multiplicative', 'dotproduct'], type = str, default = None, required = False)
     parser.add_argument('-lr', '--learning-rate', help = 'learning rate', type = float, default = 0.01)
     parser.add_argument('-hs', '--hidden-size', help = 'hidden size', type = int, default = 256)
@@ -88,7 +88,7 @@ def parse_arguments():
 def main():
     args = parse_arguments()
  
-    store, logging_meters = setup_store(parse_arguments())
+    store, logging_meters = setup_store(args)
 
     # Device specification
     available_device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
