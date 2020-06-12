@@ -36,9 +36,9 @@ def setup_store(args):
         store[META_TABLE].append_row(args_dict)
 
         logging_meters = dict()
-        if args.sentacc: logging['sentence-level-accuracy'] = SentenceAccuracyLogger()
-        if args.tokenacc: logging['token-level-accuracy'] = TokenAccuracyLogger()
-        if args.lenacc: logging['length-accuracy'] = LengthAccuracyLogger()
+        if args.sentacc: logging_meters['sentence-level-accuracy'] = training.SentenceLevelAccuracy()
+        if args.tokenacc: logging_meters['token-level-accuracy'] = training.TokenLevelAccuracy()
+        if args.lenacc: logging_meters['length-accuracy'] = training.LengthLevelAccuracy()
 
         # TODO: support columns that aren't float
         logs_schema = {name: float for name, meter in logging_meters.items()}
@@ -147,7 +147,7 @@ def main():
         ckpt_path = os.path.join(store.path, CKPT_NAME_LATEST)
         s2s.load_state_dict(torch.load(ckpt_path))
 
-    training.train(s2s, train_iter, val_iter, store, args, ignore_index=TRG.vocab.stoi['<pad>'])
+    training.train(s2s, train_iter, val_iter, logging_meters, store, args, ignore_index=TRG.vocab.stoi['<pad>'])
 
 import warnings
 warnings.warn("""If you have Pandas 1.0 you must make the following change manually for cox to work:

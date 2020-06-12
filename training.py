@@ -35,6 +35,8 @@ import math
 
 from abc import ABC, abstractmethod
  
+CKPT_NAME_LATEST = "latest_ckpt.pt"
+
 class AbstractMetric(ABC):
     @abstractmethod
     def process_batch(self, prediction, target):
@@ -59,8 +61,13 @@ class SentenceLevelAccuracy(AverageMetric):
         self.sum += (prediction == target).prod(axis=1).sum()
         self.n_total += batch_size
 
-class TokenAccuracyLogger(AverageMetric):
-    pass
+class TokenLevelAccuracy(AverageMetric):
+    def process_batch(self, prediction, target): 
+        pass
+
+class LengthLevelAccuracy(AverageMetric):
+    def process_batch(self, prediction, target): 
+        pass
 
 # TODO: can we work this into the Metric hierarchy ^
 class AverageMeter:
@@ -78,7 +85,6 @@ class AverageMeter:
         return self.sum / self.count if self.count > 0 else np.nan
 
 def evaluate(model, val_iter, criterion=None, logging_meters=None, store=None):
-    return
 
     model.eval()
     stats_dict = dict()
@@ -93,16 +99,13 @@ def evaluate(model, val_iter, criterion=None, logging_meters=None, store=None):
             pred = logits.argmax(2) # seq length (of pred) x batch_size 
             target = batch.target # seq length (of target) x batch_size
 
+            # helpful utility
+            # pred_target = torch.nn.utils.rnn.pad_sequence([pred, target], padding_value=-1)
+
             batch_loss = criterion(logits, target)
             loss_meter.update(batch_loss)
 
-            # pred = [The dog runs <pad> <pad> <pad>]
-            # target = [The dog and the cat run]
-
-            pred == target
-
-            # helpful utility
-            # pred_target = torch.nn.utils.rnn.pad_sequence([pred, target], padding_value=-1)
+            
 
             for meter in logging_meters:
                 meter.process_batch(pred, target)
@@ -111,11 +114,12 @@ def evaluate(model, val_iter, criterion=None, logging_meters=None, store=None):
             stats_dict[stat_name] = meter.result()
         stats_dict['loss'] = loss_meter.result()
 
-        store["logs"].append_row(stats_dict)
+        if store is not None:
+            store["logs"].append_row(stats_dict)
 
     return stats_dict
 
-def train(model, train_iterator, validation_iter, store, args, ignore_index=None):
+def train(model, train_iterator, validation_iter, logging_meters, store, args, ignore_index=None):
     # if validation_iter is None:
     #     validation_iter = train_iterator
 
@@ -143,10 +147,12 @@ def train(model, train_iterator, validation_iter, store, args, ignore_index=None
 
                 # item() to turn a 0-dimensional tensor into a regular float
                 loss_meter.update(batch_loss.item())
-                T.set_postfix(avg_train_loss=loss_meter.avg)
+                T.set_postfix(avg_train_loss=loss_meter.result())
 
         # dictionary of stat_name => value
         eval_stats = evaluate(model, validation_iter, criterion, logging_meters=logging_meters, store=store)
+        for name, stat in eval_stats.items():
+            print(name, "\t", stat)
 
         torch.save(model.state_dict(), os.path.join(store.path, CKPT_NAME_LATEST))
 
