@@ -3,7 +3,7 @@
 
 ### The following argument is required:
 
-file name from which data will be accessed (-t, --task): Example: negation
+file name from which data will be accessed `(-t, --task)`: Example: `negation`
 
 ### The following arguments are optional:
 
