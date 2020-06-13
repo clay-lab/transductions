@@ -7,6 +7,7 @@ file name from which data will be accessed (-t, --task): Example: negation
 
 ### The following arguments are optional:
 
+```
 encoder (-e, --encoder): Default: GRU. Options: GRU, LSTM, SRN, Tree  
 decoder (-e, --decoder): Default: GRU. Options: GRU, LSTM, SRN, Tree  
 attention (-a, --attention): Default: None. Options: location, additive, multiplicative, dotproduct  
@@ -21,18 +22,16 @@ dropout amount (-do, --dropout): Default: 0.0.
 data representation (--input-format): Default 'sequences'. Options: sequences, trees.  
 number of epochs (-ep, --epochs): Default: 20.  
 batch size (-b, --batch-size): Default: 5.  
-
+```
 
 ### Required Command: 
 ```bash
-python main.py --task negation
+task (-t, --task)
 ```
 
-### Optional Command: 
+### Example Command: 
 ```bash
 python main.py --task negation --encoder LSTM --decoder LSTM -a location -lr 0.001 --hidden-size 256 -l 3  --max-length 35 -rs 0.43 -p 4 --vocab SRC -do 0.01 --input-format trees -ep 25 -b 4
 ```
-
-### If an optional command is not provided, the default value will be used.
 
 
