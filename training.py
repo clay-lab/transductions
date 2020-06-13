@@ -57,13 +57,27 @@ class AverageMetric(AbstractMetric):
 
 class SentenceLevelAccuracy(AverageMetric):
 
-    def process_batch(self, prediction, target):        
-        self.sum += (prediction == target).prod(axis=1).sum()
+    def process_batch(self, prediction, target, model):  
+        correct = (prediction == target).prod(axis=0).sum()    
+        total = target.size()[1]
+        self.sum += (prediction == target).prod(axis=0).sum()
         self.n_total += target.size()[1]
+
+        if correct > total:
+            p = model.scores2sentence(prediction, model.decoder.vocab)
+            t = model.scores2sentence(target, model.decoder.vocab)
+
+            print("I got {} / {} right this time!".format(correct, total))
+            print("Predictions:\n", p)
+            print("Target:\n", t)
+            print(prediction == target)
+            print((prediction == target).prod(axis=0))
+
+            raise(SystemError)
 
 class TokenLevelAccuracy(AverageMetric):
 
-    def process_batch(self, prediction, target): 
+    def process_batch(self, prediction, target, model): 
         self.sum += (prediction == target).sum()
         self.n_total += target.size()[0] * target.size()[1]
 
@@ -73,7 +87,7 @@ class LengthLevelAccuracy(AverageMetric):
         AverageMetric.__init__(self)
         self.n_total = 1
 
-    def process_batch(self, prediction, target): 
+    def process_batch(self, prediction, target, model): 
         pass
 
 # TODO: can we work this into the Metric hierarchy ^
@@ -143,7 +157,7 @@ def evaluate(model, val_iter, criterion=None, logging_meters=None, store=None):
             loss_meter.update(batch_loss)
 
             for _, meter in logging_meters.items():
-                meter.process_batch(pred, target)
+                meter.process_batch(pred, target, model)
 
         for name, meter in logging_meters.items():
             stats_dict[name] = meter.result()
