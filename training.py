@@ -52,24 +52,19 @@ class AverageMetric(AbstractMetric):
         self.n_total = 0
 
     def result(self):
-        return self.sum / self.n_total 
+        return 1.0 * self.sum / self.n_total 
 
 class SentenceLevelAccuracy(AverageMetric):
+
     def process_batch(self, prediction, target):        
-        # TODO: PSEUDOCODE: please fix
-        # 1 if correct, 0 if incorrect
-        
         self.sum += (prediction == target).prod(axis=1).sum()
         self.n_total += target.size()[1]
 
 class TokenLevelAccuracy(AverageMetric):
 
-    def __init__(self):
-        AverageMetric.__init__(self)
-        self.n_total = 1
-
     def process_batch(self, prediction, target): 
-        pass
+        self.sum += (prediction == target).sum()
+        self.n_total += target.size()[0] * target.size()[1]
 
 class LengthLevelAccuracy(AverageMetric):
 
@@ -120,7 +115,6 @@ def evaluate(model, val_iter, criterion=None, logging_meters=None, store=None):
                 meter.process_batch(pred, target)
 
         for name, meter in logging_meters.items():
-            # print(meter.n_total)
             stats_dict[name] = meter.result()
 
         stats_dict['loss'] = loss_meter.result()
