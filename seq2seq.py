@@ -48,7 +48,10 @@ class Seq2Seq(torch.nn.Module):
     def scores2sentence(self, scores, vocab):
         ids = scores.transpose(0, 1).contiguous().view(-1)
         tests = np.reshape([vocab.itos[i] for i in ids], tuple(scores.size())[::-1])
-        tests = [' '.join(r) for r in tests]
+        test_okay = []
+        for test in tests:
+            test_okay.append([t for t in test if t not in ['<pad>', '<unk>']])
+        tests = [' '.join(r) for r in test_okay]
         return tests
         # return scores.apply_(f)
         # ix2word = np.array(vocab.itos)
