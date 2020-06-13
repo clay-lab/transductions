@@ -58,22 +58,10 @@ class AverageMetric(AbstractMetric):
 class SentenceLevelAccuracy(AverageMetric):
 
     def process_batch(self, prediction, target, model):  
-        correct = (prediction == target).prod(axis=0).sum()    
-        total = target.size()[1]
-        self.sum += (prediction == target).prod(axis=0).sum()
-        self.n_total += target.size()[1]
-
-        if correct > total:
-            p = model.scores2sentence(prediction, model.decoder.vocab)
-            t = model.scores2sentence(target, model.decoder.vocab)
-
-            print("I got {} / {} right this time!".format(correct, total))
-            print("Predictions:\n", p)
-            print("Target:\n", t)
-            print(prediction == target)
-            print((prediction == target).prod(axis=0))
-
-            raise(SystemError)
+        correct = (prediction == target).prod(axis=0)
+        total = correct.size()[0]
+        self.sum += correct.sum()
+        self.n_total += total
 
 class TokenLevelAccuracy(AverageMetric):
 
@@ -200,7 +188,9 @@ def train(model, train_iterator, validation_iter, logging_meters, store, args, i
         # dictionary of stat_name => value
         eval_stats = evaluate(model, validation_iter, criterion, logging_meters=new_meters, store=store)
         for name, stat in eval_stats.items():
-            print('{:<25s} {:f}'.format(name, stat))
+            if 'accuracy' in name:
+                stat = stat * 100
+            print('{:<25s} {:.5} {:s}'.format(name, stat, '%' if 'accuracy' in name else ''))
 
         torch.save(model.state_dict(), os.path.join(store.path, CKPT_NAME_LATEST))
 
