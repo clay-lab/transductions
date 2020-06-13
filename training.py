@@ -147,12 +147,6 @@ def evaluate(model, val_iter, criterion=None, logging_meters=None, store=None):
             l = logits[:target.size()[0], :].permute(0, 2, 1)
             pred = logits[:target.size()[0], :].argmax(2)
 
-            # p_sentences = model.scores2sentence(pred, model.decoder.vocab)
-            # t_sentences = model.scores2sentence(target, model.decoder.vocab)
-
-            # print("Predicted Sequences:\n", p_sentences)
-            # print("Target Sequences:\n", t_sentences)
-
             batch_loss = criterion(l, target)
             loss_meter.update(batch_loss)
 
@@ -171,8 +165,6 @@ def evaluate(model, val_iter, criterion=None, logging_meters=None, store=None):
     return stats_dict
 
 def train(model, train_iterator, validation_iter, logging_meters, store, args, ignore_index=None):
-    # if validation_iter is None:
-    #     validation_iter = train_iterator
 
     optimizer = optim.SGD(model.parameters(), lr=args.learning_rate)
     criterion = nn.CrossEntropyLoss(weight=None, ignore_index=ignore_index)
@@ -181,6 +173,11 @@ def train(model, train_iterator, validation_iter, logging_meters, store, args, i
     for epoch in range(args.epochs):
     
         loss_meter = AverageMeter()
+        new_meters = dict()
+        new_meters['sentence-level-accuracy'] = SentenceLevelAccuracy()
+        new_meters['token-level-accuracy'] = TokenLevelAccuracy()
+        new_meters['length-accuracy'] = LengthLevelAccuracy()
+
         model.train()
         with tqdm(train_iterator) as T:
             for batch in T:
@@ -201,10 +198,9 @@ def train(model, train_iterator, validation_iter, logging_meters, store, args, i
                 T.set_postfix(avg_train_loss=loss_meter.result())
 
         # dictionary of stat_name => value
-        eval_stats = evaluate(model, validation_iter, criterion, logging_meters=logging_meters, store=store)
+        eval_stats = evaluate(model, validation_iter, criterion, logging_meters=new_meters, store=store)
         for name, stat in eval_stats.items():
             print('{:<25s} {:f}'.format(name, stat))
-            # print(name, "\t", stat)
 
         torch.save(model.state_dict(), os.path.join(store.path, CKPT_NAME_LATEST))
 
