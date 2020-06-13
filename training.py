@@ -158,7 +158,8 @@ def train(model, train_iterator, validation_iter, logging_meters, store, args, i
         # dictionary of stat_name => value
         eval_stats = evaluate(model, validation_iter, criterion, logging_meters=logging_meters, store=store)
         for name, stat in eval_stats.items():
-            print(name, "\t", stat)
+            print('{:<25s} {:f}'.format(name, stat))
+            # print(name, "\t", stat)
 
         torch.save(model.state_dict(), os.path.join(store.path, CKPT_NAME_LATEST))
 
