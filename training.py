@@ -52,20 +52,31 @@ class AverageMetric(AbstractMetric):
         self.n_total = 0
 
     def result(self):
-        return self.n_correct / self.n_total 
+        return self.sum / self.n_total 
 
 class SentenceLevelAccuracy(AverageMetric):
     def process_batch(self, prediction, target):        
         # TODO: PSEUDOCODE: please fix
         # 1 if correct, 0 if incorrect
+        
         self.sum += (prediction == target).prod(axis=1).sum()
-        self.n_total += batch_size
+        self.n_total += target.size()[1]
 
 class TokenLevelAccuracy(AverageMetric):
+
+    def __init__(self):
+        AverageMetric.__init__(self)
+        self.n_total = 1
+
     def process_batch(self, prediction, target): 
         pass
 
 class LengthLevelAccuracy(AverageMetric):
+
+    def __init__(self):
+        AverageMetric.__init__(self)
+        self.n_total = 1
+
     def process_batch(self, prediction, target): 
         pass
 
@@ -94,28 +105,29 @@ def evaluate(model, val_iter, criterion=None, logging_meters=None, store=None):
     with torch.no_grad():
 
         for batch in val_iter:
+
             # run the model
             logits = model(batch) # seq length (of pred) x batch_size x vocab
-            pred = logits.argmax(2) # seq length (of pred) x batch_size 
             target = batch.target # seq length (of target) x batch_size
 
-            # helpful utility
-            # pred_target = torch.nn.utils.rnn.pad_sequence([pred, target], padding_value=-1)
+            l = logits[:target.size()[0], :].permute(0, 2, 1)
+            pred = logits[:target.size()[0], :].argmax(2)
 
-            batch_loss = criterion(logits, target)
+            batch_loss = criterion(l, target)
             loss_meter.update(batch_loss)
 
-            
-
-            for meter in logging_meters:
+            for _, meter in logging_meters.items():
                 meter.process_batch(pred, target)
 
         for name, meter in logging_meters.items():
-            stats_dict[stat_name] = meter.result()
+            # print(meter.n_total)
+            stats_dict[name] = meter.result()
+
         stats_dict['loss'] = loss_meter.result()
 
-        if store is not None:
-            store["logs"].append_row(stats_dict)
+        # if store is not None:
+            # print(store)
+            # store["logs"].append_row(stats_dict)
 
     return stats_dict
 
