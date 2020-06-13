@@ -30,14 +30,15 @@ else:
 
 # Generic sequential encoder
 class EncoderRNN(nn.Module):
-    def __init__(self, vocab_size, hidden_size, recurrent_unit, num_layers=1, dropout=0):
+    def __init__(self, hidden_size, vocab, recurrent_unit, num_layers=1, dropout=0):
         super(EncoderRNN, self).__init__()
         self.num_layers = num_layers
         self.hidden_size = hidden_size
         self.rnn_type = recurrent_unit
         self.dropout = nn.Dropout(p=dropout)
+        self.vocab = vocab
 
-        self.embedding = nn.Embedding(vocab_size, hidden_size)
+        self.embedding = nn.Embedding(len(self.vocab), hidden_size)
 
 
         if num_layers == 1: dropout = 0 

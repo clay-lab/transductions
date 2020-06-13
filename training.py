@@ -23,6 +23,7 @@ import torch.nn as nn
 from torch.autograd import Variable
 from torch import optim
 import torch.nn.functional as F
+import numpy as np
 
 import sys
 import os
@@ -90,6 +91,30 @@ class AverageMeter:
     def result(self):
         return self.sum / self.count if self.count > 0 else np.nan
 
+def test(model, test_iter, task):
+
+    model.eval()
+
+    with open('{0}-test-results.txt'.format(task), 'w') as f:
+        f.write('{0}\t{1}\t{2}\n'.format('Sentence', 'Target', 'Prediction'))
+
+    with torch.no_grad():
+        for batch in test_iter:
+
+            logits = model(batch)
+            target = batch.target 
+            predictions = logits[:target.size()[0], :].argmax(2)
+
+            sentences = model.scores2sentence(batch.source, model.encoder.vocab)
+            predictions = model.scores2sentence(predictions, model.decoder.vocab)
+            target = model.scores2sentence(target, model.decoder.vocab)
+
+            with open('{0}-test-results.txt'.format(task), 'a') as f:
+                for i, _ in enumerate(sentences):
+                    f.write('{0}\t{1}\t{2}\n'.format(
+                        sentences[i], target[i], predictions[i])
+                    )
+
 def evaluate(model, val_iter, criterion=None, logging_meters=None, store=None):
 
     model.eval()
@@ -107,6 +132,12 @@ def evaluate(model, val_iter, criterion=None, logging_meters=None, store=None):
 
             l = logits[:target.size()[0], :].permute(0, 2, 1)
             pred = logits[:target.size()[0], :].argmax(2)
+
+            # p_sentences = model.scores2sentence(pred, model.decoder.vocab)
+            # t_sentences = model.scores2sentence(target, model.decoder.vocab)
+
+            # print("Predicted Sequences:\n", p_sentences)
+            # print("Target Sequences:\n", t_sentences)
 
             batch_loss = criterion(l, target)
             loss_meter.update(batch_loss)

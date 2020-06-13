@@ -46,10 +46,15 @@ class Seq2Seq(torch.nn.Module):
         # delattr(batch, self.middle_field_names)
 
     def scores2sentence(self, scores, vocab):
-        ix2word = np.array(vocab.itos)
-        word_ixs = scores.argmax(dim=2)
-        word_ixs = word_ixs.detach().numpy()
-        return ix2word[word_ixs]
+        ids = scores.transpose(0, 1).contiguous().view(-1)
+        tests = np.reshape([vocab.itos[i] for i in ids], tuple(scores.size())[::-1])
+        tests = [' '.join(r) for r in tests]
+        return tests
+        # return scores.apply_(f)
+        # ix2word = np.array(vocab.itos)
+        # word_ixs = scores.argmax(dim=2)
+        # word_ixs = word_ixs.detach().numpy()
+        # return ix2word[word_ixs]
 
     def to_sentence(self, batch):
         assert len(batch.target_fields) == 1

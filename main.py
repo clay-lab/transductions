@@ -69,7 +69,7 @@ def parse_arguments():
     parser.add_argument('-do', '--dropout', help = 'how much dropout to use', type = float, default=0.0)
     # parser.add_argument('-pr', '--print-every',	help = 'print training data out after N iterations', metavar = 'N', type = int, default = 1000)
     parser.add_argument('--input-format', help='input files could contain string representations of trees or just plain sequences', type=str, choices = ['sequences', 'trees'], default='sequences')
-    parser.add_argument('-ep', '--epochs', help="num epochs", type=int, default=20)
+    parser.add_argument('-ep', '--epochs', help="number of epochs", type=int, default=20)
     parser.add_argument('-b', '--batch-size', help='batch size', type=int, default=5)
     #     args.logging_meters = { NA
     #     "sentence_accuracy": None,
@@ -135,7 +135,7 @@ def main():
         repeat = False
     )
 
-    encoder = EncoderRNN(len(SRC.vocab), hidden_size=args.hidden_size, recurrent_unit=args.encoder, num_layers=args.layers, dropout=args.dropout)
+    encoder = EncoderRNN(hidden_size=args.hidden_size, vocab = SRC.vocab, recurrent_unit=args.encoder, num_layers=args.layers, dropout=args.dropout)
     tree_decoder_names = ['Tree']
     if args.decoder not in tree_decoder_names:
         dec = DecoderRNN(hidden_size=args.hidden_size, vocab=TRG.vocab, encoder_vocab=SRC.vocab, recurrent_unit=args.decoder, num_layers=args.layers, max_length=args.max_length, attention_type=args.attention, dropout=args.dropout)
@@ -148,6 +148,7 @@ def main():
         s2s.load_state_dict(torch.load(ckpt_path))
 
     training.train(s2s, train_iter, val_iter, logging_meters, store, args, ignore_index=TRG.vocab.stoi['<pad>'])
+    training.test(s2s, test_iter, args.task)
 
 import warnings
 warnings.warn("""If you have Pandas 1.0 you must make the following change manually for cox to work:
