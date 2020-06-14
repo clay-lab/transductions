@@ -98,7 +98,7 @@ def test(model, test_iter, task):
     model.eval()
 
     with open('{0}-test-results.txt'.format(task), 'w') as f:
-        f.write('{0}\t{1}\t{2}\n'.format('Sentence', 'Target', 'Prediction'))
+        f.write('{0}\t{1}\t{2}\n'.format('source', 'target', 'prediction'))
 
     with torch.no_grad():
         for batch in test_iter:
