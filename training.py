@@ -96,8 +96,8 @@ class AverageMeter:
 def test(model, test_iter, task):
 
     model.eval()
-
-    with open('{0}-test-results.txt'.format(task), 'w') as f:
+    localtime = time.asctime(time.localtime(time.time()))
+    with open('{0}-{1}-results.txt'.format(task, localtime), 'w') as f:
         f.write('{0}\t{1}\t{2}\n'.format('source', 'target', 'prediction'))
 
     with torch.no_grad():
@@ -111,7 +111,7 @@ def test(model, test_iter, task):
             predictions = model.scores2sentence(predictions, model.decoder.vocab)
             target = model.scores2sentence(target, model.decoder.vocab)
 
-            with open('{0}-test-results.txt'.format(task), 'a') as f:
+            with open('{0}-{1}-results.txt'.format(task, localtime), 'a') as f:
                 for i, _ in enumerate(sentences):
                     f.write('{0}\t{1}\t{2}\n'.format(
                         sentences[i], target[i], predictions[i])
