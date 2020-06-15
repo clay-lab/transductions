@@ -96,55 +96,59 @@ class AverageMeter:
 def test(model, test_iter, task):
 
     model.eval()
-    localtime = time.asctime(time.localtime(time.time()))
-    with open('{0}-{1}-results.txt'.format(task, localtime), 'w') as f:
+    lt = time.localtime(time.time())
+
+    filename = "{0}-results-{1}-{2}-{3}_{4}-{5}.txt".format(task, str(lt[1]), str(lt[2]), str(lt[0])[2:], str(lt[3]), str(lt[4]))
+    
+    with open(filename, 'w') as f:
         f.write('{0}\t{1}\t{2}\n'.format('source', 'target', 'prediction'))
-
     with torch.no_grad():
-        for batch in test_iter:
+        print("Testing on test data")
+        with tqdm(test_iter) as t:
+            for batch in t:
 
-            logits = model(batch)
-            target = batch.target 
-            predictions = logits[:target.size()[0], :].argmax(2)
+                logits = model(batch)
+                target = batch.target 
+                predictions = logits[:target.size()[0], :].argmax(2)
 
-            sentences = model.scores2sentence(batch.source, model.encoder.vocab)
-            predictions = model.scores2sentence(predictions, model.decoder.vocab)
-            target = model.scores2sentence(target, model.decoder.vocab)
+                sentences = model.scores2sentence(batch.source, model.encoder.vocab)
+                predictions = model.scores2sentence(predictions, model.decoder.vocab)
+                target = model.scores2sentence(target, model.decoder.vocab)
 
-            with open('{0}-{1}-results.txt'.format(task, localtime), 'a') as f:
-                for i, _ in enumerate(sentences):
-                    f.write('{0}\t{1}\t{2}\n'.format(
-                        sentences[i], target[i], predictions[i])
-                    )
+                with open(filename, 'a') as f:
+                    for i, _ in enumerate(sentences):
+                        f.write('{0}\t{1}\t{2}\n'.format(
+                            sentences[i], target[i], predictions[i])
+                        )
 
-def evaluate(model, val_iter, criterion=None, logging_meters=None, store=None):
+def evaluate(model, val_iter, epoch, args, criterion=None, logging_meters=None, store=None):
 
     model.eval()
     stats_dict = dict()
 
     loss_meter = AverageMeter()
-
     with torch.no_grad():
+        print("evaluating epoch {0}/{1} on val data".format(epoch, args.epochs))
+        with tqdm(val_iter) as V:
+            for batch in V:
 
-        for batch in val_iter:
+                # run the model
+                logits = model(batch) # seq length (of pred) x batch_size x vocab
+                target = batch.target # seq length (of target) x batch_size
 
-            # run the model
-            logits = model(batch) # seq length (of pred) x batch_size x vocab
-            target = batch.target # seq length (of target) x batch_size
+                l = logits[:target.size()[0], :].permute(0, 2, 1)
+                pred = logits[:target.size()[0], :].argmax(2)
 
-            l = logits[:target.size()[0], :].permute(0, 2, 1)
-            pred = logits[:target.size()[0], :].argmax(2)
+                batch_loss = criterion(l, target)
+                loss_meter.update(batch_loss)
 
-            batch_loss = criterion(l, target)
-            loss_meter.update(batch_loss)
+                for _, meter in logging_meters.items():
+                    meter.process_batch(pred, target, model)
 
-            for _, meter in logging_meters.items():
-                meter.process_batch(pred, target, model)
+            for name, meter in logging_meters.items():
+                stats_dict[name] = meter.result()
 
-        for name, meter in logging_meters.items():
-            stats_dict[name] = meter.result()
-
-        stats_dict['loss'] = loss_meter.result()
+            stats_dict['loss'] = loss_meter.result()
 
         # if store is not None:
             # print(store)
@@ -167,6 +171,7 @@ def train(model, train_iterator, validation_iter, logging_meters, store, args, i
         new_meters['length-accuracy'] = LengthLevelAccuracy()
 
         model.train()
+        print("Training epoch {0}/{1} on train data".format(epoch, args.epochs))
         with tqdm(train_iterator) as T:
             for batch in T:
                 optimizer.zero_grad()
@@ -186,7 +191,7 @@ def train(model, train_iterator, validation_iter, logging_meters, store, args, i
                 T.set_postfix(avg_train_loss=loss_meter.result())
 
         # dictionary of stat_name => value
-        eval_stats = evaluate(model, validation_iter, criterion, logging_meters=new_meters, store=store)
+        eval_stats = evaluate(model, validation_iter, epoch, args, criterion, logging_meters=new_meters, store=store)
         for name, stat in eval_stats.items():
             if 'accuracy' in name:
                 stat = stat * 100
