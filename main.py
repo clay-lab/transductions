@@ -10,6 +10,7 @@ from models import EncoderRNN, DecoderRNN #, TreeDecoderRNN, TreeEncoderRNN
 import training
 import RPNTask
 import seq2seq
+import time
 
 import numpy as np
 import torch
@@ -69,7 +70,7 @@ def parse_arguments():
     parser.add_argument('-do', '--dropout', help = 'how much dropout to use', type = float, default=0.0)
     # parser.add_argument('-pr', '--print-every',	help = 'print training data out after N iterations', metavar = 'N', type = int, default = 1000)
     parser.add_argument('--input-format', help='input files could contain string representations of trees or just plain sequences', type=str, choices = ['sequences', 'trees'], default='sequences')
-    parser.add_argument('-ep', '--epochs', help="number of epochs", type=int, default=20)
+    parser.add_argument('-ep', '--epochs', help="number of epochs", type=int, default=40)
     parser.add_argument('-b', '--batch-size', help='batch size', type=int, default=5)
     #     args.logging_meters = { NA
     #     "sentence_accuracy": None,
@@ -155,5 +156,8 @@ warnings.warn("""If you have Pandas 1.0 you must make the following change manua
 https://github.com/MadryLab/cox/pull/3/files
 Use cox.__files__ to find where cox is installed""")
 
+
 if __name__ == '__main__':
     main()
+
+
