@@ -41,7 +41,9 @@ class Seq2Seq(torch.nn.Module):
             # enocder has one output
             setattr(batch, self.middle_field_name, middle)
 
-        return self.decoder(*(getattr(batch, fieldname) for fieldname in dec_fields))
+        result = self.decoder(*(getattr(batch, fieldname) for fieldname in dec_fields))
+
+        return result
 
         # delattr(batch, self.middle_field_names)
 

@@ -55,6 +55,7 @@ class EncoderRNN(nn.Module):
 
         embedded_source = self.dropout(self.embedding(batch))
         outputs, state = self.rnn(embedded_source)
+
         #final_output = outputs[-1]
         #only return the h (and c) vectors for the last encoder layer 
         #if self.rnn_type == 'LSTM':
@@ -185,6 +186,7 @@ class DecoderRNN(nn.Module):
             output_complete_flag += ((x == self.eos_index) | (x == self.pad_index))
             if all(output_complete_flag):
                 break
+                
         return outputs[:gen_length]#, decoder_hiddens[:i+1], attention[:i+1]
 
 

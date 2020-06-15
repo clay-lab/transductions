@@ -49,31 +49,31 @@ class AbstractMetric(ABC):
 
 class AverageMetric(AbstractMetric):
     def __init__(self):
-        self.sum = 0
-        self.n_total = 0
+        self.correct = 0
+        self.total = 0
 
     def result(self):
-        return 1.0 * self.sum / self.n_total 
+        return 1.0 * self.correct / self.total 
 
 class SentenceLevelAccuracy(AverageMetric):
 
     def process_batch(self, prediction, target, model):  
         correct = (prediction == target).prod(axis=0)
         total = correct.size()[0]
-        self.sum += correct.sum()
-        self.n_total += total
+        self.correct += correct.sum()
+        self.total += total
 
 class TokenLevelAccuracy(AverageMetric):
 
     def process_batch(self, prediction, target, model): 
-        self.sum += (prediction == target).sum()
-        self.n_total += target.size()[0] * target.size()[1]
+        self.correct += (prediction == target).sum()
+        self.total += target.size()[0] * target.size()[1]
 
 class LengthLevelAccuracy(AverageMetric):
 
     def __init__(self):
         AverageMetric.__init__(self)
-        self.n_total = 1
+        self.total = 1
 
     def process_batch(self, prediction, target, model): 
         pass
@@ -92,6 +92,20 @@ class AverageMeter:
     
     def result(self):
         return self.sum / self.count if self.count > 0 else np.nan
+
+
+def predict(model, source):
+
+    # build batch from tensor
+
+    model.eval()
+    with torch.no_grad():
+
+        logits = model(batch)
+        predictions = logits[:source.size()[0], :].argmax(2)
+        sentences = model.scores2sentence(predictions, model.decoder.vocab)
+
+        return sentences
 
 def test(model, test_iter, task):
 
