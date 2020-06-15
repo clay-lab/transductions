@@ -99,7 +99,7 @@ def test(model, test_iter, task):
     lt = time.localtime(time.time())
 
     filename = "{0}-results-{1}-{2}-{3}_{4}-{5}.txt".format(task, str(lt[1]), str(lt[2]), str(lt[0])[2:], str(lt[3]), str(lt[4]))
-    
+
     with open(filename, 'w') as f:
         f.write('{0}\t{1}\t{2}\n'.format('source', 'target', 'prediction'))
     with torch.no_grad():
@@ -128,7 +128,7 @@ def evaluate(model, val_iter, epoch, args, criterion=None, logging_meters=None, 
 
     loss_meter = AverageMeter()
     with torch.no_grad():
-        print("evaluating epoch {0}/{1} on val data".format(epoch, args.epochs))
+        print("Evaluating epoch {0}/{1} on val data".format(epoch, args.epochs))
         with tqdm(val_iter) as V:
             for batch in V:
 
