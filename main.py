@@ -72,12 +72,6 @@ def parse_arguments():
     parser.add_argument('--input-format', help='input files could contain string representations of trees or just plain sequences', type=str, choices = ['sequences', 'trees'], default='sequences')
     parser.add_argument('-ep', '--epochs', help="number of epochs", type=int, default=40)
     parser.add_argument('-b', '--batch-size', help='batch size', type=int, default=5)
-    #     args.logging_meters = { NA
-    #     "sentence_accuracy": None,
-    #     "token_accuracy": None,
-    #     "length_accuracy": None,
-    # }
-    # args.exp_name = None
     parser.add_argument('-sa', '--sentacc', help='sentence accuracy', type=bool, default=True)
     parser.add_argument('-ta', '--tokenacc', help='token accuracy', type=bool, default=True)
     parser.add_argument('-la', '--lenacc', help='length accuracy', type=bool, default=True)
