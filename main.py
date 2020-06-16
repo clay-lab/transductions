@@ -31,7 +31,7 @@ def setup_store(args):
     lt = (time.localtime(time.time()))
     date = "{0}-{1}-{2}".format(str(lt[1]), str(lt[2]), str(lt[0])[2:])
     counter = 0 
-    directory = args.outdir   
+    directory = taskname + date + "_{0}".format(str(counter))   
     while os.path.isdir(directory):
         directory = taskname + date + "_{0}".format(str(counter))
         counter += 1
