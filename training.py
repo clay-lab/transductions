@@ -93,7 +93,6 @@ class AverageMeter:
     def result(self):
         return self.sum / self.count if self.count > 0 else np.nan
 
-
 def predict(model, source):
 
     # build batch from tensor
@@ -142,7 +141,7 @@ def evaluate(model, val_iter, epoch, args, criterion=None, logging_meters=None, 
 
     loss_meter = AverageMeter()
     with torch.no_grad():
-        print("Evaluating epoch {0}/{1} on val data".format(epoch, args.epochs))
+        print("Evaluating epoch {0}/{1} on val data".format(epoch + 1, args.epochs))
         with tqdm(val_iter) as V:
             for batch in V:
 
@@ -165,8 +164,8 @@ def evaluate(model, val_iter, epoch, args, criterion=None, logging_meters=None, 
             stats_dict['loss'] = loss_meter.result()
 
         # if store is not None:
-            # print(store)
-            # store["logs"].append_row(stats_dict)
+        #     print(store)
+        #     store["logs"].append_row(stats_dict)
 
     return stats_dict
 
@@ -185,7 +184,7 @@ def train(model, train_iterator, validation_iter, logging_meters, store, args, i
         new_meters['length-accuracy'] = LengthLevelAccuracy()
 
         model.train()
-        print("Training epoch {0}/{1} on train data".format(epoch, args.epochs))
+        print("Training epoch {0}/{1} on train data".format(epoch + 1, args.epochs))
         with tqdm(train_iterator) as T:
             for batch in T:
                 optimizer.zero_grad()
@@ -202,7 +201,7 @@ def train(model, train_iterator, validation_iter, logging_meters, store, args, i
 
                 # item() to turn a 0-dimensional tensor into a regular float
                 loss_meter.update(batch_loss.item())
-                T.set_postfix(avg_train_loss=loss_meter.result())
+                T.set_postfix(loss=loss_meter.result())
 
         # dictionary of stat_name => value
         eval_stats = evaluate(model, validation_iter, epoch, args, criterion, logging_meters=new_meters, store=store)
@@ -210,6 +209,5 @@ def train(model, train_iterator, validation_iter, logging_meters, store, args, i
             if 'accuracy' in name:
                 stat = stat * 100
             print('{:<25s} {:.5} {:s}'.format(name, stat, '%' if 'accuracy' in name else ''))
-
         torch.save(model.state_dict(), os.path.join(store.path, CKPT_NAME_LATEST))
 
