@@ -28,6 +28,8 @@ import numpy as np
 import sys
 import os
 
+from early_stopping import EarlyStopping
+
 # Functions for tracking time
 import time
 import math
@@ -173,8 +175,9 @@ def train(model, train_iterator, validation_iter, logging_meters, store, args, i
 
     optimizer = optim.SGD(model.parameters(), lr=args.learning_rate)
     criterion = nn.CrossEntropyLoss(weight=None, ignore_index=ignore_index)
+    early_stopping = EarlyStopping(patience = args.patience, verbose = False,
+        filename = os.path.join(store.path, CKPT_NAME_LATEST), delta=0.005)
     
-    # if we DON"T want to organize by epochs, go to this tutorial and CMD-F "epoch": <http://anie.me/On-Torchtext/>
     for epoch in range(args.epochs):
     
         loss_meter = AverageMeter()
@@ -205,9 +208,19 @@ def train(model, train_iterator, validation_iter, logging_meters, store, args, i
 
         # dictionary of stat_name => value
         eval_stats = evaluate(model, validation_iter, epoch, args, criterion, logging_meters=new_meters, store=store)
+
         for name, stat in eval_stats.items():
             if 'accuracy' in name:
                 stat = stat * 100
             print('{:<25s} {:.5} {:s}'.format(name, stat, '%' if 'accuracy' in name else ''))
+
+        print("Checking for early stopping")
+        early_stopping(eval_stats['loss'], model)
+        if early_stopping.early_stop:
+            print("Early stopping. Loading model from last saved checkoint.")
+            # model.load_from_checkpoint
+            model.load_state_dict(torch.load(os.path.join(store.path, CKPT_NAME_LATEST)))
+            break
+
         torch.save(model.state_dict(), os.path.join(store.path, CKPT_NAME_LATEST))
 
