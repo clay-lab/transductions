@@ -165,9 +165,9 @@ def evaluate(model, val_iter, epoch, args, criterion=None, logging_meters=None, 
 
             stats_dict['loss'] = loss_meter.result()
 
-        # if store is not None:
-        #     print(store)
-        #     store["logs"].append_row(stats_dict)
+        if store is not None:
+            print(store)
+            store["logs"].append_row(stats_dict)
 
     return stats_dict
 
@@ -214,7 +214,7 @@ def train(model, train_iterator, validation_iter, logging_meters, store, args, i
                 stat = stat * 100
             print('{:<25s} {:.5} {:s}'.format(name, stat, '%' if 'accuracy' in name else ''))
 
-        print("Checking for early stopping")
+        # print("Checking for early stopping")
         early_stopping(eval_stats['loss'], model)
         if early_stopping.early_stop:
             print("Early stopping. Loading model from last saved checkoint.")
