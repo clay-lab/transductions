@@ -27,7 +27,20 @@ CKPT_NAME_LATEST = "latest_ckpt.pt"
 CKPT_NAME_BEST = "best_ckpt.pt"
 
 def setup_store(args):
-    store = cox.store.Store(args.outdir, args.expname)
+    taskname = args.outdir + "/{0}-results-".format(args.task)
+    lt = (time.localtime(time.time()))
+    date = "{0}-{1}-{2}".format(str(lt[1]), str(lt[2]), str(lt[0])[2:])
+    counter = 0 
+    directory = args.outdir   
+    while os.path.isdir(directory):
+        directory = taskname + date + "_{0}".format(str(counter))
+        counter += 1
+    # print(directory[13:])
+    # exit()
+    store = cox.store.Store(directory, args.expname)
+
+
+
 
     if args.expname is None:
         # store metadata
@@ -51,7 +64,7 @@ def setup_store(args):
         old_meta_schema = store[META_TABLE].schema
         old_args = dict(store[META_TABLE].df.loc[0, :])
 
-    return store, logging_meters
+    return store, logging_meters, directory[13:]
 
 def parse_arguments():
 
@@ -84,7 +97,7 @@ def parse_arguments():
 def main():
     args = parse_arguments()
  
-    store, logging_meters = setup_store(args)
+    store, logging_meters, directory = setup_store(args)
 
     # Device specification
     available_device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
@@ -144,7 +157,7 @@ def main():
         s2s.load_state_dict(torch.load(ckpt_path))
 
     training.train(s2s, train_iter, val_iter, logging_meters, store, args, ignore_index=TRG.vocab.stoi['<pad>'])
-    training.test(s2s, test_iter, args.task)
+    training.test(s2s, test_iter, args.task, directory)
 
 import warnings
 warnings.warn("""If you have Pandas 1.0 you must make the following change manually for cox to work:
