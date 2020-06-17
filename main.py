@@ -53,7 +53,7 @@ def setup_store(args):
         if args.sentacc: logging_meters['sentence-level-accuracy'] = training.SentenceLevelAccuracy()
         if args.tokenacc: logging_meters['token-level-accuracy'] = training.TokenLevelAccuracy()
         if args.lenacc: logging_meters['length-accuracy'] = training.LengthLevelAccuracy()
-        logging_meters['loss'] = training.AverageMeter()
+        logging_meters['loss'] = training.AverageMetric()
 
         # TODO: support columns that aren't float
         logs_schema = {name: float for name, meter in logging_meters.items()}
