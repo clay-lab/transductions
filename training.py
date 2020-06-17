@@ -1,28 +1,30 @@
 #from __future__ import unicode_literals, print_function, division
 
 # Imports
-import os.path
-
-import torch
-from torch import optim
-from tqdm import tqdm
-
-from nltk.parse import ViterbiParser
-import nltk.grammar
-
-import RPNTask
-
-from io import open
-import unicodedata
-import string
-import re
-import random
+# import os.path
 
 import torch
 import torch.nn as nn
-from torch.autograd import Variable
 from torch import optim
-import torch.nn.functional as F
+
+from tqdm import tqdm
+
+# from nltk.parse import ViterbiParser
+# import nltk.grammar
+
+# import RPNTask
+
+# from io import open
+# import unicodedata
+# import string
+# import re
+import random
+
+# import torch
+# import torch.nn as nn
+# from torch.autograd import Variable
+# from torch import optim
+# import torch.nn.functional as F
 import numpy as np
 
 import sys
