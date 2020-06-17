@@ -111,7 +111,7 @@ def test(model: ss.Seq2Seq, test_iter: tt.Iterator, task: str, filename: str):
 
 	model.eval()
 
-	with open(filename, 'w') as f:
+	with open("results/" + filename, 'w') as f:
 		f.write('{0}\t{1}\t{2}\n'.format('source', 'target', 'prediction'))
 	with torch.no_grad():
 		print("Testing on test data")
