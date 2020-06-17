@@ -26,6 +26,10 @@ class AverageMetric:
 		self.correct = 0
 		self.total = 0
 
+	def reset(self):
+		self.correct = 0
+		self.total = 0
+
 	@abstractmethod
 	def process_batch(self, prediction, target):
 		"""
@@ -75,6 +79,7 @@ class TokenLevelAccuracy(AverageMetric):
 	"""
 
 	def process_batch(self, prediction, target): 
+		# TODO: Does this still work if pred and target are different sizes?
 		correct = (prediction == target).sum()
 		total = target.size()[0] * target.size()[1]
 		self.update(correct, total)
@@ -153,6 +158,7 @@ def evaluate(model: ss.Seq2Seq, val_iter: tt.Iterator, epoch: int,
 
 			for name, meter in logging_meters.items():
 				stats_dict[name] = meter.result()
+				meter.reset()
 
 		if store is not None:
 			store["logs"].append_row(stats_dict)
@@ -169,12 +175,6 @@ def train(model: ss.Seq2Seq, train_iterator: tt.Iterator,
 		filename = os.path.join(store.path, CKPT_NAME_LATEST), delta=0.005)
 	
 	for epoch in range(args.epochs):
-	
-		new_meters = dict()
-		new_meters['sentence-level-accuracy'] = SentenceLevelAccuracy()
-		new_meters['token-level-accuracy'] = TokenLevelAccuracy()
-		new_meters['length-accuracy'] = LengthLevelAccuracy()
-		new_meters['loss'] = AverageMetric()
 
 		model.train()
 		print("Training epoch {0}/{1} on train data".format(epoch + 1, args.epochs))
@@ -190,11 +190,11 @@ def train(model: ss.Seq2Seq, train_iterator: tt.Iterator,
 				batch_loss.backward()
 				optimizer.step()
 
-				new_meters['loss'].update(batch_loss.item())
-				T.set_postfix(loss=new_meters['loss'].result())
+				logging_meters['loss'].update(batch_loss.item())
+				T.set_postfix(loss=logging_meters['loss'].result())
 
 		eval_stats = evaluate(model, validation_iter, epoch, args, criterion,
-		                      logging_meters=new_meters, store=store)
+		                      logging_meters=logging_meters, store=store)
 
 		for name, stat in eval_stats.items():
 			if 'accuracy' in name:
