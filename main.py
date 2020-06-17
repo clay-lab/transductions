@@ -82,16 +82,15 @@ def parse_arguments():
     parser.add_argument('-p', '--patience', help = 'parience', type = int, default = 3)
     parser.add_argument('-v', '--vocab', help = 'which vocabulary contains the transformation annotation', type = str, choices = ['SRC', 'TRG'], default = 'TRG')
     parser.add_argument('-do', '--dropout', help = 'how much dropout to use', type = float, default=0.0)
-    # parser.add_argument('-pr', '--print-every',	help = 'print training data out after N iterations', metavar = 'N', type = int, default = 1000)
     parser.add_argument('--input-format', help='input files could contain string representations of trees or just plain sequences', type=str, choices = ['sequences', 'trees'], default='sequences')
     parser.add_argument('-ep', '--epochs', help="number of epochs", type=int, default=40)
     parser.add_argument('-b', '--batch-size', help='batch size', type=int, default=5)
     parser.add_argument('-sa', '--sentacc', help='sentence accuracy', type=bool, default=True)
     parser.add_argument('-ta', '--tokenacc', help='token accuracy', type=bool, default=True)
     parser.add_argument('-la', '--lenacc', help='length accuracy', type=bool, default=True)
-
     parser.add_argument('-exp', '--expname', help='exp_name', type=None, default=None)
     parser.add_argument('-out', '--outdir', help='directory in which to place cox store', type=None, default='logs/default')
+
     return parser.parse_args()
 
 def main():
