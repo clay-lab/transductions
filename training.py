@@ -110,12 +110,10 @@ def predict(model, source):
 
         return sentences
 
-def test(model, test_iter, task):
+def test(model, test_iter, task, filename):
 
     model.eval()
-    lt = time.localtime(time.time())
 
-    filename = "{0}-results-{1}-{2}-{3}_{4}-{5}.txt".format(task, str(lt[1]), str(lt[2]), str(lt[0])[2:], str(lt[3]), str(lt[4]))
 
     with open(filename, 'w') as f:
         f.write('{0}\t{1}\t{2}\n'.format('source', 'target', 'prediction'))
