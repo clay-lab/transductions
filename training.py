@@ -10,7 +10,8 @@ from abc import abstractmethod
 import seq2seq as ss
 from typing import Dict
 import cox.store as cx
- 
+from torch.nn.utils.rnn import pad_sequence
+from torch import tensor
 CKPT_NAME_LATEST = "latest_ckpt.pt"
 
 class AverageMetric:
@@ -65,7 +66,7 @@ class SentenceLevelAccuracy(AverageMetric):
 	sequence is correct if it is equal to the target sequence.
 	"""
 
-	def process_batch(self, prediction, target, length):  
+	def process_batch(self, prediction, target):  
 		correct = (prediction == target).prod(axis=0)
 		total = correct.size()[0]
 		self.update(correct.sum(), total)
@@ -78,7 +79,7 @@ class TokenLevelAccuracy(AverageMetric):
 	the same.
 	"""
 
-	def process_batch(self, prediction, target, length): 
+	def process_batch(self, prediction, target): 
 		# TODO: Does this still work if pred and target are different sizes?
 		correct = (prediction == target).sum()
 		total = target.size()[0] * target.size()[1]
@@ -90,10 +91,11 @@ class LengthLevelAccuracy(AverageMetric):
 		AverageMetric.__init__(self)
 		self.total = 1
 
-	def process_batch(self, prediction, target, length): 
-		correct = (length == target.size()[0])
-		total = target.size()[0] * target.size()[1]
-		self.update(correct, total)
+	def process_batch(self, prediction, target): 
+		# correct = (prediction == target.size()[0]).sum()
+		# total = target.size()[0] * target.size()[1]
+		# self.update(correct, total)
+		pass
 
 def predict(model: ss.Seq2Seq, source: torch.Tensor):
 
@@ -129,7 +131,8 @@ def test(model: ss.Seq2Seq, test_iter: tt.Iterator, task: str, filename: str):
 				predictions = logits[:target.size()[0], :].argmax(2)
 
 				sentences = model.scores2sentence(batch.source, model.encoder.vocab)
-				predictions = model.scores2sentence(predictions, model.decoder.vocab)
+				# predictions = model.scores2sentence(predictions, model.decoder.vocab)
+				predictions = model.scores2sentence(logits.argmax(2), model.decoder.vocab)
 				target = model.scores2sentence(target, model.decoder.vocab)
 
 				with open(outfile, 'a') as f:
@@ -151,16 +154,36 @@ def evaluate(model: ss.Seq2Seq, val_iter: tt.Iterator, epoch: int,
 				logits = model(batch) # seq length x batch_size x vocab
 				target = batch.target # seq length x batch_size
 				l = logits[:target.size()[0], :].permute(0, 2, 1)
-				predictions = logits[:target.size()[0], :].argmax(2)
+				# print("LOGITS: ", logits.size())
+				# print("L: ", l.size())
+				# exit()
+				# predictions = logits[:target.size()[0], :].argmax(2)
+
+				predictions = logits.argmax(2)
+				# print("\nORIGINAL LOGITS: ", logits.size())
+				# print("\nLOGITS: ", predictions.size())
+				# print("TARGET SIZE", target.size())
+				new = pad_sequence([predictions, target], 1, padding_value=-1)
+				predictions = new[0]
+				new_target = new[1]
+				# print("NEW SIZE", new.size())
+				# print("TARGET: ", target)
+				# print("NEW SIZE: ", new[0].size())
+				# print("NEW 0: ", new[0])
+				# print("NEW SIZE: ", new[1].size())
+				# print("NEW 1: ", new[1])
+				# exit()
 				
-				if target.size()[0] == logits.size()[0]:
-					print(True)
+				# if target.size()[0] == logits.size()[0]:
+				# 	print(True)
 					# print("TARGET", target.size())
 					# print("LOGITS:", logits.size())
 					# print("LOGITS:", logits.size()[0])
 			
 					# exit()
-            	
+				# print(predictions.size())
+				# print((predictions.type(torch.FloatTensor)).size())
+				# print(new_target.type(torch.FloatTensor))
 				batch_loss = criterion(l, target)
 				
 
@@ -168,8 +191,8 @@ def evaluate(model: ss.Seq2Seq, val_iter: tt.Iterator, epoch: int,
 					if name == 'loss':
 						meter.update(batch_loss)
 					else:
-						meter.process_batch(predictions, target, logits.size()[0])
-			print(logits.size()[0], target.size()[0])
+						meter.process_batch(predictions, new_target)
+			# print(logits.size()[0], target.size()[0])
 			for name, meter in logging_meters.items():
 				stats_dict[name] = meter.result()
 				meter.reset()
