@@ -111,7 +111,11 @@ def test(model: ss.Seq2Seq, test_iter: tt.Iterator, task: str, filename: str):
 
 	model.eval()
 
-	with open("results/" + filename, 'w') as f:
+	if not os.path.exists('results'):
+		os.makedirs('results')
+		
+	outfile = os.path.join('results', filename + '.tsv')
+	with open(outfile, 'w') as f:
 		f.write('{0}\t{1}\t{2}\n'.format('source', 'target', 'prediction'))
 	with torch.no_grad():
 		print("Testing on test data")
@@ -126,7 +130,7 @@ def test(model: ss.Seq2Seq, test_iter: tt.Iterator, task: str, filename: str):
 				predictions = model.scores2sentence(predictions, model.decoder.vocab)
 				target = model.scores2sentence(target, model.decoder.vocab)
 
-				with open(filename, 'a') as f:
+				with open(outfile, 'a') as f:
 					for i, _ in enumerate(sentences):
 						f.write('{0}\t{1}\t{2}\n'.format(
 							sentences[i], target[i], predictions[i])
