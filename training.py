@@ -153,8 +153,8 @@ def evaluate(model: ss.Seq2Seq, val_iter: tt.Iterator, epoch: int,
 				l = logits[:target.size()[0], :].permute(0, 2, 1)
 				predictions = logits[:target.size()[0], :].argmax(2)
 				
-				if target.size()[0] == logits.size()[0]:
-					print(True)
+				# if target.size()[0] == logits.size()[0]:
+					# print(True)
 					# print("TARGET", target.size())
 					# print("LOGITS:", logits.size())
 					# print("LOGITS:", logits.size()[0])
@@ -169,7 +169,7 @@ def evaluate(model: ss.Seq2Seq, val_iter: tt.Iterator, epoch: int,
 						meter.update(batch_loss)
 					else:
 						meter.process_batch(predictions, target, logits.size()[0])
-			print(logits.size()[0], target.size()[0])
+			# print(logits.size()[0], target.size()[0])
 			for name, meter in logging_meters.items():
 				stats_dict[name] = meter.result()
 				meter.reset()
@@ -223,4 +223,3 @@ def train(model: ss.Seq2Seq, train_iterator: tt.Iterator,
 			break
 
 		torch.save(model.state_dict(), os.path.join(store.path, CKPT_NAME_LATEST))
-
