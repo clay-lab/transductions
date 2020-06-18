@@ -31,7 +31,7 @@ class AverageMetric:
 		self.total = 0
 
 	@abstractmethod
-	def process_batch(self, prediction, target):
+	def process_batch(self, prediction, target, length):
 		"""
 		Implement this method if you need to update the metric based on 
 		calculations of the model's output for a particular set of training
@@ -65,7 +65,7 @@ class SentenceLevelAccuracy(AverageMetric):
 	sequence is correct if it is equal to the target sequence.
 	"""
 
-	def process_batch(self, prediction, target):  
+	def process_batch(self, prediction, target, length):  
 		correct = (prediction == target).prod(axis=0)
 		total = correct.size()[0]
 		self.update(correct.sum(), total)
@@ -78,7 +78,7 @@ class TokenLevelAccuracy(AverageMetric):
 	the same.
 	"""
 
-	def process_batch(self, prediction, target): 
+	def process_batch(self, prediction, target, length): 
 		# TODO: Does this still work if pred and target are different sizes?
 		correct = (prediction == target).sum()
 		total = target.size()[0] * target.size()[1]
@@ -90,8 +90,10 @@ class LengthLevelAccuracy(AverageMetric):
 		AverageMetric.__init__(self)
 		self.total = 1
 
-	def process_batch(self, prediction, target): 
-		pass
+	def process_batch(self, prediction, target, length): 
+		correct = (length == target.size()[0])
+		total = target.size()[0] * target.size()[1]
+		self.update(correct, total)
 
 def predict(model: ss.Seq2Seq, source: torch.Tensor):
 
@@ -142,20 +144,28 @@ def evaluate(model: ss.Seq2Seq, val_iter: tt.Iterator, epoch: int,
 		print("Evaluating epoch {0}/{1} on val data".format(epoch + 1, args.epochs))
 		with tqdm(val_iter) as V:
 			for batch in V:
-
 				logits = model(batch) # seq length x batch_size x vocab
 				target = batch.target # seq length x batch_size
 				l = logits[:target.size()[0], :].permute(0, 2, 1)
 				predictions = logits[:target.size()[0], :].argmax(2)
-
+				
+				if target.size()[0] == logits.size()[0]:
+					print(True)
+					# print("TARGET", target.size())
+					# print("LOGITS:", logits.size())
+					# print("LOGITS:", logits.size()[0])
+			
+					# exit()
+            	
 				batch_loss = criterion(l, target)
+				
 
 				for name, meter in logging_meters.items():
 					if name == 'loss':
 						meter.update(batch_loss)
 					else:
-						meter.process_batch(predictions, target)
-
+						meter.process_batch(predictions, target, logits.size()[0])
+			print(logits.size()[0], target.size()[0])
 			for name, meter in logging_meters.items():
 				stats_dict[name] = meter.result()
 				meter.reset()
