@@ -71,7 +71,8 @@ class DecoderRNN(nn.Module):
         super(DecoderRNN, self).__init__()
         self.vocab = vocab
         self.vocab_size = len(vocab)
-        self.eos_index = self.vocab.stoi['<eos>']
+        self.eos_index = self.vocab.stoi["<eos>"]
+        
         self.pad_index = self.vocab.stoi['<pad>']
         self.encoder_vocab = encoder_vocab
         self.hidden_size = hidden_size
@@ -135,9 +136,11 @@ class DecoderRNN(nn.Module):
             weighted_encoder_outputs = weighted_encoder_outputs.squeeze(1)
             #weighted_encoder_rep = [batch size, enc hid dim]
             rnn_input = torch.cat((rnn_input, weighted_encoder_outputs), dim=1)
+            
         else:
              a = torch.zeros(encoder_outputs.shape[1], 1, encoder_outputs.shape[0])
-        
+        # print(rnn_input.size())
+        # exit()
         batch_size = rnn_input.shape[0] 
         _, state = self.rnn(rnn_input.unsqueeze(0), h)
         #Only include last h in output computation. for LSTM pass only h (not c)
@@ -147,6 +150,10 @@ class DecoderRNN(nn.Module):
 
     # Perform the full forward pass
     def forward(self, h0, x0, encoder_outputs, source, target=None, tf_ratio=0.5, evaluation=False):
+        # annotation field eos token (main.py) turns x0 from [1,5] to [2,5]. Resolve by taking the first row
+        x0 = x0[0]
+        # print(x0)
+        # exit()
         batch_size = encoder_outputs.shape[1]
         outputs = torch.zeros(self.max_length, batch_size, self.vocab_size)
         decoder_hiddens = torch.zeros(self.max_length, batch_size, self.hidden_size)
@@ -163,6 +170,8 @@ class DecoderRNN(nn.Module):
         source_mask = create_mask(source, self.encoder_vocab)
         #initialize x and h to given initial values. 
         x, h = x0.squeeze(0), h0
+        # print(x0.size())
+        # print()
         #print('x before', x, x0, self.vocab.stoi)
         output_complete_flag = torch.zeros(batch_size, dtype=torch.bool)
         if self.recurrent_unit_type == "LSTM": #Non-LSTM encoder, LSTM decoder: create c
@@ -172,6 +181,8 @@ class DecoderRNN(nn.Module):
         elif isinstance(h0,tuple): #LSTM encoder, but not LSTM decoder: ignore c
             h = h[0]
         for i in range(gen_length): 
+            # print("\n",i)
+            # print(x.size())
             y, h, a = self.forwardStep(x, h, encoder_outputs, source_mask)
             outputs[i] = y
             attention[i] = a
@@ -182,11 +193,15 @@ class DecoderRNN(nn.Module):
             else:
                 x = target[i]  
             #stop if all of the examples in the batch include eos or pad
-            #print('x after', x, output_complete_flag)
+            # print('x after', x, output_complete_flag)
+            # print(self.eos_index)
+            
             output_complete_flag += ((x == self.eos_index) | (x == self.pad_index))
+            # print('x after AGAIN', x, output_complete_flag)
             if all(output_complete_flag):
                 break
                 
+        # exit()
         return outputs[:gen_length]#, decoder_hiddens[:i+1], attention[:i+1]
 
 

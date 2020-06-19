@@ -151,7 +151,29 @@ def evaluate(model: ss.Seq2Seq, val_iter: tt.Iterator, epoch: int,
 				logits = model(batch) # seq length x batch_size x vocab
 				target = batch.target # seq length x batch_size
 				l = logits[:target.size()[0], :].permute(0, 2, 1)
+<<<<<<< Updated upstream
 				predictions = logits[:target.size()[0], :].argmax(2)
+=======
+				# print("LOGITS: ", logits.size())
+				# print("L: ", l.size())
+				# exit()
+				old_pred = logits[:target.size()[0], :].argmax(2)
+
+				predictions = logits.argmax(2)
+				# print("\nORIGINAL LOGITS: ", logits.size())
+				# print("\nLOGITS: ", predictions.size())
+				# print("TARGET SIZE", target.size())
+				new = pad_sequence([predictions, target], 1, padding_value=-1)
+				predictions = new[0]
+				new_target = new[1]
+				# print("NEW SIZE", new.size())
+				# print("TARGET: ", target)
+				# print("NEW SIZE: ", new[0].size())
+				# print("NEW 0: ", new[0])
+				# print("NEW SIZE: ", new[1].size())
+				# print("NEW 1: ", new[1])
+				# exit()
+>>>>>>> Stashed changes
 				
 				# if target.size()[0] == logits.size()[0]:
 					# print(True)
@@ -168,7 +190,11 @@ def evaluate(model: ss.Seq2Seq, val_iter: tt.Iterator, epoch: int,
 					if name == 'loss':
 						meter.update(batch_loss)
 					else:
+<<<<<<< Updated upstream
 						meter.process_batch(predictions, target, logits.size()[0])
+=======
+						meter.process_batch(old_pred, target)
+>>>>>>> Stashed changes
 			# print(logits.size()[0], target.size()[0])
 			for name, meter in logging_meters.items():
 				stats_dict[name] = meter.result()

@@ -114,8 +114,8 @@ def main():
 			("annotation", TRANS), 
 			(("target_tree", "target"), (TAR_TREE, TAR))]
 	else:
-		SRC = Field(sequential=True, lower=True) # Source vocab
-		TRG = Field(sequential=True, lower=True) # Target vocab
+		SRC = Field(lower=True, eos_token="<eos>") # Source vocab
+		TRG = Field(lower=True, eos_token="<eos>") # Target vocab
 		TRANS = SRC if args.vocab == "SRC" else TRG
 		datafields = [("source", SRC), ("annotation", TRANS), ("target", TRG)]
 
@@ -128,9 +128,12 @@ def main():
 		skip_header = True,
 		fields = datafields
 	)
+	# print(train[0].source)
+	# exit()
 
 	SRC.build_vocab(train, valid, test)
 	TRG.build_vocab(train, valid, test)
+	# print(SRC.vocab.stoi)
 
 	train_iter, val_iter, test_iter = BucketIterator.splits(
 		(train, valid, test), 
@@ -140,6 +143,10 @@ def main():
 		sort_within_batch = True, 
 		repeat = False
 	)
+	# for batch in train_iter:
+	# 	print(batch.source)
+	# 	exit()
+
 
 	encoder = EncoderRNN(hidden_size=args.hidden_size, vocab = SRC.vocab, recurrent_unit=args.encoder, num_layers=args.layers, dropout=args.dropout)
 	tree_decoder_names = ['Tree']
