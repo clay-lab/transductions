@@ -10,7 +10,9 @@ from abc import abstractmethod
 import seq2seq as ss
 from typing import Dict
 import cox.store as cx
- 
+from torch.nn.utils.rnn import pad_sequence
+import torch.nn.functional as F
+
 CKPT_NAME_LATEST = "latest_ckpt.pt"
 
 class AverageMetric:
@@ -31,7 +33,7 @@ class AverageMetric:
 		self.total = 0
 
 	@abstractmethod
-	def process_batch(self, prediction, target, length):
+	def process_batch(self, prediction, target, model):
 		"""
 		Implement this method if you need to update the metric based on 
 		calculations of the model's output for a particular set of training
@@ -59,13 +61,45 @@ class AverageMetric:
 	def result(self):
 		return 1.0 * self.correct / self.total if self.total > 0 else np.nan
 
+# class LengthLevelAccuracy(AverageMetric):
+
+# 	def __init__(self):
+# 		AverageMetric.__init__(self)
+# 		self.total = 1
+
+# 	def process_batch(self, prediction, target, model):
+# 		batch = model.scores2sentence(prediction, model.decoder.vocab)
+# 		print("BATCH", batch)
+# 		for sentence in batch:
+# 			sentence = sentence.split(" ")
+# 			print("SENTENCE: ", sentence)
+# 			for word in range(len(sentence)):
+# 				print("WORD:", word)
+# 				print(sentence[word])
+# 				print(sentence[0])
+# 				print(sentence[1])
+# 				if sentence[word] == '<eos>':
+# 					break
+# 				sentence = sentence[:word]
+# 				print("SENTENCE", sentence)
+# 		exit()
+# 		# correct = (length == target.size()[0])
+# 		# total = target.size()[0] * target.size()[1]
+# 		# self.update(correct, total)
+# 		pass
+
 class SentenceLevelAccuracy(AverageMetric):
 	"""
 	Computes the accuracy of a model at the sentence level. A predicted 
 	sequence is correct if it is equal to the target sequence.
 	"""
 
-	def process_batch(self, prediction, target, length):  
+	def process_batch(self, prediction, target, model:ss.Seq2Seq):  
+
+		# target_sen = model.scores2sentence(target, model.decoder.vocab)
+		# print("\nPREDICTION: ", prediction_sen)
+		# print("\nTARGET: ", target_sen)
+		# exit()
 		correct = (prediction == target).prod(axis=0)
 		total = correct.size()[0]
 		self.update(correct.sum(), total)
@@ -78,22 +112,12 @@ class TokenLevelAccuracy(AverageMetric):
 	the same.
 	"""
 
-	def process_batch(self, prediction, target, length): 
+	def process_batch(self, prediction, target, model): 
 		# TODO: Does this still work if pred and target are different sizes?
 		correct = (prediction == target).sum()
 		total = target.size()[0] * target.size()[1]
 		self.update(correct, total)
 
-class LengthLevelAccuracy(AverageMetric):
-
-	def __init__(self):
-		AverageMetric.__init__(self)
-		self.total = 1
-
-	def process_batch(self, prediction, target, length): 
-		correct = (length == target.size()[0])
-		total = target.size()[0] * target.size()[1]
-		self.update(correct, total)
 
 def predict(model: ss.Seq2Seq, source: torch.Tensor):
 
@@ -126,10 +150,11 @@ def test(model: ss.Seq2Seq, test_iter: tt.Iterator, task: str, filename: str):
 
 				logits = model(batch)
 				target = batch.target 
-				predictions = logits[:target.size()[0], :].argmax(2)
-
+				# predictions = logits[:target.size()[0], :].argmax(2)
+				predictions = logits.argmax(2)
 				sentences = model.scores2sentence(batch.source, model.encoder.vocab)
-				predictions = model.scores2sentence(predictions, model.decoder.vocab)
+				# predictions = model.scores2sentence(predictions, model.decoder.vocab)
+				predictions = model.scores2sentence(logits.argmax(2), model.decoder.vocab)
 				target = model.scores2sentence(target, model.decoder.vocab)
 
 				with open(outfile, 'a') as f:
@@ -149,53 +174,22 @@ def evaluate(model: ss.Seq2Seq, val_iter: tt.Iterator, epoch: int,
 		with tqdm(val_iter) as V:
 			for batch in V:
 				logits = model(batch) # seq length x batch_size x vocab
-				target = batch.target # seq length x batch_size
-				l = logits[:target.size()[0], :].permute(0, 2, 1)
-<<<<<<< Updated upstream
-				predictions = logits[:target.size()[0], :].argmax(2)
-=======
-				# print("LOGITS: ", logits.size())
-				# print("L: ", l.size())
-				# exit()
-				old_pred = logits[:target.size()[0], :].argmax(2)
+				target = batch.target # seq length x batch size
 
-				predictions = logits.argmax(2)
-				# print("\nORIGINAL LOGITS: ", logits.size())
-				# print("\nLOGITS: ", predictions.size())
-				# print("TARGET SIZE", target.size())
-				new = pad_sequence([predictions, target], 1, padding_value=-1)
-				predictions = new[0]
-				new_target = new[1]
-				# print("NEW SIZE", new.size())
-				# print("TARGET: ", target)
-				# print("NEW SIZE: ", new[0].size())
-				# print("NEW 0: ", new[0])
-				# print("NEW SIZE: ", new[1].size())
-				# print("NEW 1: ", new[1])
-				# exit()
->>>>>>> Stashed changes
-				
-				# if target.size()[0] == logits.size()[0]:
-					# print(True)
-					# print("TARGET", target.size())
-					# print("LOGITS:", logits.size())
-					# print("LOGITS:", logits.size()[0])
-			
-					# exit()
-            	
-				batch_loss = criterion(l, target)
-				
+				perm_logits = logits.permute(1, 2, 0)
+				perm_target = batch.target.permute(1, 0) # seq length x batch_size
+
+				pad_len = perm_logits.size()[2] - perm_target.size()[1]
+				pad_token = model.decoder.vocab['<pad>']
+				new_target = F.pad(perm_target, (0, pad_len) , "constant", pad_token)
+
+				batch_loss = criterion(perm_logits, new_target)
 
 				for name, meter in logging_meters.items():
 					if name == 'loss':
 						meter.update(batch_loss)
 					else:
-<<<<<<< Updated upstream
-						meter.process_batch(predictions, target, logits.size()[0])
-=======
-						meter.process_batch(old_pred, target)
->>>>>>> Stashed changes
-			# print(logits.size()[0], target.size()[0])
+						meter.process_batch(logits[:target.size()[0], :].argmax(2), target, model)
 			for name, meter in logging_meters.items():
 				stats_dict[name] = meter.result()
 				meter.reset()
@@ -208,12 +202,11 @@ def evaluate(model: ss.Seq2Seq, val_iter: tt.Iterator, epoch: int,
 def train(model: ss.Seq2Seq, train_iterator: tt.Iterator, 
 	        validation_iter: tt.Iterator, logging_meters: Dict, 
 	        store: cx.Store, args: Dict, ignore_index=None):
-
 	optimizer = optim.SGD(model.parameters(), lr=args.learning_rate)
 	criterion = nn.CrossEntropyLoss(weight=None, ignore_index=ignore_index)
 	early_stopping = EarlyStopping(patience = args.patience, verbose = False,
 		filename = os.path.join(store.path, CKPT_NAME_LATEST), delta=0.005)
-	
+	  
 	for epoch in range(args.epochs):
 
 		model.train()
@@ -225,6 +218,7 @@ def train(model: ss.Seq2Seq, train_iterator: tt.Iterator,
 				decoder_outputs = model(batch)
 				pred = decoder_outputs.permute(1, 2, 0)
 				target = batch.target.permute(1, 0)
+
 				batch_loss = criterion(pred, target)
 
 				batch_loss.backward()
@@ -249,3 +243,4 @@ def train(model: ss.Seq2Seq, train_iterator: tt.Iterator,
 			break
 
 		torch.save(model.state_dict(), os.path.join(store.path, CKPT_NAME_LATEST))
+
