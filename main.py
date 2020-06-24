@@ -50,6 +50,9 @@ def setup_store(args: Dict):
 		logging_meters = dict()
 		if args.sentacc: logging_meters['sentence-level-accuracy'] = training.SentenceLevelAccuracy()
 		if args.tokenacc: logging_meters['token-level-accuracy'] = training.TokenLevelAccuracy()
+		if args.tokens is not None:
+			for token in args.tokens.split('-'):
+				logging_meters['{0}-accuracy'.format(token)] = training.SpecTokenAccuracy(token)
 		logging_meters['loss'] = training.AverageMetric()
 
 		# TODO: support columns that aren't float
@@ -87,6 +90,7 @@ def parse_arguments():
 	parser.add_argument('-la', '--lenacc', help='length accuracy', type=bool, default=True)
 	parser.add_argument('-exp', '--expname', help='exp_name', type=None, default=None)
 	parser.add_argument('-out', '--outdir', help='directory in which to place cox store', type=None, default='logs/default')
+	parser.add_argument('-to', '--tokens', help='list of tokens for logit-level-accuracy', type=str, default=None)
 
 	return parser.parse_args()
 
