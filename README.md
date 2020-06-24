@@ -22,7 +22,7 @@ dropout amount (-do, --dropout): Default: 0.0.
 data representation (--input-format): Default 'sequences'. Options: sequences, trees.  
 number of epochs (-ep, --epochs): Default: 20.  
 batch size (-b, --batch-size): Default: 5.  
-tokens (-t, --tokens): Default: None.
+tokens (-to, --tokens): Default: None.
 ```
 
 ### Required Command: 
