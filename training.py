@@ -24,9 +24,10 @@ class AverageMetric:
 	and set the new value with the update method.
 	"""
 
-	def __init__(self):
+	def __init__(self, token=None):
 		self.correct = 0
 		self.total = 0
+		self.token = token
 
 	def reset(self):
 		self.correct = 0
@@ -61,32 +62,6 @@ class AverageMetric:
 	def result(self):
 		return 1.0 * self.correct / self.total if self.total > 0 else np.nan
 
-# class LengthLevelAccuracy(AverageMetric):
-
-# 	def __init__(self):
-# 		AverageMetric.__init__(self)
-# 		self.total = 1
-
-# 	def process_batch(self, prediction, target, model):
-# 		batch = model.scores2sentence(prediction, model.decoder.vocab)
-# 		print("BATCH", batch)
-# 		for sentence in batch:
-# 			sentence = sentence.split(" ")
-# 			print("SENTENCE: ", sentence)
-# 			for word in range(len(sentence)):
-# 				print("WORD:", word)
-# 				print(sentence[word])
-# 				print(sentence[0])
-# 				print(sentence[1])
-# 				if sentence[word] == '<eos>':
-# 					break
-# 				sentence = sentence[:word]
-# 				print("SENTENCE", sentence)
-# 		exit()
-# 		# correct = (length == target.size()[0])
-# 		# total = target.size()[0] * target.size()[1]
-# 		# self.update(correct, total)
-# 		pass
 
 class SentenceLevelAccuracy(AverageMetric):
 	"""
@@ -94,12 +69,7 @@ class SentenceLevelAccuracy(AverageMetric):
 	sequence is correct if it is equal to the target sequence.
 	"""
 
-	def process_batch(self, prediction, target, model:ss.Seq2Seq):  
-
-		# target_sen = model.scores2sentence(target, model.decoder.vocab)
-		# print("\nPREDICTION: ", prediction_sen)
-		# print("\nTARGET: ", target_sen)
-		# exit()
+	def process_batch(self, prediction, target, model:ss.Seq2Seq):
 		correct = (prediction == target).prod(axis=0)
 		total = correct.size()[0]
 		self.update(correct.sum(), total)
@@ -113,11 +83,28 @@ class TokenLevelAccuracy(AverageMetric):
 	"""
 
 	def process_batch(self, prediction, target, model): 
-		# TODO: Does this still work if pred and target are different sizes?
+		# TODO: Does this still work if pred and target are different sizes?		
 		correct = (prediction == target).sum()
 		total = target.size()[0] * target.size()[1]
 		self.update(correct, total)
 
+class SpecTokenAccuracy(AverageMetric):
+	"""
+	Computes the accuracy of a model at the specified token level. For each index in a
+	predicted sequence the number of correct predictions is incremented if the
+	tokens at that index in the predicted sequence and the target sequence are
+	the same for a given token.
+	"""
+	def process_batch(self, prediction, target, model):
+		logit = model.decoder.vocab[self.token]
+		correct = 0
+		for row in range(prediction.size()[0]):
+			for i in range(prediction.size()[1]):
+				correct += ((logit in prediction[row][i]) and (logit in target[row][i]))
+		total = (target == logit).sum()
+
+		self.update(correct, total.item())
+		
 
 def predict(model: ss.Seq2Seq, source: torch.Tensor):
 
@@ -184,6 +171,9 @@ def evaluate(model: ss.Seq2Seq, val_iter: tt.Iterator, epoch: int,
 				new_target = F.pad(perm_target, (0, pad_len) , "constant", pad_token)
 
 				batch_loss = criterion(perm_logits, new_target)
+				
+				
+			
 
 				for name, meter in logging_meters.items():
 					if name == 'loss':
@@ -229,6 +219,9 @@ def train(model: ss.Seq2Seq, train_iterator: tt.Iterator,
 
 		eval_stats = evaluate(model, validation_iter, epoch, args, criterion,
 		                      logging_meters=logging_meters, store=store)
+		# print(eval_stats)
+		# exit()
+
 
 		for name, stat in eval_stats.items():
 			if 'accuracy' in name:
