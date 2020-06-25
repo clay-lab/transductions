@@ -73,10 +73,9 @@ def test(model: Seq2Seq, tasks: List, name: str):
 
 	for task in tasks:
 
-		print('Testing on {}'.format(task))
 		SRC = Field(lower=True, eos_token="<eos>")
 		TRG = Field(lower=True, eos_token="<eos>")
-		TRANS = SRC
+		TRANS = TRG
 		datafields = [("source", SRC), ("annotation", TRANS), ("target", TRG)]
 		dataset = TabularDataset(os.path.join('data', task + '.test'), format = 'tsv', fields = datafields)
 		SRC.build_vocab(dataset)

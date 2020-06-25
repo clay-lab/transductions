@@ -70,7 +70,7 @@ def train_model(args: Dict):
 
 	with open(os.path.join(model_dir, 'arguments.txt'), 'w') as f:
 		for key, value in vars(args).items():
-			f.write('--{0}\n{1}\n'.format(key, value))
+			f.write('{0}: {1}\n'.format(key, value))
 
 	store, logging_meters = setup_store(args, logging_dir)
 
@@ -134,22 +134,77 @@ def train_model(args: Dict):
 		ckpt_path = os.path.join(store.path, CKPT_NAME_LATEST)
 		model.load_state_dict(torch.load(ckpt_path))
 
+	print(model)
+
 	training.train(model, train_iter, val_iter, logging_meters, store, args,
 		save_dir = model_dir, ignore_index=TRG.vocab.stoi['<pad>'])
 
 def test_model(args: Dict):
 	
-	structure_path = os.path.join('models', args.model, 'model.structure')
-	structure_dict = {}
+	# Load the saved model structure
+	structure_path = os.path.join('models', args.model, 'arguments.txt')
+	structure = {}
 	with open(structure_path, 'r') as f:
 		for line in f:
 			(key, value) = line.split(': ')
-			structure_dict[key] = value.strip()
+			structure[key] = value.strip()
 
-	print(structure_dict)
+	# Pull out relevant parameters
+	hidden_size = int(structure['hidden_size'])
+	layers = int(structure['layers'])
+	max_length = int(structure['max_length'])
+	dropout = float(structure['dropout'])
+	encoder = str(structure['encoder'])
+	decoder = str(structure['decoder'])
+	attention = str(structure['attention'])
+	vocab = str(structure['vocab'])
+	trainedtask = str(structure['task'])
 
-	model_path = os.path.join('models', args.model, 'model.pt')
-	model = torch.load(model_path)
+	# Device specification
+	available_device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+
+	# Create datasets and vocabulary
+	SRC = Field(lower=True, eos_token="<eos>") # Source vocab
+	TRG = Field(lower=True, eos_token="<eos>") # Target vocab
+	TRANS = SRC if vocab == "SRC" else TRG
+	datafields = [("source", SRC), ("annotation", TRANS), ("target", TRG)]
+
+	vocabsources = set()
+	vocabsources.add(trainedtask + '.train')
+	vocabsources.add(trainedtask + '.val')
+	vocabsources.add(trainedtask + '.test')
+	if args.task is not None:
+		vocabsources.add(task + '.test')
+
+	datasets = []
+	for v in vocabsources:
+		d = TabularDataset(os.path.join('data', v), format = 'tsv', 
+			skip_header = True, fields = datafields)
+		datasets.append(datasets)
+
+	SRC.build_vocab(*[TabularDataset(os.path.join('data', v), format = 'tsv', 
+			skip_header = True, fields = datafields) for v in vocabsources])
+	TRG.build_vocab(*[TabularDataset(os.path.join('data', v), format = 'tsv', 
+			skip_header = True, fields = datafields) for v in vocabsources])
+
+	enc = EncoderRNN(hidden_size=hidden_size, vocab = SRC.vocab, 
+		recurrent_unit=encoder, num_layers=layers, dropout=dropout)
+	dec = DecoderRNN(hidden_size=hidden_size, vocab=TRG.vocab, 
+		encoder_vocab=SRC.vocab, recurrent_unit=decoder, num_layers=layers, 
+		max_length=max_length, attention_type=attention, dropout=dropout)
+
+	enc.to(available_device)
+	dec.to(available_device)
+
+	model = seq2seq.Seq2Seq(enc, dec, ["source"], ["middle0", "annotation", "middle1", "source"], decoder_train_field_names=["middle0", "annotation", "middle1", "source", "target"])
+
+	# Does this need to be re-done once the model is loaded?
+	model.to(available_device)
+
+	print(model)
+
+	model_path = os.path.join('models', args.model, 'checkpoint.pt')
+	model.load_state_dict(torch.load(model_path))
 	model.eval()
 
 	if args.task is not None:

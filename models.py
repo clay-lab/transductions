@@ -210,7 +210,6 @@ class DecoderRNN(nn.Module):
         # exit()
         return outputs[:gen_length]#, decoder_hiddens[:i+1], attention[:i+1]
 
-
 # GRU modified such that its hidden states are not bounded
 class UnsquashedGRU(nn.Module):
     def __init__(self, input_size, hidden_size):
@@ -236,7 +235,6 @@ class UnsquashedGRU(nn.Module):
         h_t = z_t * hx + v_t * h_tilde
 
         return h_t, h_t
-
 
 # CumMax function for use in the ON-LSTM
 class CumMax(nn.Module):
@@ -429,7 +427,6 @@ class TreeDecoderRNN(nn.Module):
 
         return words_out
 
-
 class TridentDecoder(nn.Module):
     def __init__(self, arity, vocab_size, hidden_size, max_depth, null_placement="pre"):
         super(TridentDecoder, self).__init__()
@@ -612,15 +609,3 @@ class AltGRUTridentDecoder(nn.Module):
                 yield from self.forward_eval_helper(child_hidden, depth+1)
         else:
             yield production
-
-# class Seq2Seq(nn.Module):
-#     def __init__(self, encoder, decoder):
-#         super(Seq2Seq, self).__init__()
-#         self.encoder = encoder
-#         self.decoder = decoder
-        
-#     def forward(self, training_pair):
-#         encoder_output, encoder_hidden, encoder_outputs = self.encoder(training_pair)
-#         decoder_hidden = encoder_hidden[0,0,:]
-#         decoder_outputs = self.decoder(decoder_hidden, training_pair)
-#         return decoder_outputs
