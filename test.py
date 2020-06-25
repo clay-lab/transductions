@@ -36,9 +36,26 @@ class ModelREPL(Cmd):
 		raise SystemExit
 
 def repl(model: Seq2Seq):
+	"""
+	Enters an interactive read-evaluate-print loop (REPL) with the provided 
+	model, where you enter a sequence into the prompt and the model evaluates
+	the sequences and prints is prediction to standard output.
+
+	@param model: The provided Seq2Seq model.
+	"""
 
 	prompt = ModelREPL(model)
 	prompt.cmdloop()
+
+def test(model: Seq2Seq, tasks: List):
+	"""
+	Runs model.test() on the provided list of tasks. It is presumed that each
+	task corresponds to a test split of data named `task.test` in the data/
+	directory.
+
+	@param model: The provided Seq2Seq model.
+	@param tasks: A list of tasks as strings.
+	"""
 
 
 if __name__ == '__main__':
