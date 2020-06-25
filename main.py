@@ -36,11 +36,11 @@ def train_model(args: Dict):
 	# Directory structure is as follows:
 	#
 	# models/
-	#   task-month-day-year_N/
+	#   task-month-day-year-N/
 	#     model.pt
 	# 
 	# logs/
-	#   task-month-day-year_N/
+	#   task-month-day-year-N/
 	#     <some random hash>/
 	#       COX DATA HERE?
 	# 
@@ -126,14 +126,14 @@ def train_model(args: Dict):
 
 def test_model(args: Dict):
 	
-	model_path = os.join('models', args.model) + 'model.pt'
-	model = load(model_path)
+	model_path = os.path.join('models', args.model, 'model.pt')
+	model = torch.load(model_path)
 	model.eval()
 
 	if args.task is not None:
-		test.test(model, args.task)
+		test.test(model, args.task, name = args.model)
 	else:
-		test.repl(model)
+		test.repl(model, name = args.model)
 
 
 def setup_store(args: Dict, logging_dir: str):
