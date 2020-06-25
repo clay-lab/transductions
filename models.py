@@ -173,7 +173,10 @@ class DecoderRNN(nn.Module):
         # print(x0.size())
         # print()
         #print('x before', x, x0, self.vocab.stoi)
-        output_complete_flag = torch.zeros(batch_size, dtype=torch.bool)
+
+        avd = next(self.parameters()).device
+
+        output_complete_flag = torch.zeros(batch_size, dtype=torch.bool, device = avd)
         if self.recurrent_unit_type == "LSTM": #Non-LSTM encoder, LSTM decoder: create c
                 if not(isinstance(h0,tuple)):
                     c0 = torch.zeros(self.num_layers,batch_size, self.hidden_size)
