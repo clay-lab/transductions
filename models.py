@@ -117,6 +117,8 @@ class DecoderRNN(nn.Module):
         x = self.embedding(x)
         #Apply ReLU to embedded input?
         rnn_input = F.relu(x)
+
+        avd = next(self.parameters()).device
         
         if self.attention_type:
             #use h alone for attention key in case we're dealing with LSTM
@@ -138,7 +140,7 @@ class DecoderRNN(nn.Module):
             rnn_input = torch.cat((rnn_input, weighted_encoder_outputs), dim=1)
             
         else:
-             a = torch.zeros(encoder_outputs.shape[1], 1, encoder_outputs.shape[0])
+             a = torch.zeros(encoder_outputs.shape[1], 1, encoder_outputs.shape[0], device = avd)
         # print(rnn_input.size())
         # exit()
         batch_size = rnn_input.shape[0] 
@@ -150,14 +152,17 @@ class DecoderRNN(nn.Module):
 
     # Perform the full forward pass
     def forward(self, h0, x0, encoder_outputs, source, target=None, tf_ratio=0.5, evaluation=False):
+
+        avd = next(self.parameters()).device
+
         # annotation field eos token (main.py) turns x0 from [1,5] to [2,5]. Resolve by taking the first row
         x0 = x0[0]
         # print(x0)
         # exit()
         batch_size = encoder_outputs.shape[1]
-        outputs = torch.zeros(self.max_length, batch_size, self.vocab_size)
-        decoder_hiddens = torch.zeros(self.max_length, batch_size, self.hidden_size)
-        attention = torch.zeros(self.max_length, batch_size, encoder_outputs.shape[0])
+        outputs = torch.zeros(self.max_length, batch_size, self.vocab_size, device = avd)
+        decoder_hiddens = torch.zeros(self.max_length, batch_size, self.hidden_size, device = avd)
+        attention = torch.zeros(self.max_length, batch_size, encoder_outputs.shape[0], device = avd)
 
         #if we're evaluating, never use teacher forcing
         if (evaluation or not(torch.is_tensor(target))):
@@ -174,12 +179,10 @@ class DecoderRNN(nn.Module):
         # print()
         #print('x before', x, x0, self.vocab.stoi)
 
-        avd = next(self.parameters()).device
-
         output_complete_flag = torch.zeros(batch_size, dtype=torch.bool, device = avd)
         if self.recurrent_unit_type == "LSTM": #Non-LSTM encoder, LSTM decoder: create c
                 if not(isinstance(h0,tuple)):
-                    c0 = torch.zeros(self.num_layers,batch_size, self.hidden_size)
+                    c0 = torch.zeros(self.num_layers,batch_size, self.hidden_size, device = avd)
                     h = (h0, c0)
         elif isinstance(h0,tuple): #LSTM encoder, but not LSTM decoder: ignore c
             h = h[0]
