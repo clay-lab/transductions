@@ -36,10 +36,10 @@ python main.py --task negation --encoder LSTM --decoder LSTM -a location -lr 0.0
 ```
 
 ### A note on --tokens:
-Input type is string separated by '-'. This argument will include accuracy measures for any token in the vocabulary for a given dataset. If no argument is included, only the loss, the token-level accuracy, and the length-level accuracy will be calculated.
+Input type is string separated by '-' and '_'. The dashes separate individual words and accuracy measurements, respectively. This argument will include accuracy measures for any token in the vocabulary for a given dataset. If no argument is included, only the loss, the token-level accuracy, and the length-level accuracy will be calculated.
 #### Example Command:
 ```bash
-python main.py --task negation --tokens she-he-them
+python main.py --task negation --tokens she-he_them-they
 ```
 
 

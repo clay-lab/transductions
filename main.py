@@ -51,7 +51,7 @@ def setup_store(args: Dict):
 		if args.sentacc: logging_meters['sentence-level-accuracy'] = training.SentenceLevelAccuracy()
 		if args.tokenacc: logging_meters['token-level-accuracy'] = training.TokenLevelAccuracy()
 		if args.tokens is not None:
-			for token in args.tokens.split('-'):
+			for token in args.tokens.split('_'):
 				logging_meters['{0}-accuracy'.format(token)] = training.SpecTokenAccuracy(token)
 		logging_meters['loss'] = training.AverageMetric()
 
