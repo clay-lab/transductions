@@ -4,6 +4,7 @@
 
 from cmd import Cmd
 from seq2seq import Seq2Seq
+from typing import List
 
 class Model():
 
