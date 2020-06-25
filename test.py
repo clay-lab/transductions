@@ -32,7 +32,7 @@ class ModelREPL(Cmd):
 		Default command executed, if no command is specified. Since we have no
 		'commands' per-se, this will always be called.
 		"""
-		print('Hello, {0}'.format(args))
+		print('{0}'.format(args))
 
 	def do_quit(self, args):
 		"""
@@ -87,7 +87,7 @@ def test(model: Seq2Seq, tasks: List, name: str):
 			with tqdm(interator) as t:
 				for batch in t:
 
-					raise SystemExit
+					# raise SystemExit
 
 					logits = model(batch)
 					

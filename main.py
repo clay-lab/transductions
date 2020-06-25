@@ -3,6 +3,7 @@
 
 import os
 import argparse
+import json
 
 from torchtext.data import Field, TabularDataset, BucketIterator, RawField
 
@@ -62,6 +63,15 @@ def train_model(args: Dict):
 	logging_dir = os.path.join(args.outdir, exp_path)
 	model_dir = os.path.join('models', exp_path)
 
+	# We need to save not only the model parameters, but also enough information
+	# about the models structure that we can initialize a model compatable with
+	# the saved parameters before loading the state dictionary. We'll write out
+	# the relevant arguments to the file `model.structure` in `model_dir`.
+
+	with open(os.path.join(model_dir, 'arguments.txt'), 'w') as f:
+		for key, value in vars(args).items():
+			f.write('--{0}\n{1}\n'.format(key, value))
+
 	store, logging_meters = setup_store(args, logging_dir)
 
 	# Device specification
@@ -110,10 +120,13 @@ def train_model(args: Dict):
 	)
 
 	encoder = EncoderRNN(hidden_size=args.hidden_size, vocab = SRC.vocab, recurrent_unit=args.encoder, num_layers=args.layers, dropout=args.dropout)
+	encoder.to(available_device)
 	tree_decoder_names = ['Tree']
 	if args.decoder not in tree_decoder_names:
 		dec = DecoderRNN(hidden_size=args.hidden_size, vocab=TRG.vocab, encoder_vocab=SRC.vocab, recurrent_unit=args.decoder, num_layers=args.layers, max_length=args.max_length, attention_type=args.attention, dropout=args.dropout)
+		dec.to(available_device)
 		model = seq2seq.Seq2Seq(encoder, dec, ["source"], ["middle0", "annotation", "middle1", "source"], decoder_train_field_names=["middle0", "annotation", "middle1", "source", "target"])
+		model.to(available_device)
 	else:
 		assert False
 
@@ -126,6 +139,15 @@ def train_model(args: Dict):
 
 def test_model(args: Dict):
 	
+	structure_path = os.path.join('models', args.model, 'model.structure')
+	structure_dict = {}
+	with open(structure_path, 'r') as f:
+		for line in f:
+			(key, value) = line.split(': ')
+			structure_dict[key] = value.strip()
+
+	print(structure_dict)
+
 	model_path = os.path.join('models', args.model, 'model.pt')
 	model = torch.load(model_path)
 	model.eval()
@@ -137,16 +159,7 @@ def test_model(args: Dict):
 
 
 def setup_store(args: Dict, logging_dir: str):
-	# taskname = args.outdir + "/{0}-results-".format(args.task)
-	# lt = (time.localtime(time.time()))
-	# date = "{0}-{1}-{2}".format(str(lt[1]), str(lt[2]), str(lt[0])[2:])
-	# counter = 0 
-	# directory = taskname + date + "_{0}".format(str(counter))   
-	# while os.path.isdir(directory):
-	# 	directory = taskname + date + "_{0}".format(str(counter))
-	# 	counter += 1
-	# # print(directory[13:])
-	# # exit()
+
 	store = cox.store.Store(logging_dir, args.expname)
 
 	if args.expname is None:
