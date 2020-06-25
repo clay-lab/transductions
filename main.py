@@ -130,11 +130,9 @@ def train_model(args: Dict):
 	else:
 		assert False
 
-	if CKPT_NAME_LATEST in os.listdir(store.path):
-		ckpt_path = os.path.join(store.path, CKPT_NAME_LATEST)
-		model.load_state_dict(torch.load(ckpt_path))
-
-	print(model)
+	# if CKPT_NAME_LATEST in os.listdir(store.path):
+	# 	ckpt_path = os.path.join(store.path, CKPT_NAME_LATEST)
+	# 	model.load_state_dict(torch.load(ckpt_path))
 
 	training.train(model, train_iter, val_iter, logging_meters, store, args,
 		save_dir = model_dir, ignore_index=TRG.vocab.stoi['<pad>'])
@@ -157,6 +155,8 @@ def test_model(args: Dict):
 	encoder = str(structure['encoder'])
 	decoder = str(structure['decoder'])
 	attention = str(structure['attention'])
+	if attention == 'None':
+		attention = None
 	vocab = str(structure['vocab'])
 	trainedtask = str(structure['task'])
 
@@ -174,7 +174,8 @@ def test_model(args: Dict):
 	vocabsources.add(trainedtask + '.val')
 	vocabsources.add(trainedtask + '.test')
 	if args.task is not None:
-		vocabsources.add(task + '.test')
+		for task in args.task:
+			vocabsources.add(task + '.test')
 
 	datasets = []
 	for v in vocabsources:
@@ -201,14 +202,17 @@ def test_model(args: Dict):
 	# Does this need to be re-done once the model is loaded?
 	model.to(available_device)
 
-	print(model)
-
 	model_path = os.path.join('models', args.model, 'checkpoint.pt')
 	model.load_state_dict(torch.load(model_path))
 	model.eval()
 
+	iterators = []
+	for d in [TabularDataset(os.path.join('data', v), format = 'tsv', skip_header = True, fields = datafields) for v in vocabsources]:
+		i = BucketIterator(d, batch_size = 5, device = available_device, sort_key = lambda x: len(x.target), sort_within_batch = True, repeat = False)
+		iterators.append(i)
+
 	if args.task is not None:
-		test.test(model, args.task, name = args.model)
+		test.test(model, name = args.model, data = iterators)
 	else:
 		test.repl(model, name = args.model)
 

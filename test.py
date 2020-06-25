@@ -52,14 +52,15 @@ def repl(model: Seq2Seq, name: str):
 	prompt = ModelREPL(model, name = name)
 	prompt.cmdloop()
 
-def test(model: Seq2Seq, tasks: List, name: str):
+def test(model: Seq2Seq, name: str, data: List):
 	"""
 	Runs model.test() on the provided list of tasks. It is presumed that each
 	task corresponds to a test split of data named `task.test` in the data/
 	directory.
 
 	@param model: The provided Seq2Seq model.
-	@param tasks: A list of tasks as strings.
+	@param name: The name of the model.
+	@param data: A list of TabularDatasets.
 	"""
 
 	available_device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
@@ -71,19 +72,10 @@ def test(model: Seq2Seq, tasks: List, name: str):
 	with open(outfile, 'w') as f:
 		f.write('{0}\t{1}\t{2}\n'.format('source', 'target', 'prediction'))
 
-	for task in tasks:
-
-		SRC = Field(lower=True, eos_token="<eos>")
-		TRG = Field(lower=True, eos_token="<eos>")
-		TRANS = TRG
-		datafields = [("source", SRC), ("annotation", TRANS), ("target", TRG)]
-		dataset = TabularDataset(os.path.join('data', task + '.test'), format = 'tsv', fields = datafields)
-		SRC.build_vocab(dataset)
-		TRG.build_vocab(dataset)
-		interator = BucketIterator(dataset, batch_size = 5, device = available_device, sort_key = lambda x: len(x.target), sort_within_batch = True, repeat = False)
+	for iterator in data:
 
 		with torch.no_grad():
-			with tqdm(interator) as t:
+			with tqdm(iterator) as t:
 				for batch in t:
 
 					# raise SystemExit
