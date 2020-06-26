@@ -1,0 +1,220 @@
+main.py:173: UserWarning: If you have Pandas 1.0 you must make the following change manually for cox to work: https://github.com/MadryLab/cox/pull/3/files
+  "If you have Pandas 1.0 you must make the following change manually for cox to work: https://github.com/MadryLab/cox/pull/3/files")
+Logging in: /gpfs/loomis/home.grace/sls248/transductions/logs/default/negation-results-6-25-20_3/cef6cbad-a9b4-4eac-a156-15873e09053b
+Training epoch 1/100 on train data
+Evaluating epoch 1/100 on val data
+sentence-level-accuracy   0.545 %
+token-level-accuracy      22.636 %
+that-which-accuracy       9.8442 %
+because-since-accuracy    0.61394 %
+can-may-must-should-accuracy 37.641 %
+loss                      2.8103 
+Training epoch 2/100 on train data
+Evaluating epoch 2/100 on val data
+sentence-level-accuracy   8.9 %
+token-level-accuracy      48.623 %
+that-which-accuracy       66.615 %
+because-since-accuracy    28.962 %
+can-may-must-should-accuracy 56.652 %
+loss                      1.6652 
+Training epoch 3/100 on train data
+Evaluating epoch 3/100 on val data
+sentence-level-accuracy   41.231 %
+token-level-accuracy      64.973 %
+that-which-accuracy       74.392 %
+because-since-accuracy    51.596 %
+can-may-must-should-accuracy 70.796 %
+loss                      1.0369 
+Training epoch 4/100 on train data
+Evaluating epoch 4/100 on val data
+sentence-level-accuracy   53.118 %
+token-level-accuracy      73.214 %
+that-which-accuracy       76.779 %
+because-since-accuracy    63.358 %
+can-may-must-should-accuracy 78.654 %
+loss                      0.67545 
+Training epoch 5/100 on train data
+Evaluating epoch 5/100 on val data
+sentence-level-accuracy   67.498 %
+token-level-accuracy      79.814 %
+that-which-accuracy       80.738 %
+because-since-accuracy    74.757 %
+can-may-must-should-accuracy 83.234 %
+loss                      0.46657 
+Training epoch 6/100 on train data
+Evaluating epoch 6/100 on val data
+sentence-level-accuracy   72.218 %
+token-level-accuracy      83.655 %
+that-which-accuracy       85.431 %
+because-since-accuracy    80.014 %
+can-may-must-should-accuracy 86.369 %
+loss                      0.35119 
+Training epoch 7/100 on train data
+Evaluating epoch 7/100 on val data
+sentence-level-accuracy   74.626 %
+token-level-accuracy      86.126 %
+that-which-accuracy       87.949 %
+because-since-accuracy    83.117 %
+can-may-must-should-accuracy 88.788 %
+loss                      0.28462 
+Training epoch 8/100 on train data
+Evaluating epoch 8/100 on val data
+sentence-level-accuracy   76.858 %
+token-level-accuracy      88.14 %
+that-which-accuracy       89.997 %
+because-since-accuracy    86.8 %
+can-may-must-should-accuracy 90.622 %
+loss                      0.23761 
+Training epoch 9/100 on train data
+Evaluating epoch 9/100 on val data
+sentence-level-accuracy   78.567 %
+token-level-accuracy      89.65 %
+that-which-accuracy       90.429 %
+because-since-accuracy    88.131 %
+can-may-must-should-accuracy 92.052 %
+loss                      0.2041 
+Training epoch 10/100 on train data
+Evaluating epoch 10/100 on val data
+sentence-level-accuracy   80.817 %
+token-level-accuracy      90.69 %
+that-which-accuracy       91.683 %
+because-since-accuracy    89.036 %
+can-may-must-should-accuracy 92.646 %
+loss                      0.18372 
+Training epoch 11/100 on train data
+Evaluating epoch 11/100 on val data
+sentence-level-accuracy   82.371 %
+token-level-accuracy      91.771 %
+that-which-accuracy       92.609 %
+because-since-accuracy    90.292 %
+can-may-must-should-accuracy 93.907 %
+loss                      0.15944 
+Training epoch 12/100 on train data
+Evaluating epoch 12/100 on val data
+sentence-level-accuracy   83.502 %
+token-level-accuracy      92.614 %
+that-which-accuracy       93.365 %
+because-since-accuracy    91.21 %
+can-may-must-should-accuracy 94.519 %
+loss                      0.14337 
+Training epoch 13/100 on train data
+Evaluating epoch 13/100 on val data
+sentence-level-accuracy   84.493 %
+token-level-accuracy      93.37 %
+that-which-accuracy       94.124 %
+because-since-accuracy    92.699 %
+can-may-must-should-accuracy 94.937 %
+loss                      0.12586 
+Training epoch 14/100 on train data
+Evaluating epoch 14/100 on val data
+sentence-level-accuracy   86.365 %
+token-level-accuracy      94.439 %
+that-which-accuracy       95.078 %
+because-since-accuracy    92.955 %
+can-may-must-should-accuracy 96.317 %
+loss                      0.11 
+Training epoch 15/100 on train data
+Evaluating epoch 15/100 on val data
+sentence-level-accuracy   87.459 %
+token-level-accuracy      95.026 %
+that-which-accuracy       96.006 %
+because-since-accuracy    93.804 %
+can-may-must-should-accuracy 96.454 %
+loss                      0.098618 
+Training epoch 16/100 on train data
+Evaluating epoch 16/100 on val data
+sentence-level-accuracy   88.093 %
+token-level-accuracy      95.13 %
+that-which-accuracy       95.929 %
+because-since-accuracy    93.861 %
+can-may-must-should-accuracy 96.378 %
+loss                      0.094312 
+EarlyStopping counter: 1 out of 3
+Training epoch 17/100 on train data
+Evaluating epoch 17/100 on val data
+sentence-level-accuracy   89.311 %
+token-level-accuracy      95.665 %
+that-which-accuracy       96.607 %
+because-since-accuracy    94.252 %
+can-may-must-should-accuracy 96.807 %
+loss                      0.085336 
+Training epoch 18/100 on train data
+Evaluating epoch 18/100 on val data
+sentence-level-accuracy   90.167 %
+token-level-accuracy      96.097 %
+that-which-accuracy       96.783 %
+because-since-accuracy    94.73 %
+can-may-must-should-accuracy 97.247 %
+loss                      0.077232 
+Training epoch 19/100 on train data
+Evaluating epoch 19/100 on val data
+sentence-level-accuracy   91.095 %
+token-level-accuracy      96.559 %
+that-which-accuracy       97.52 %
+because-since-accuracy    95.078 %
+can-may-must-should-accuracy 97.444 %
+loss                      0.069149 
+Training epoch 20/100 on train data
+Evaluating epoch 20/100 on val data
+sentence-level-accuracy   91.067 %
+token-level-accuracy      96.53 %
+that-which-accuracy       97.795 %
+because-since-accuracy    94.452 %
+can-may-must-should-accuracy 97.542 %
+loss                      0.068613 
+EarlyStopping counter: 1 out of 3
+Training epoch 21/100 on train data
+Evaluating epoch 21/100 on val data
+sentence-level-accuracy   89.667 %
+token-level-accuracy      94.77 %
+that-which-accuracy       94.865 %
+because-since-accuracy    93.047 %
+can-may-must-should-accuracy 95.838 %
+loss                      0.099584 
+EarlyStopping counter: 2 out of 3
+Training epoch 22/100 on train data
+Evaluating epoch 22/100 on val data
+sentence-level-accuracy   91.894 %
+token-level-accuracy      96.918 %
+that-which-accuracy       98.14 %
+because-since-accuracy    95.508 %
+can-may-must-should-accuracy 97.126 %
+loss                      0.060579 
+Training epoch 23/100 on train data
+Evaluating epoch 23/100 on val data
+sentence-level-accuracy   93.007 %
+token-level-accuracy      97.395 %
+that-which-accuracy       98.349 %
+because-since-accuracy    96.076 %
+can-may-must-should-accuracy 97.847 %
+loss                      0.052777 
+Training epoch 24/100 on train data
+Evaluating epoch 24/100 on val data
+sentence-level-accuracy   93.197 %
+token-level-accuracy      97.504 %
+that-which-accuracy       98.37 %
+because-since-accuracy    96.132 %
+can-may-must-should-accuracy 98.247 %
+loss                      0.050479 
+EarlyStopping counter: 1 out of 3
+Training epoch 25/100 on train data
+Evaluating epoch 25/100 on val data
+sentence-level-accuracy   93.32 %
+token-level-accuracy      97.436 %
+that-which-accuracy       98.351 %
+because-since-accuracy    96.173 %
+can-may-must-should-accuracy 97.894 %
+loss                      0.052006 
+EarlyStopping counter: 2 out of 3
+Training epoch 26/100 on train data
+Evaluating epoch 26/100 on val data
+sentence-level-accuracy   92.907 %
+token-level-accuracy      97.238 %
+that-which-accuracy       98.283 %
+because-since-accuracy    95.82 %
+can-may-must-should-accuracy 97.504 %
+loss                      0.052223 
+EarlyStopping counter: 3 out of 3
+Early stopping. Loading model from last saved checkoint.
+Testing on test data
+Closing remaining open files:logs/default/negation-results-6-25-20_3/cef6cbad-a9b4-4eac-a156-15873e09053b/store.h5...done
