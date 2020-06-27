@@ -50,6 +50,14 @@ def train_model(args: Dict):
 	exp_name = args.task
 	exp_time = time.strftime('%d-%m-%y', time.gmtime())
 	exp_count = 0
+		
+  logging_meters = dict()
+	if args.sentacc: logging_meters['sentence-level-accuracy'] = training.SentenceLevelAccuracy()
+	if args.tokenacc: logging_meters['token-level-accuracy'] = training.TokenLevelAccuracy()
+	if args.tokens is not None:
+		for token in args.tokens.split('_'):
+			logging_meters['{0}-accuracy'.format(token)] = training.SpecTokenAccuracy(token)
+	logging_meters['loss'] = training.AverageMetric()
 
 	while True:
 		exp_path = '{0}-{1}-{2}'.format(exp_name, exp_time, exp_count)
