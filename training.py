@@ -13,7 +13,7 @@ import cox.store as cx
 from torch.nn.utils.rnn import pad_sequence
 import torch.nn.functional as F
 
-CKPT_NAME_LATEST = "latest_ckpt.pt"
+CKPT_NAME_LATEST = 'checkpoint.pt'
 
 class AverageMetric:
 	"""
@@ -108,21 +108,6 @@ class SpecTokenAccuracy(AverageMetric):
 				total += (target == logit).sum().item()
 		self.update(correct, total)
 		
-
-def predict(model: ss.Seq2Seq, source: torch.Tensor):
-
-	# build batch from tensor
-	pass
-
-	model.eval()
-	with torch.no_grad():
-
-		logits = model(batch)
-		predictions = logits[:source.size()[0], :].argmax(2)
-		sentences = model.scores2sentence(predictions, model.decoder.vocab)
-
-		return sentences
-
 def test(model: ss.Seq2Seq, test_iter: tt.Iterator, task: str, filename: str):
 
 	model.eval()
@@ -196,11 +181,17 @@ def evaluate(model: ss.Seq2Seq, val_iter: tt.Iterator, epoch: int,
 
 def train(model: ss.Seq2Seq, train_iterator: tt.Iterator, 
 	        validation_iter: tt.Iterator, logging_meters: Dict, 
-	        store: cx.Store, args: Dict, ignore_index=None):
+	        store: cx.Store, args: Dict, save_dir: str, ignore_index=None):
+
 	optimizer = optim.SGD(model.parameters(), lr=args.learning_rate)
 	criterion = nn.CrossEntropyLoss(weight=None, ignore_index=ignore_index)
+	
+
+	model_path = os.path.join(save_dir, 'model.pt')
+	checkpoint_path = os.path.join(save_dir, 'checkpoint.pt')
+
 	early_stopping = EarlyStopping(patience = args.patience, verbose = False,
-		filename = os.path.join(store.path, CKPT_NAME_LATEST), delta=0.005)
+		filename = checkpoint_path, delta=0.005)
 	  
 	for epoch in range(args.epochs):
 
@@ -225,9 +216,6 @@ def train(model: ss.Seq2Seq, train_iterator: tt.Iterator,
 
 		eval_stats = evaluate(model, validation_iter, epoch, args, criterion,
 		                      logging_meters=logging_meters, store=store)
-		# print(eval_stats)
-		# exit()
-
 
 		for name, stat in eval_stats.items():
 			if 'accuracy' in name:
@@ -237,9 +225,15 @@ def train(model: ss.Seq2Seq, train_iterator: tt.Iterator,
 
 		early_stopping(eval_stats['loss'], model)
 		if early_stopping.early_stop:
-			print("Early stopping. Loading model from last saved checkoint.")
-			model.load_state_dict(torch.load(os.path.join(store.path, CKPT_NAME_LATEST)))
+			print("Early stopping, resetting to last checkpoint.")
+			model.load_state_dict(torch.load(checkpoint_path))
 			break
 
-		torch.save(model.state_dict(), os.path.join(store.path, CKPT_NAME_LATEST))
+
+		# Save the paramaters at the end of every epoch
+		torch.save(model.state_dict(), checkpoint_path)
+
+	# Save the entire model so that we can load it in testing without knowledge
+	# of the model structure
+	torch.save(model, model_path)
 
