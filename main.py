@@ -51,7 +51,7 @@ def train_model(args: Dict):
 	exp_time = time.strftime('%d-%m-%y', time.gmtime())
 	exp_count = 0
 		
-  logging_meters = dict()
+	logging_meters = dict()
 	if args.sentacc: logging_meters['sentence-level-accuracy'] = training.SentenceLevelAccuracy()
 	if args.tokenacc: logging_meters['token-level-accuracy'] = training.TokenLevelAccuracy()
 	if args.tokens is not None:
