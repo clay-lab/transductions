@@ -4,7 +4,7 @@
 
 from cmd import Cmd
 from seq2seq import Seq2Seq
-from typing import List
+from typing import List, Dict
 from tqdm import tqdm
 import torch
 from torchtext.data import Field, TabularDataset, BucketIterator
@@ -79,7 +79,7 @@ def repl(model: Seq2Seq, name: str, datafields):
 	prompt = ModelREPL(model, name = name, datafields = datafields)
 	prompt.cmdloop()
 
-def test(model: Seq2Seq, name: str, data: List):
+def test(model: Seq2Seq, name: str, data: Dict):
 	"""
 	Runs model.test() on the provided list of tasks. It is presumed that each
 	task corresponds to a test split of data named `task.test` in the data/
@@ -94,12 +94,16 @@ def test(model: Seq2Seq, name: str, data: List):
 
 	if not os.path.exists('results'):
 		os.makedir('results')
-		
-	outfile = os.path.join('results', name + '.tsv')
-	with open(outfile, 'w') as f:
-		f.write('{0}\t{1}\t{2}\n'.format('source', 'target', 'prediction'))
 
-	for iterator in data:
+	for key, iterator in data.items():
+
+		keyless = key[:-len('.test')]
+		outfile = os.path.join('results', name + '-' + keyless + '.tsv')
+		print('Testing model on {}'.format(key))
+		print('Writing results to {}'.format(outfile))
+		with open(outfile, 'w') as f:
+			f.write('{0}\t{1}\t{2}\n'.format('source', 'target', 'prediction'))
+
 
 		with torch.no_grad():
 			with tqdm(iterator) as t:

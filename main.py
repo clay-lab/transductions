@@ -208,13 +208,21 @@ def test_model(args: Dict):
 
 	if args.task is not None:
 
-		iterators = []
-		for d in [TabularDataset(os.path.join('data', v), format = 'tsv', skip_header = True, fields = datafields) for v in vocabsources]:
-			i = BucketIterator(d, batch_size = 5, device = available_device, 
-				sort_key = lambda x: len(x.target), sort_within_batch = True, 
-				repeat = False)
-			iterators.append(i)
+		iterators = {}
+		for v in vocabsources:
+			if v.endswith('.test'):
+				d = TabularDataset(os.path.join('data', v), format = 'tsv', skip_header = True, fields = datafields)
+				i = BucketIterator(d, batch_size = 5, device = available_device, 
+					sort_key = lambda x: len(x.target), sort_within_batch = True, 
+					repeat = False)
+				iterators[v] = i
+		# for d in [TabularDataset(os.path.join('data', v), format = 'tsv', skip_header = True, fields = datafields) for v in vocabsources]:
+		# 	i = BucketIterator(d, batch_size = 5, device = available_device, 
+		# 		sort_key = lambda x: len(x.target), sort_within_batch = True, 
+		# 		repeat = False)
+		# 	iterators.append(i)
 
+		# TODO MAKE THE test func work with a DICT insteaf of a LIST??
 		test.test(model, name = args.model, data = iterators)
 	else:
 		test.repl(model, name = args.model, datafields = datafields)
