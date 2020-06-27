@@ -33,7 +33,8 @@ class ModelREPL(Cmd):
 		Default command executed, if no command is specified. Since we have no
 		'commands' per-se, this will always be called.
 		"""
-		with open('tmp', 'w') as f:
+		tempfile = 'tmp'
+		with open(tempfile, 'w') as f:
 			transformation, source = args.split(' ', 1)
 			f.write('{0}\t{1}\t{0}\n'.format(source, transformation))
 			f.write('{0}\t{1}\t{0}'.format(source, transformation))
@@ -41,7 +42,7 @@ class ModelREPL(Cmd):
 		# SRC = Field(lower=True, eos_token="<eos>")
 		# TRG = Field(lower=True, eos_token="<eos>")
 		# datafields = [("source", SRC), ("annotation", TRG), ("target", TRG)]
-		dataset = TabularDataset('tmp', format = 'tsv', fields = self.datafields, 
+		dataset = TabularDataset(tempfile, format = 'tsv', fields = self.datafields, 
 			skip_header = False)
 		# SRC.build_vocab(dataset)
 		# TRG.build_vocab(dataset)
@@ -57,6 +58,8 @@ class ModelREPL(Cmd):
 			prediction = logits.argmax(2)
 			sentence = self.model.scores2sentence(prediction, self.model.decoder.vocab)
 			print(sentence[0])
+
+		os.remove(tempfile)
 
 	def do_quit(self, args):
 		"""
