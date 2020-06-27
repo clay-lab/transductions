@@ -30,7 +30,9 @@ else:
 
 # Generic sequential encoder
 class EncoderRNN(nn.Module):
-    def __init__(self, hidden_size, vocab, recurrent_unit, num_layers=1, dropout=0):
+    def __init__(self, hidden_size, vocab, recurrent_unit, num_layers=1, 
+        dropout=0):
+        
         super(EncoderRNN, self).__init__()
         self.num_layers = num_layers
         self.hidden_size = hidden_size
@@ -50,6 +52,7 @@ class EncoderRNN(nn.Module):
                 self.rnn = nn.LSTM(hidden_size, hidden_size, num_layers = num_layers, dropout = dropout)
         else:
                 print("Invalid recurrent unit type")
+                raise SystemError
 
     def forward(self, batch):
 

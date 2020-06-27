@@ -105,21 +105,6 @@ class SpecTokenAccuracy(AverageMetric):
 
 		self.update(correct, total.item())
 		
-
-def predict(model: ss.Seq2Seq, source: torch.Tensor):
-
-	# build batch from tensor
-	pass
-
-	model.eval()
-	with torch.no_grad():
-
-		logits = model(batch)
-		predictions = logits[:source.size()[0], :].argmax(2)
-		sentences = model.scores2sentence(predictions, model.decoder.vocab)
-
-		return sentences
-
 def test(model: ss.Seq2Seq, test_iter: tt.Iterator, task: str, filename: str):
 
 	model.eval()

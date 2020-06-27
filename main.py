@@ -206,15 +206,18 @@ def test_model(args: Dict):
 	model.load_state_dict(torch.load(model_path))
 	model.eval()
 
-	iterators = []
-	for d in [TabularDataset(os.path.join('data', v), format = 'tsv', skip_header = True, fields = datafields) for v in vocabsources]:
-		i = BucketIterator(d, batch_size = 5, device = available_device, sort_key = lambda x: len(x.target), sort_within_batch = True, repeat = False)
-		iterators.append(i)
-
 	if args.task is not None:
+
+		iterators = []
+		for d in [TabularDataset(os.path.join('data', v), format = 'tsv', skip_header = True, fields = datafields) for v in vocabsources]:
+			i = BucketIterator(d, batch_size = 5, device = available_device, 
+				sort_key = lambda x: len(x.target), sort_within_batch = True, 
+				repeat = False)
+			iterators.append(i)
+
 		test.test(model, name = args.model, data = iterators)
 	else:
-		test.repl(model, name = args.model)
+		test.repl(model, name = args.model, datafields = datafields)
 
 
 def setup_store(args: Dict, logging_dir: str):
@@ -256,9 +259,6 @@ def parse_arguments():
 	trn = subparser.add_parser('train')
 	trn.set_defaults(func = train_model)
 
-	trn.add_argument('-m', '--model', 
-		help = 'type of model (encoder and decoder) used', type = str, 
-		choices = ['GRU', 'LSTM', 'SRN', 'Tree'], default = 'GRU')
 	trn.add_argument('-e', '--encoder', 
 		help = 'type of encoder used', type = str, 
 		choices = ['GRU', 'LSTM', 'SRN', 'Tree'], default = 'GRU')
