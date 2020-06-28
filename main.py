@@ -94,11 +94,11 @@ def train_model(args: Dict):
 		SRC_TREE = TreeField(collapse_unary=True)
 		SRC = TreeSequenceField(SRC_TREE)
 		TRANS = RawField()
-		TAR_TREE = TreeField(collapse_unary=True)
-		TAR = TreeSequenceField(TAR_TREE, inner_order="pre", inner_symbol="NULL", is_target=True)
+		TRG_TREE = TreeField(collapse_unary=True)
+		TRG = TreeSequenceField(TRG_TREE, inner_order="pre", inner_symbol="NULL", is_target=True)
 		datafields = [(("source_tree", "source"), (SRC_TREE, SRC)), 
 			("annotation", TRANS), 
-			(("target_tree", "target"), (TAR_TREE, TAR))]
+			(("target_tree", "target"), (TRG_TREE, TRG))]
 	else:
 		SRC = Field(lower=True, eos_token="<eos>") # Source vocab
 		TRG = Field(lower=True, eos_token="<eos>") # Target vocab
@@ -132,11 +132,14 @@ def train_model(args: Dict):
 	tree_decoder_names = ['Tree']
 	if args.decoder not in tree_decoder_names:
 		dec = DecoderRNN(hidden_size=args.hidden_size, vocab=TRG.vocab, encoder_vocab=SRC.vocab, recurrent_unit=args.decoder, num_layers=args.layers, max_length=args.max_length, attention_type=args.attention, dropout=args.dropout)
-		dec.to(available_device)
+		dec.to(available_device)	# TODO: isn't this line redundant?
 		model = seq2seq.Seq2Seq(encoder, dec, ["source"], ["middle0", "annotation", "middle1", "source"], decoder_train_field_names=["middle0", "annotation", "middle1", "source", "target"])
 		model.to(available_device)
 	else:
-		assert False
+		#dec = TridentDecoder(arity=3, vocab_size=len(TRG.vocab), hidden_size=args.hidden_size, max_depth=5)
+		dec = GRUTridentDecoder(arity=3, vocab_size=len(TRG.vocab), hidden_size=args.hidden_size, max_depth=5)
+		model = seq2seq.Seq2Seq(encoder, dec, ["source"], ["middle0", "annotation", "middle1", "source"], decoder_train_field_names=["middle0", "annotation", "middle1", "source", "target"])
+		model.to(available_device)
 
 	# if CKPT_NAME_LATEST in os.listdir(store.path):
 	# 	ckpt_path = os.path.join(store.path, CKPT_NAME_LATEST)
