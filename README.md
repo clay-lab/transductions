@@ -90,6 +90,9 @@ to evaluate the model on. This will generate two new files,
 `results/negation-29-06-20-0-neg-1` and `results/negation-29-06-20-0-neg-2`,
 which contain the model's output on these datasets.
 
+A brief warning: For some reason, there is an as-of-yet unsolved bug in the code which causes testing to not work if more than three tasks are passed in at
+once, so please only pass three or fewer arguments to the `-t, --task` flag.
+
 In interactive mode, you don't specify any tasks. Instead you enter a 
 Read-Evaluate-Print Loop (REPL) which loads your model and prompts you to enter
 sequences into a prompt and the model's output will be printed below. Sequences
