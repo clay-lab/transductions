@@ -142,12 +142,11 @@ def train_model(args: Dict):
 		TRANS = SRC if args.vocab == "SRC" else TRG
 		datafields = [("source", SRC), ("annotation", TRANS), ("target", TRG)]
 
+	train_iter, val_iter, test_iter = get_iterators(args, SRC, TRANS, TRG)
+
 	print(os.path.join(model_dir, 'SRC.vocab'))
 	pickle.dump(SRC, open(os.path.join(model_dir, 'SRC.vocab'), 'wb') )
 	pickle.dump(TRG, open(os.path.join(model_dir, 'TRG.vocab'), 'wb') )
-
-
-	train_iter, val_iter, test_iter = get_iterators(args, SRC, TRANS, TRG)
 
 	encoder = EncoderRNN(hidden_size=args.hidden_size, vocab = SRC.vocab, recurrent_unit=args.encoder, num_layers=args.layers, dropout=args.dropout)
 	encoder.to(device)
@@ -189,6 +188,7 @@ def test_model(args: Dict):
 	SRC = pickle.load(open(os.path.join('models', args.model, 'SRC.vocab'), 'rb'))
 	TRG = pickle.load(open(os.path.join('models', args.model, 'TRG.vocab'), 'rb'))
 	TRANS = SRC if vocab == "SRC" else TRG
+	datafields = [("source", SRC), ("annotation", TRANS), ("target", TRG)]
 
 	enc = EncoderRNN(hidden_size=hidden_size, vocab = SRC.vocab, 
 		recurrent_unit=encoder, num_layers=layers, dropout=dropout)
