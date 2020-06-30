@@ -495,7 +495,7 @@ class TridentDecoder(nn.Module):
         return torch.split(self.to_children(hidden), self.hidden_size, dim=-1)
 
 class GRUTridentDecoder(nn.Module):
-    def __init__(self, arity, vocab, hidden_size, max_depth, all_annotations, null_placement="pre"):
+    def __init__(self, arity, vocab, hidden_size, max_depth, all_annotations, null_placement="pre", inner_label="NULL"):
         super(GRUTridentDecoder, self).__init__()
 
         self.arity = arity
@@ -503,7 +503,9 @@ class GRUTridentDecoder(nn.Module):
 
         self.hidden_size = hidden_size
         self.vocab = vocab
-        self.vocab_size = len(self.vocab) + 1 # first one is for null
+        self.vocab_size = len(self.vocab) #+ 1 # first one is for null # TODO: no null is already in the vocab
+        self.null_ix = self.vocab.stoi[inner_label]
+        
         self.max_depth = max_depth
 
         self.hidden2vocab = nn.Sequential(nn.Linear(self.hidden_size, 2*self.hidden_size), nn.Sigmoid(), nn.Linear(2*self.hidden_size, self.vocab_size))
@@ -518,9 +520,9 @@ class GRUTridentDecoder(nn.Module):
         for _ in range(self.arity):
             self.per_child_cell.append(nn.GRUCell(self.hidden_size, self.hidden_size))
         
-    @property
-    def null_ix(self):
-        return 0
+    #@property
+    #def null_ix(self):
+    #    return 0
 
     """def new_annotation_embedding(self):
         
@@ -570,7 +572,7 @@ class GRUTridentDecoder(nn.Module):
             yield production
 
     def forward_eval_helper(self, root_hidden, input_embedding, depth=0):
-        production = self.hidden2vocab(root_hidden)[0]
+        production = self.hidden2vocab(root_hidden)[0] # batch ix 0 (but there's only one!)
         if (torch.argmax(production) == self.null_ix) and (depth <= self.max_depth):
             # we chose NOT to output a word here... recurse more
             for child_ix in range(self.arity):

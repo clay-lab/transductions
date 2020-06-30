@@ -169,7 +169,8 @@ def evaluate(model: ss.Seq2Seq, val_iter: tt.Iterator, epoch: int,
 				if name == 'loss':
 					meter.update(batch_loss)
 				else:
-					meter.process_batch(logits[:target.size()[0], :].argmax(2), target, model)
+					#meter.process_batch(logits[:target.size()[0], :].argmax(2), target, model)
+					meter.process_batch(logits[:target.size()[0], :].argmax(2), target[:logits.size()[0]], model)
 		for name, meter in logging_meters.items():
 			stats_dict[name] = meter.result()
 			meter.reset()
