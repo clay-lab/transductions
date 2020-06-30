@@ -20,6 +20,7 @@ import torch
 import torch.nn as nn
 from torch import optim
 import cox.store
+from cox.store import Store
 from tqdm import tqdm
 from tree_loaders import TreeField, TreeSequenceField
 from typing import Dict
@@ -180,10 +181,6 @@ def test_model(args: Dict):
 	datafields = [("source", SRC), ("annotation", TRANS), ("target", TRG)]
 
 	vocabsources = [trainedtask + ext for ext in ['.train', '.test', '.val']]
-	# vocabsources.append(trainedtask + '.train')
-	# vocabsources.append(trainedtask + '.val')
-	# vocabsources.append(trainedtask + '.test')
-
 	datasets = [TabularDataset(os.path.join('data', v), format = 'tsv', 
 		skip_header = True, fields = datafields) for v in vocabsources]
 
@@ -243,6 +240,17 @@ def test_model(args: Dict):
 	# else:
 	# 	test.repl(model, name = args.model, datafields = datafields)
 
+def show_model_log(args: Dict):
+
+	logging_dir = os.path.join('logs', args.model)
+	exp_dir = os.listdir(logging_dir)[0]
+
+	store = Store(logging_dir, exp_dir)
+	metadata = store['metadata'].df
+	logs = store['logs'].df
+
+	print(metadata)
+	print(logs)
 
 def setup_store(args: Dict, logging_dir: str):
 
@@ -287,9 +295,11 @@ def parse_arguments():
 
 	trn = subparser.add_parser('train')
 	tst = subparser.add_parser('test')
+	log = subparser.add_parser('log')
 
 	trn.set_defaults(func = train_model)
 	tst.set_defaults(func = test_model)
+	log.set_defaults(func = show_model_log)
 
 	trn.add_argument('-e', '--encoder', 
 		help = 'type of encoder used', type = str, 
@@ -350,6 +360,11 @@ def parse_arguments():
 		type = str, nargs = '+', default = None)
 	tst.add_argument('-m', '--model', help = 'name of model to test', type = str,
 		required = True)
+
+	log.add_argument('-m', '--model', help = 'name of model to show logs of', 
+		type = str, required = True)
+	log.add_argument('-exp', '--expname', help = 'experiment name', 
+		type = str, default = None)
 
 	return parser.parse_args()
 
