@@ -10,7 +10,8 @@ $ python main.py {train, test}
 ```
 
 Passing the `train` argument will allow you to train a new model, while 
-issuing the `test` argument will allow you to load a model and test it.
+issuing the `test` argument will allow you to load a model and test it. Note 
+that Python 3 is required; Python 2.7 is not supported.
 
 ### Training
 
