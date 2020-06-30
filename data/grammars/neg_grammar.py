@@ -29,20 +29,22 @@ from generator import create_file
 # RP, # Relative Pronoun
 # V, # Verb that occurs at the end of an AdvP
 # Adv, # Adverb
+
+#TODO: ADD NEG
 S, NP, MP, VP, AdvP, VPTr, RelP, NPTr, Det, N, PN, Pron, M, VInTr, VTr, NTr, PlDet,PlNTr, RP, NTand, Adv = nonterminals('S, NP, MP, VP, AdvP, VPTr, RelP, NPTr, Det, N, PN, Pron, M, VInTr, VTr, NTr, PlDet,PlNTr, RP, NTand, Adv')
 
 neg_grammar = PCFG.fromstring("""
     S -> NP MP [0.6] | AdvP S [0.2] | S AdvP [0.2]
-    NP -> Det N [0.2] | PN [0.7] | Pron [0.1]
+    NP -> Det N [0.2] | PN [0.7] | Pron [0.1] 
     MP -> M VP [1.0]
     VP -> VInTr [0.2] | VPTr [0.4] | VPTr RelP [0.4] 
     AdvP -> Adv NP MP [1.0] 
     VPTr -> VTr NPTr  [1.0]
-    RelP -> RP NP M VTr [1.0] 
+    RelP -> RP NP M VTr [1.0] | 
     NPTr -> Det NTr [0.5] | PlDet PlNTr [0.5] 
     Det -> 'the' [0.5] | 'a' [0.5]
     N -> 'student' [0.3] | 'professor' [0.3] | 'wizard' [0.2] | 'witch' [0.2]
-    PN -> 'Harry' [0.05] | 'Ginny' [0.05] | 'Hermione' [0.05] | 'Ron' [0.05] | 'Fred' [0.05] | 'George' [0.05] | 'Petunia' [0.05] | 'Vernon' [0.05] | 'Lily' [0.05] | 'Hagrid' [0.05] | 'James' [0.05] | 'Neville' [0.05] | 'Snape' [0.05] | 'Dobby' [0.05] | 'McGonagall' [0.05] | 'Lupin' [0.05] | 'Draco' [0.05] | 'Voldemort' [0.05] | 'Sirius' [0.05] | 'Albus' [0.05]
+    PN -> 'Harry' [0.05] | 'Ginny' [0.05] | 'Hermione' [0.05] | 'Ron' [0.05] | 'Fred' [0.05] | 'George' [0.05] | 'Petunia' [0.05] | 'Vernon' [0.05] | 'Lily' [0.05] | 'Hagrid' [0.05] | 'James' [0.05] | 'Neville' [0.05] | 'Snape' [0.05] | 'Dobby' [0.05] | 'McGonagall' [0.05] | 'lupin' [0.05] | 'Draco' [0.05] | 'voldemort' [0.05] | 'Sirius' [0.05] | 'Albus' [0.05]
     Pron -> 'he' [0.5] | 'she' [0.5]
     M -> 'can' [0.2] | 'may' [0.2] | 'must' [0.3] | 'should' [0.3] 
     VInTr -> 'hiccup' [0.1] | 'party'[0.1] | 'wiggle' [0.1] | 'laugh' [0.1] | 'smile' [0.1] | 'giggle' [0.1] | 'jump' [0.1] | 'run' [0.1] | 'walk' [0.1] | 'swim' [0.1]
@@ -53,7 +55,9 @@ neg_grammar = PCFG.fromstring("""
     RP -> 'that' [0.6] | 'which' [0.4] 
     NTand -> 'and' [1.0]
     Adv -> 'because' [0.5] | 'since' [0.5]   
+    
 """)
+
 
 # generate positive and negative sentences
 # return source, neg, and target to be used in create file
