@@ -1,8 +1,8 @@
 source	target	prediction
-alice notices herself <eos>	notice ( alice , alice ) <eos>	notice ( alice , alice ) <eos>
-alice throws herself <eos>	throw ( alice , alice ) <eos>	throw ( alice , alice ) <eos>
-alice knows herself <eos>	know ( alice , alice ) <eos>	know ( alice , alice ) <eos>
-alice sees herself <eos>	see ( alice , alice ) <eos>	see ( alice , alice ) <eos>
 alice likes herself <eos>	like ( alice , alice ) <eos>	like ( alice , alice ) <eos>
+alice notices herself <eos>	notice ( alice , alice ) <eos>	notice ( alice , alice ) <eos>
 alice dislikes herself <eos>	dislike ( alice , alice ) <eos>	dislike ( alice , alice ) <eos>
+alice sees herself <eos>	see ( alice , alice ) <eos>	see ( alice , alice ) <eos>
+alice throws herself <eos>	throw ( alice , alice ) <eos>	throw ( alice , alice ) <eos>
 alice meets herself <eos>	meet ( alice , alice ) <eos>	meet ( alice , alice ) <eos>
+alice knows herself <eos>	know ( alice , alice ) <eos>	know ( alice , alice ) <eos>
