@@ -1,0 +1,8 @@
+source	target	prediction
+alice sees alice <eos>	see ( alice , alice ) <eos>	see ( alice , winnifred ) <eos>
+alice meets alice <eos>	meet ( alice , alice ) <eos>	meet ( alice , samuel ) <eos>
+alice notices alice <eos>	notice ( alice , alice ) <eos>	notice ( alice , samuel ) <eos>
+alice knows alice <eos>	know ( alice , alice ) <eos>	know ( alice , tracy ) <eos>
+alice throws alice <eos>	throw ( alice , alice ) <eos>	throw ( alice , john ) <eos>
+alice dislikes alice <eos>	dislike ( alice , alice ) <eos>	dislike ( alice , winnifred ) <eos>
+alice likes alice <eos>	like ( alice , alice ) <eos>	like ( alice , john ) <eos>
