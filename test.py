@@ -94,6 +94,7 @@ def test(model: Seq2Seq, name: str, data: Dict):
 	"""
 
 	available_device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+	model.eval()
 
 	if not os.path.exists('results'):
 		os.makedir('results')

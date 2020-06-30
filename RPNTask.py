@@ -124,6 +124,6 @@ if False:
 
     fields = {"source_tree": SRC, "annotation": EXTRACT, "target_tree": TAR}
 
-    for name, n in zip(["train", "test", "val"], [500, 100, 50]):
+    for name, n in zip(["train", "test", "val"], [5000, 5000, 5000]):
         ds = tree_loaders.PCFGDataset(polish_annotated, n, fields, min_length=5, max_length=15)
         tree_loaders.write_dataset(ds, f"./data/arithmetic.{name}")

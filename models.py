@@ -21,6 +21,8 @@ import os
 import time
 import math
 
+from collections import defaultdict
+
 use_cuda = torch.cuda.is_available()
 
 if use_cuda:
@@ -448,37 +450,37 @@ class TridentDecoder(nn.Module):
     def null_ix(self):
         return 0
 
-    def forward(self, root_hidden, training_set):
-        #If the root_hidden input is from an LSTM, take h
-        if isinstance(root_hidden,tuple):
-            root_hidden = root_hidden[0]
-        #only take the last hidden layer from the encoder
-        root_hidden = root_hidden[-1, :, :].squeeze(1)
-        print('root_hidden', root_hidden.shape)
-        
+    def forward(self, root_hidden, annotation, target_tree=None):
+        batch_size = root_hidden.shape[0]
+        assert batch_size == annotation.shape[0]
+        batch_outs = []
+        for eg_ix in range(batch_size):
+            batch_outs.append(self.forward_nobatch(root_hidden[eg_ix, :], annotation[eg_ix], target_tree=(None if target_tree is None else target_tree[eg_ix])))
+
+        return nn.utils.rnn.pad_sequence(batch_outs)
+
+    def forward_nobatch(self, root_hidden, annotation, target_tree=None):
         if self.training:
             # assumption: every non-terminal node either has 3 children which are all non-terminals, or is the parent of one terminal node
-            tree = training_set[3]
-            raw_scores = torch.stack(list(self.forward_train_helper(root_hidden, tree)))
-            return F.log_softmax(raw_scores, dim=1)
+            assert target_tree is not None
+            return torch.stack(list(self.forward_train_helper(root_hidden, annotation, target_tree)))
         else:
-            raw_scores = torch.stack(list(self.forward_eval_helper(root_hidden)))
-            return F.log_softmax(raw_scores, dim=1)
+            return torch.stack(list(self.forward_eval_helper(root_hidden, annotation)))
 
-    def forward_train_helper(self, root_hidden, root):
+    def forward_train_helper(self, root_hidden, annotation, target_tree):
         production = self.hidden2vocab(root_hidden)
-        if len(root) > 1:
-            assert len(root) == self.arity
+        if len(target_tree) > 1:
+            assert len(target_tree) == self.arity
 
             assert self.null_placement == "pre"
             yield production
             children_hidden = self._hidden2children(root_hidden)
             for child_ix in range(self.arity):
-                yield from self.forward_train_helper(children_hidden[child_ix], root[child_ix])
+                yield from self.forward_train_helper(children_hidden[child_ix], target_tree[child_ix])
         else:
             yield production
 
-    def forward_eval_helper(self, root_hidden, depth=0):
+    def forward_eval_helper(self, root_hidden, annotation, depth=0):
         production = self.hidden2vocab(root_hidden)
 
         if (torch.argmax(production) == self.null_ix) and (depth <= self.max_depth):
@@ -493,20 +495,25 @@ class TridentDecoder(nn.Module):
         return torch.split(self.to_children(hidden), self.hidden_size, dim=-1)
 
 class GRUTridentDecoder(nn.Module):
-    def __init__(self, arity, vocab_size, hidden_size, max_depth, null_placement="pre"):
+    def __init__(self, arity, vocab, hidden_size, max_depth, all_annotations, null_placement="pre"):
         super(GRUTridentDecoder, self).__init__()
 
         self.arity = arity
         self.null_placement = null_placement
 
         self.hidden_size = hidden_size
-        self.vocab_size = vocab_size + 1 # first one is for null
+        self.vocab = vocab
+        self.vocab_size = len(self.vocab) + 1 # first one is for null
         self.max_depth = max_depth
 
         self.hidden2vocab = nn.Sequential(nn.Linear(self.hidden_size, 2*self.hidden_size), nn.Sigmoid(), nn.Linear(2*self.hidden_size, self.vocab_size))
         
+        # in regular nn.Embedding, weights are initialized from N(0,1) so we'll do that too
+        # unsqueeze because first dimension must be batch
+        self.annotation_embeddings = nn.ParameterDict({str(a): nn.Parameter(torch.randn(self.hidden_size, requires_grad=True).unsqueeze(0)) for a in all_annotations})
+
         # IDEA: in the future, have just one GRU for all the children but feed in a different input for each instead of always using this same dumb vector 
-        self.null_vector = torch.zeros(self.hidden_size, requires_grad=False).unsqueeze(0)
+        #self.null_vector = torch.zeros(self.hidden_size, requires_grad=False).unsqueeze(0)
         self.per_child_cell = nn.ModuleList()
         for _ in range(self.arity):
             self.per_child_cell.append(nn.GRUCell(self.hidden_size, self.hidden_size))
@@ -515,43 +522,60 @@ class GRUTridentDecoder(nn.Module):
     def null_ix(self):
         return 0
 
-    def forward(self, root_hidden, training_set):
-        #If the root_hidden input is from an LSTM, take h
-        if isinstance(root_hidden,tuple):
-            root_hidden = root_hidden[0]
-        #only take the last hidden layer from the encoder
-        root_hidden = root_hidden[-1, :, :].squeeze(1)
+    """def new_annotation_embedding(self):
+        
+        return nn.Parameter(torch.randn(self.hidden_size, requires_grad=True).unsqueeze(0))"""
 
-        root_hidden = root_hidden.unsqueeze(0)
+    def forward(self, root_hiddens, annotations, target_trees=None):
+        # for some reason the size comes out of Encoder as [1, 5, 256]
+        root_hiddens = root_hiddens.squeeze()
+
+        batch_size = root_hiddens.shape[0]
+        assert batch_size == len(annotations)
+        batch_outs = []
+        for eg_ix in range(batch_size):
+            batch_outs.append(self.forward_nobatch(root_hiddens[eg_ix, :], annotations[eg_ix], target_tree=(None if target_trees is None else target_trees[eg_ix])))
+
+        return nn.utils.rnn.pad_sequence(batch_outs, padding_value=self.vocab['<pad>'])
+
+    def forward_nobatch(self, root_hidden, annotation, target_tree=None):
+        root_hidden = root_hidden.unsqueeze(0) # GRUCell expects first dimension to be batch size
+        
+        annotation_str = str(annotation)
+        """if annotation_str not in self.annotation_embeddings:
+            if self.training:
+                self.annotation_embeddings[annotation_str] = self.new_annotation_embedding()
+            else:
+                assert False"""
+        input_embedding = self.annotation_embeddings[annotation_str]
+        
         if self.training:
             # assumption: every non-terminal node either has 3 children which are all non-terminals, or is the parent of one terminal node
-            tree = training_set[3]
-            raw_scores = torch.stack(list(self.forward_train_helper(root_hidden, tree)))
-            return F.log_softmax(raw_scores, dim=1)
+            assert target_tree is not None
+            return torch.stack(list(self.forward_train_helper(root_hidden, input_embedding, target_tree)))
         else:
-            raw_scores = torch.stack(list(self.forward_eval_helper(root_hidden)))
-            return F.log_softmax(raw_scores, dim=1)
+            return torch.stack(list(self.forward_eval_helper(root_hidden, input_embedding)))
 
-    def forward_train_helper(self, root_hidden, root):
-        production = self.hidden2vocab(root_hidden)[0]
-        if len(root) > 1:
-            assert len(root) == self.arity
+    def forward_train_helper(self, root_hidden, input_embedding, target_tree):
+        production = self.hidden2vocab(root_hidden)[0] # batch ix 0 (but there's only one!)
+        if len(target_tree) > 1:
+            assert len(target_tree) == self.arity
 
             assert self.null_placement == "pre"
             yield production
             for child_ix in range(self.arity):
-                child_hidden = self.per_child_cell[child_ix](self.null_vector, root_hidden)
-                yield from self.forward_train_helper(child_hidden, root[child_ix])
+                child_hidden = self.per_child_cell[child_ix](input_embedding, root_hidden)
+                yield from self.forward_train_helper(child_hidden, input_embedding, target_tree[child_ix])
         else:
             yield production
 
-    def forward_eval_helper(self, root_hidden, depth=0):
+    def forward_eval_helper(self, root_hidden, input_embedding, depth=0):
         production = self.hidden2vocab(root_hidden)[0]
         if (torch.argmax(production) == self.null_ix) and (depth <= self.max_depth):
             # we chose NOT to output a word here... recurse more
             for child_ix in range(self.arity):
-                child_hidden = self.per_child_cell[child_ix](self.null_vector, root_hidden)
-                yield from self.forward_eval_helper(child_hidden, depth+1)
+                child_hidden = self.per_child_cell[child_ix](input_embedding, root_hidden)
+                yield from self.forward_eval_helper(child_hidden, input_embedding, depth+1)
         else:
             yield production
 

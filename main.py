@@ -7,7 +7,7 @@ import json
 
 from torchtext.data import Field, TabularDataset, BucketIterator, RawField
 
-from models import EncoderRNN, DecoderRNN #, TreeDecoderRNN, TreeEncoderRNN
+from models import EncoderRNN, DecoderRNN, GRUTridentDecoder #, TreeDecoderRNN, TreeEncoderRNN
 import training
 import RPNTask
 import seq2seq
@@ -137,8 +137,8 @@ def train_model(args: Dict):
 		model.to(available_device)
 	else:
 		#dec = TridentDecoder(arity=3, vocab_size=len(TRG.vocab), hidden_size=args.hidden_size, max_depth=5)
-		dec = GRUTridentDecoder(arity=3, vocab_size=len(TRG.vocab), hidden_size=args.hidden_size, max_depth=5)
-		model = seq2seq.Seq2Seq(encoder, dec, ["source"], ["middle0", "annotation", "middle1", "source"], decoder_train_field_names=["middle0", "annotation", "middle1", "source", "target"])
+		dec = GRUTridentDecoder(arity=3, vocab=TRG.vocab, hidden_size=args.hidden_size, all_annotations=["POLISH", "RPN"], max_depth=5)
+		model = seq2seq.Seq2Seq(encoder, dec, ["source"], ["middle0", "annotation"], decoder_train_field_names=["middle0", "annotation", "target_tree"])
 		model.to(available_device)
 
 	# if CKPT_NAME_LATEST in os.listdir(store.path):
@@ -170,15 +170,25 @@ def test_model(args: Dict):
 		attention = None
 	vocab = str(structure['vocab'])
 	trainedtask = str(structure['task'])
+	input_format = str(structure['input_format'])
 
 	# Device specification
 	available_device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
-	# Create datasets and vocabulary
-	SRC = Field(lower=True, eos_token="<eos>") # Source vocab
-	TRG = Field(lower=True, eos_token="<eos>") # Target vocab
-	TRANS = SRC if vocab == "SRC" else TRG
-	datafields = [("source", SRC), ("annotation", TRANS), ("target", TRG)]
+	if input_format == 'trees':
+		SRC_TREE = TreeField(collapse_unary=True)
+		SRC = TreeSequenceField(SRC_TREE)
+		TRANS = RawField()
+		TRG_TREE = TreeField(collapse_unary=True)
+		TRG = TreeSequenceField(TRG_TREE, inner_order="pre", inner_symbol="NULL", is_target=True)
+		datafields = [(("source_tree", "source"), (SRC_TREE, SRC)), 
+			("annotation", TRANS), 
+			(("target_tree", "target"), (TRG_TREE, TRG))]
+	else:
+		SRC = Field(lower=True, eos_token="<eos>") # Source vocab
+		TRG = Field(lower=True, eos_token="<eos>") # Target vocab
+		TRANS = SRC if vocab == "SRC" else TRG
+		datafields = [("source", SRC), ("annotation", TRANS), ("target", TRG)]
 
 	vocabsources = set()
 	vocabsources.add(trainedtask + '.train')
@@ -199,19 +209,20 @@ def test_model(args: Dict):
 	TRG.build_vocab(*[TabularDataset(os.path.join('data', v), format = 'tsv', 
 			skip_header = True, fields = datafields) for v in vocabsources])
 
-	enc = EncoderRNN(hidden_size=hidden_size, vocab = SRC.vocab, 
-		recurrent_unit=encoder, num_layers=layers, dropout=dropout)
-	dec = DecoderRNN(hidden_size=hidden_size, vocab=TRG.vocab, 
-		encoder_vocab=SRC.vocab, recurrent_unit=decoder, num_layers=layers, 
-		max_length=max_length, attention_type=attention, dropout=dropout)
-
+	enc = EncoderRNN(hidden_size=hidden_size, vocab = SRC.vocab, recurrent_unit=encoder, num_layers=layers, dropout=dropout)
 	enc.to(available_device)
-	dec.to(available_device)
-
-	model = seq2seq.Seq2Seq(enc, dec, ["source"], ["middle0", "annotation", "middle1", "source"], decoder_train_field_names=["middle0", "annotation", "middle1", "source", "target"])
-
-	# Does this need to be re-done once the model is loaded?
-	model.to(available_device)
+	tree_decoder_names = ['Tree']
+	if decoder not in tree_decoder_names:
+		dec = DecoderRNN(hidden_size=hidden_size, vocab=TRG.vocab, 
+							encoder_vocab=SRC.vocab, recurrent_unit=decoder, num_layers=layers, 
+							max_length=max_length, attention_type=attention, dropout=dropout)
+		dec.to(available_device)	# TODO: isn't this line redundant?
+		model = seq2seq.Seq2Seq(enc, dec, ["source"], ["middle0", "annotation", "middle1", "source"], decoder_train_field_names=["middle0", "annotation", "middle1", "source", "target"])
+		model.to(available_device)
+	else:
+		dec = GRUTridentDecoder(arity=3, vocab=TRG.vocab, hidden_size=hidden_size, all_annotations=["POLISH", "RPN"], max_depth=5)
+		model = seq2seq.Seq2Seq(enc, dec, ["source"], ["middle0", "annotation"], decoder_train_field_names=["middle0", "annotation", "target_tree"])
+		model.to(available_device)
 
 	model_path = os.path.join('models', args.model, 'checkpoint.pt')
 	model.load_state_dict(torch.load(model_path))
