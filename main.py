@@ -113,15 +113,6 @@ def train_model(args: Dict):
 	logging_dir = os.path.join(args.outdir, exp_path)
 	model_dir = os.path.join('models', exp_path)
 
-	# We need to save not only the model parameters, but also enough information
-	# about the models structure that we can initialize a model compatable with
-	# the saved parameters before loading the state dictionary. We'll write out
-	# the relevant arguments to the file `model.structure` in `model_dir`.
-
-	with open(os.path.join(model_dir, 'arguments.txt'), 'w') as f:
-		for key, value in vars(args).items():
-			f.write('{0}: {1}\n'.format(key, value))
-
 	store, logging_meters = setup_store(args, logging_dir)
 
 	# Device specification
