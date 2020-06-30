@@ -137,6 +137,8 @@ def train_model(args: Dict):
 			("annotation", TRANS), 
 			(("target_tree", "target"), (TRG_TREE, TRG))]
 		
+		train_iter, val_iter, test_iter = get_iterators(args, SRC, TRG, datafields)
+
 		print(os.path.join(model_dir, 'SRC.vocab'))
 		pickle.dump(SRC, open(os.path.join(model_dir, 'SRC.vocab'), 'wb') )
 		pickle.dump(TRG, open(os.path.join(model_dir, 'TRG.vocab'), 'wb') )
@@ -149,25 +151,24 @@ def train_model(args: Dict):
 		TRANS = SRC if args.vocab == "SRC" else TRG
 		datafields = [("source", SRC), ("annotation", TRANS), ("target", TRG)]
 
+		train_iter, val_iter, test_iter = get_iterators(args, SRC, TRG, datafields)
+
 		print(os.path.join(model_dir, 'SRC.vocab'))
 		pickle.dump(SRC, open(os.path.join(model_dir, 'SRC.vocab'), 'wb') )
 		pickle.dump(TRG, open(os.path.join(model_dir, 'TRG.vocab'), 'wb') )
 
-	train_iter, val_iter, test_iter = get_iterators(args, SRC, TRG, datafields)
 
 	encoder = EncoderRNN(hidden_size=args.hidden_size, vocab = SRC.vocab, recurrent_unit=args.encoder, num_layers=args.layers, dropout=args.dropout)
-	encoder.to(device)
 	tree_decoder_names = ['Tree']
 	if args.decoder not in tree_decoder_names:
 		dec = DecoderRNN(hidden_size=args.hidden_size, vocab=TRG.vocab, encoder_vocab=SRC.vocab, recurrent_unit=args.decoder, num_layers=args.layers, max_length=args.max_length, attention_type=args.attention, dropout=args.dropout)
-		dec.to(device)
 		model = seq2seq.Seq2Seq(encoder, dec, ["source"], ["middle0", "annotation", "middle1", "source"], decoder_train_field_names=["middle0", "annotation", "middle1", "source", "target"])
-		model.to(device)
 	else:
 		#dec = TridentDecoder(arity=3, vocab_size=len(TRG.vocab), hidden_size=args.hidden_size, max_depth=5)
 		dec = GRUTridentDecoder(arity=3, vocab=TRG.vocab, hidden_size=args.hidden_size, all_annotations=["POLISH", "RPN"], max_depth=5)
 		model = seq2seq.Seq2Seq(encoder, dec, ["source"], ["middle0", "annotation"], decoder_train_field_names=["middle0", "annotation", "target_tree"])
-		model.to(available_device)
+	
+	model.to(device)
 
 	training.train(model, train_iter, val_iter, logging_meters, store, args,
 		save_dir = model_dir, ignore_index=TRG.vocab.stoi['<pad>'])
@@ -195,18 +196,13 @@ def test_model(args: Dict):
 	# Device specification
 	device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 	
-	if input_format == 'trees':
-		SRC_TREE = TreeField(collapse_unary=True)
-		SRC = TreeSequenceField(SRC_TREE)
-		TRANS = RawField()
-		TRG_TREE = TreeField(collapse_unary=True)
-		TRG = TreeSequenceField(TRG_TREE, inner_order="pre", inner_symbol="NULL", is_target=True)
-		
+	if input_format == 'trees':		
 		SRC = pickle.load(open(os.path.join('models', args.model, 'SRC.vocab'), 'rb'))
 		TRG = pickle.load(open(os.path.join('models', args.model, 'TRG.vocab'), 'rb'))
+		TRG.inner_order = None # don't print the annotations about tree structure (the "None"s) when converting tree to sequence
 		SRC_TREE = pickle.load(open(os.path.join('models', args.model, 'SRC_TREE.vocab'), 'rb'))
 		TRG_TREE = pickle.load(open(os.path.join('models', args.model, 'TRG_TREE.vocab'), 'rb'))
-		TRANS = SRC if vocab == "SRC" else TRG
+		TRANS = RawField()
 		datafields = [(("source_tree", "source"), (SRC_TREE, SRC)), 
 			("annotation", TRANS), 
 			(("target_tree", "target"), (TRG_TREE, TRG))]
@@ -220,14 +216,12 @@ def test_model(args: Dict):
 	
 	enc = EncoderRNN(hidden_size=hidden_size, vocab = SRC.vocab, 
 		recurrent_unit=encoder, num_layers=layers, dropout=dropout)
-	enc.to(device)
+
 	tree_decoder_names = ['Tree']
 	if decoder not in tree_decoder_names:
 		dec = DecoderRNN(hidden_size=hidden_size, vocab=TRG.vocab, 
 			encoder_vocab=SRC.vocab, recurrent_unit=decoder, num_layers=layers, 
 			max_length=max_length, attention_type=attention, dropout=dropout)
-
-		dec.to(device)
 
 		model = seq2seq.Seq2Seq(enc, dec, ["source"], ["middle0", "annotation", 
 			"middle1", "source"], decoder_train_field_names=["middle0", "annotation", 
