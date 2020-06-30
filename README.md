@@ -1,5 +1,5 @@
 # transductions
-## Pytorch/Torchtext implementation of seq2seq transductions
+A Pytorch/Torchtext implementation of seq2seq transductions
 
 
 ## Running `transductions`
@@ -20,7 +20,7 @@ tab-separated values (TSV) of the following form:
 
 ```
 source	transformation	target
-...	...	...
+..... 	............. 	....
 ```
 Note that the header (`source	transformation	target`) must be present. The
 `source` and `target` columns consist of the input and output data you want to
@@ -35,22 +35,22 @@ generate unique models with predictable names.
 
 #### Training Options:
 
-	* `-e, --encoder`: type of encoder used; one of `GRU`, `SRN`, `LSTM`, or `Tree`. Defaults to `GRU`.
-	* `-d, --decoder`: type of decoder used; one of `GRU`, `SRN`, `LSTM`, or `Tree`. Defaults to `GRU`.
-	* `-t, --task`: task model is trained to perform. This corresponds to the name of the data files mentioned earlier. These files must be placed in the `data/` directory.
-	* `-a, --attention`: type of attention used; one of `none`, `additive`, `multiplicative`, `location`. Defaults to `none`.
-	* `-lr, --learning-rate`: learning rate of the model. Defaults to `0.01`.
-	* `-l, --layers`: number of layers in the encoder and decoder. Defaults to `1`.
-	* `-p, --patience`: number of changes model has to improve loss by `DELTA` to avoid early stopping. Defaults to `3`.
-	* `-dt, --delta`: amount model needs to improve by to avoid early stopping. Defaults to `0.005`.
-	* `-v, --vocab`: which vocabulary contains the transformation annotation; one of `SRC` or `TRG`. Defaults to `TRG`.
-	* `-do, --dropout`: how much dropout to use. Defaults to `0.0`.
-	* `-ep, --epochs`: number of epochs to train for. Defaults to `40`.
-	* `-b, --batch-size`: batch size. Defaults to `5`.
-	* `-sa, --sentacc`: whether or not to log sentence accuracy on validation data. Defaults to `True`.
-	* `-la, --lengacc`: whether or not to log length accuracy on validation data. Defaults to `True`.
-	* `-ta, --tokenacc`: whether or not to log token accuracy on validation data. Defaults to `True`.
-	* `-to, --tokens`: tokens to track the accuracy of on validation data. Defaults to `None`.
+* `-e, --encoder`: type of encoder used; one of `GRU`, `SRN`, `LSTM`, or `Tree`. Defaults to `GRU`.
+* `-d, --decoder`: type of decoder used; one of `GRU`, `SRN`, `LSTM`, or `Tree`. Defaults to `GRU`.
+* `-t, --task`: task model is trained to perform. This corresponds to the name of the data files mentioned earlier. These files must be placed in the `data/` directory.
+* `-a, --attention`: type of attention used; one of `none`, `additive`, `multiplicative`, `location`. Defaults to `none`.
+* `-lr, --learning-rate`: learning rate of the model. Defaults to `0.01`.
+* `-l, --layers`: number of layers in the encoder and decoder. Defaults to `1`.
+* `-p, --patience`: number of changes model has to improve loss by `DELTA` to avoid early stopping. Defaults to `3`.
+* `-dt, --delta`: amount model needs to improve by to avoid early stopping. Defaults to `0.005`.
+* `-v, --vocab`: which vocabulary contains the transformation annotation; one of `SRC` or `TRG`. Defaults to `TRG`.
+* `-do, --dropout`: how much dropout to use. Defaults to `0.0`.
+* `-ep, --epochs`: number of epochs to train for. Defaults to `40`.
+* `-b, --batch-size`: batch size. Defaults to `5`.
+* `-sa, --sentacc`: whether or not to log sentence accuracy on validation data. Defaults to `True`.
+* `-la, --lengacc`: whether or not to log length accuracy on validation data. Defaults to `True`.
+* `-ta, --tokenacc`: whether or not to log token accuracy on validation data. Defaults to `True`.
+* `-to, --tokens`: tokens to track the accuracy of on validation data. Defaults to `None`.
 
 #### A note on `--tokens`:
 
