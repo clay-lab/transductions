@@ -1,0 +1,8 @@
+source	transformation	target
+Alice sees Alice	sem	see ( alice , alice )
+Alice meets Alice	sem	meet ( alice , alice )
+Alice likes Alice	sem	like ( alice , alice )
+Alice dislikes Alice	sem	dislike ( alice , alice )
+Alice throws Alice	sem	throw ( alice , alice )
+Alice notices Alice	sem	notice ( alice , alice )
+Alice knows Alice	sem	know ( alice , alice )
