@@ -62,7 +62,7 @@ class ModelREPL(Cmd):
 			sentence = self.model.scores2sentence(prediction, self.model.decoder.vocab)
 			print(sentence[0])
 
-		# os.remove(tempfile)
+		os.remove(tempfile)
 
 	def do_quit(self, args):
 		"""
