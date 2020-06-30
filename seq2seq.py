@@ -52,7 +52,13 @@ class Seq2Seq(torch.nn.Module):
         tests = np.reshape([vocab.itos[i] for i in ids], tuple(scores.size())[::-1])
         test_okay = []
         for test in tests:
-            test_okay.append([t for t in test if t not in ['<pad>', '<unk>']])
+            currtest = []
+            for t in test:
+                if t not in ['<pad>', '<unk>']:
+                    currtest.append(t)
+                if t == '<eos>':
+                    break
+            test_okay.append(currtest)
         tests = [' '.join(r) for r in test_okay]
         return tests
         # return scores.apply_(f)

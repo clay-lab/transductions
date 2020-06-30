@@ -30,7 +30,9 @@ else:
 
 # Generic sequential encoder
 class EncoderRNN(nn.Module):
-    def __init__(self, hidden_size, vocab, recurrent_unit, num_layers=1, dropout=0):
+    def __init__(self, hidden_size, vocab, recurrent_unit, num_layers=1, 
+        dropout=0):
+        
         super(EncoderRNN, self).__init__()
         self.num_layers = num_layers
         self.hidden_size = hidden_size
@@ -50,6 +52,7 @@ class EncoderRNN(nn.Module):
                 self.rnn = nn.LSTM(hidden_size, hidden_size, num_layers = num_layers, dropout = dropout)
         else:
                 print("Invalid recurrent unit type")
+                raise SystemError
 
     def forward(self, batch):
 
@@ -117,6 +120,8 @@ class DecoderRNN(nn.Module):
         x = self.embedding(x)
         #Apply ReLU to embedded input?
         rnn_input = F.relu(x)
+
+        avd = next(self.parameters()).device
         
         if self.attention_type:
             #use h alone for attention key in case we're dealing with LSTM
@@ -138,7 +143,7 @@ class DecoderRNN(nn.Module):
             rnn_input = torch.cat((rnn_input, weighted_encoder_outputs), dim=1)
             
         else:
-             a = torch.zeros(encoder_outputs.shape[1], 1, encoder_outputs.shape[0])
+             a = torch.zeros(encoder_outputs.shape[1], 1, encoder_outputs.shape[0], device = avd)
         # print(rnn_input.size())
         # exit()
         batch_size = rnn_input.shape[0] 
@@ -150,14 +155,17 @@ class DecoderRNN(nn.Module):
 
     # Perform the full forward pass
     def forward(self, h0, x0, encoder_outputs, source, target=None, tf_ratio=0.5, evaluation=False):
+
+        avd = next(self.parameters()).device
+
         # annotation field eos token (main.py) turns x0 from [1,5] to [2,5]. Resolve by taking the first row
         x0 = x0[0]
         # print(x0)
         # exit()
         batch_size = encoder_outputs.shape[1]
-        outputs = torch.zeros(self.max_length, batch_size, self.vocab_size)
-        decoder_hiddens = torch.zeros(self.max_length, batch_size, self.hidden_size)
-        attention = torch.zeros(self.max_length, batch_size, encoder_outputs.shape[0])
+        outputs = torch.zeros(self.max_length, batch_size, self.vocab_size, device = avd)
+        decoder_hiddens = torch.zeros(self.max_length, batch_size, self.hidden_size, device = avd)
+        attention = torch.zeros(self.max_length, batch_size, encoder_outputs.shape[0], device = avd)
 
         #if we're evaluating, never use teacher forcing
         if (evaluation or not(torch.is_tensor(target))):
@@ -173,10 +181,11 @@ class DecoderRNN(nn.Module):
         # print(x0.size())
         # print()
         #print('x before', x, x0, self.vocab.stoi)
-        output_complete_flag = torch.zeros(batch_size, dtype=torch.bool)
+
+        output_complete_flag = torch.zeros(batch_size, dtype=torch.bool, device = avd)
         if self.recurrent_unit_type == "LSTM": #Non-LSTM encoder, LSTM decoder: create c
                 if not(isinstance(h0,tuple)):
-                    c0 = torch.zeros(self.num_layers,batch_size, self.hidden_size)
+                    c0 = torch.zeros(self.num_layers,batch_size, self.hidden_size, device = avd)
                     h = (h0, c0)
         elif isinstance(h0,tuple): #LSTM encoder, but not LSTM decoder: ignore c
             h = h[0]
@@ -204,7 +213,6 @@ class DecoderRNN(nn.Module):
         # exit()
         return outputs[:gen_length]#, decoder_hiddens[:i+1], attention[:i+1]
 
-
 # GRU modified such that its hidden states are not bounded
 class UnsquashedGRU(nn.Module):
     def __init__(self, input_size, hidden_size):
@@ -230,7 +238,6 @@ class UnsquashedGRU(nn.Module):
         h_t = z_t * hx + v_t * h_tilde
 
         return h_t, h_t
-
 
 # CumMax function for use in the ON-LSTM
 class CumMax(nn.Module):
@@ -423,7 +430,6 @@ class TreeDecoderRNN(nn.Module):
 
         return words_out
 
-
 class TridentDecoder(nn.Module):
     def __init__(self, arity, vocab_size, hidden_size, max_depth, null_placement="pre"):
         super(TridentDecoder, self).__init__()
@@ -606,15 +612,3 @@ class AltGRUTridentDecoder(nn.Module):
                 yield from self.forward_eval_helper(child_hidden, depth+1)
         else:
             yield production
-
-# class Seq2Seq(nn.Module):
-#     def __init__(self, encoder, decoder):
-#         super(Seq2Seq, self).__init__()
-#         self.encoder = encoder
-#         self.decoder = decoder
-        
-#     def forward(self, training_pair):
-#         encoder_output, encoder_hidden, encoder_outputs = self.encoder(training_pair)
-#         decoder_hidden = encoder_hidden[0,0,:]
-#         decoder_outputs = self.decoder(decoder_hidden, training_pair)
-#         return decoder_outputs
