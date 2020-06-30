@@ -6,7 +6,7 @@ import argparse
 
 from torchtext.data import Field, TabularDataset, BucketIterator, RawField
 
-from models import EncoderRNN, DecoderRNN #, TreeDecoderRNN, TreeEncoderRNN
+from models import EncoderRNN, DecoderRNN, GRUTridentDecoder #, TreeDecoderRNN, TreeEncoderRNN
 from metrics import SentenceLevelAccuracy, TokenLevelAccuracy, SpecTokenAccuracy, AverageMetric
 import training
 import RPNTask
@@ -34,7 +34,7 @@ META_TABLE = "metadata"
 CKPT_NAME_LATEST = "latest_ckpt.pt"
 CKPT_NAME_BEST = "best_ckpt.pt"
 
-def get_iterators(args: Dict, source, trans, target):
+def get_iterators(args: Dict, source, target, datafields):
 	"""
 	Constructs train-val-test splits from the task.{train, val, test} files.
 
@@ -55,7 +55,7 @@ def get_iterators(args: Dict, source, trans, target):
 		test = task_test,
 		format = 'tsv',
 		skip_header = True,
-		fields = [('source', source), ('annotation', trans), ('target', target)]
+		fields = datafields
 	)
 
 	train, val, test = BucketIterator.splits(
@@ -131,22 +131,29 @@ def train_model(args: Dict):
 		SRC_TREE = TreeField(collapse_unary=True)
 		SRC = TreeSequenceField(SRC_TREE)
 		TRANS = RawField()
-		TAR_TREE = TreeField(collapse_unary=True)
-		TAR = TreeSequenceField(TAR_TREE, inner_order="pre", inner_symbol="NULL", is_target=True)
+		TRG_TREE = TreeField(collapse_unary=True)
+		TRG = TreeSequenceField(TRG_TREE, inner_order="pre", inner_symbol="NULL", is_target=True)
 		datafields = [(("source_tree", "source"), (SRC_TREE, SRC)), 
 			("annotation", TRANS), 
-			(("target_tree", "target"), (TAR_TREE, TAR))]
+			(("target_tree", "target"), (TRG_TREE, TRG))]
+		
+		print(os.path.join(model_dir, 'SRC.vocab'))
+		pickle.dump(SRC, open(os.path.join(model_dir, 'SRC.vocab'), 'wb') )
+		pickle.dump(TRG, open(os.path.join(model_dir, 'TRG.vocab'), 'wb') )
+		pickle.dump(SRC_TREE, open(os.path.join(model_dir, 'SRC_TREE.vocab'), 'wb') )
+		pickle.dump(TRG_TREE, open(os.path.join(model_dir, 'TRG_TREE.vocab'), 'wb') )
+	
 	else:
 		SRC = Field(lower=True, eos_token="<eos>") # Source vocab
 		TRG = Field(lower=True, eos_token="<eos>") # Target vocab
 		TRANS = SRC if args.vocab == "SRC" else TRG
 		datafields = [("source", SRC), ("annotation", TRANS), ("target", TRG)]
 
-	train_iter, val_iter, test_iter = get_iterators(args, SRC, TRANS, TRG)
+		print(os.path.join(model_dir, 'SRC.vocab'))
+		pickle.dump(SRC, open(os.path.join(model_dir, 'SRC.vocab'), 'wb') )
+		pickle.dump(TRG, open(os.path.join(model_dir, 'TRG.vocab'), 'wb') )
 
-	print(os.path.join(model_dir, 'SRC.vocab'))
-	pickle.dump(SRC, open(os.path.join(model_dir, 'SRC.vocab'), 'wb') )
-	pickle.dump(TRG, open(os.path.join(model_dir, 'TRG.vocab'), 'wb') )
+	train_iter, val_iter, test_iter = get_iterators(args, SRC, TRG, datafields)
 
 	encoder = EncoderRNN(hidden_size=args.hidden_size, vocab = SRC.vocab, recurrent_unit=args.encoder, num_layers=args.layers, dropout=args.dropout)
 	encoder.to(device)
@@ -157,7 +164,10 @@ def train_model(args: Dict):
 		model = seq2seq.Seq2Seq(encoder, dec, ["source"], ["middle0", "annotation", "middle1", "source"], decoder_train_field_names=["middle0", "annotation", "middle1", "source", "target"])
 		model.to(device)
 	else:
-		assert False
+		#dec = TridentDecoder(arity=3, vocab_size=len(TRG.vocab), hidden_size=args.hidden_size, max_depth=5)
+		dec = GRUTridentDecoder(arity=3, vocab=TRG.vocab, hidden_size=args.hidden_size, all_annotations=["POLISH", "RPN"], max_depth=5)
+		model = seq2seq.Seq2Seq(encoder, dec, ["source"], ["middle0", "annotation"], decoder_train_field_names=["middle0", "annotation", "target_tree"])
+		model.to(available_device)
 
 	training.train(model, train_iter, val_iter, logging_meters, store, args,
 		save_dir = model_dir, ignore_index=TRG.vocab.stoi['<pad>'])
@@ -180,30 +190,55 @@ def test_model(args: Dict):
 		attention = None
 	vocab = str(metadata['vocab'][0])
 	trainedtask = str(metadata['task'][0])
+	input_format = str(metadata['input_format'][0])
 
 	# Device specification
 	device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+	
+	if input_format == 'trees':
+		SRC_TREE = TreeField(collapse_unary=True)
+		SRC = TreeSequenceField(SRC_TREE)
+		TRANS = RawField()
+		TRG_TREE = TreeField(collapse_unary=True)
+		TRG = TreeSequenceField(TRG_TREE, inner_order="pre", inner_symbol="NULL", is_target=True)
+		
+		SRC = pickle.load(open(os.path.join('models', args.model, 'SRC.vocab'), 'rb'))
+		TRG = pickle.load(open(os.path.join('models', args.model, 'TRG.vocab'), 'rb'))
+		SRC_TREE = pickle.load(open(os.path.join('models', args.model, 'SRC_TREE.vocab'), 'rb'))
+		TRG_TREE = pickle.load(open(os.path.join('models', args.model, 'TRG_TREE.vocab'), 'rb'))
+		TRANS = SRC if vocab == "SRC" else TRG
+		datafields = [(("source_tree", "source"), (SRC_TREE, SRC)), 
+			("annotation", TRANS), 
+			(("target_tree", "target"), (TRG_TREE, TRG))]
+	else:
+		# Create datasets and vocabulary
+		SRC = pickle.load(open(os.path.join('models', args.model, 'SRC.vocab'), 'rb'))
+		TRG = pickle.load(open(os.path.join('models', args.model, 'TRG.vocab'), 'rb'))
+		TRANS = SRC if vocab == "SRC" else TRG
+		datafields = [("source", SRC), ("annotation", TRANS), ("target", TRG)]
 
-	# Create datasets and vocabulary
-	SRC = pickle.load(open(os.path.join('models', args.model, 'SRC.vocab'), 'rb'))
-	TRG = pickle.load(open(os.path.join('models', args.model, 'TRG.vocab'), 'rb'))
-	TRANS = SRC if vocab == "SRC" else TRG
-	datafields = [("source", SRC), ("annotation", TRANS), ("target", TRG)]
-
+	
 	enc = EncoderRNN(hidden_size=hidden_size, vocab = SRC.vocab, 
 		recurrent_unit=encoder, num_layers=layers, dropout=dropout)
-	dec = DecoderRNN(hidden_size=hidden_size, vocab=TRG.vocab, 
-		encoder_vocab=SRC.vocab, recurrent_unit=decoder, num_layers=layers, 
-		max_length=max_length, attention_type=attention, dropout=dropout)
-
 	enc.to(device)
-	dec.to(device)
+	tree_decoder_names = ['Tree']
+	if decoder not in tree_decoder_names:
+		dec = DecoderRNN(hidden_size=hidden_size, vocab=TRG.vocab, 
+			encoder_vocab=SRC.vocab, recurrent_unit=decoder, num_layers=layers, 
+			max_length=max_length, attention_type=attention, dropout=dropout)
 
-	model = seq2seq.Seq2Seq(enc, dec, ["source"], ["middle0", "annotation", 
-		"middle1", "source"], decoder_train_field_names=["middle0", "annotation", 
-		"middle1", "source", "target"])
+		dec.to(device)
+
+		model = seq2seq.Seq2Seq(enc, dec, ["source"], ["middle0", "annotation", 
+			"middle1", "source"], decoder_train_field_names=["middle0", "annotation", 
+			"middle1", "source", "target"])
+	else:
+		# TODO: replace max depth with max length -- to find depth just take log_3 max length
+		dec = GRUTridentDecoder(arity=3, vocab=TRG.vocab, hidden_size=hidden_size, all_annotations=["POLISH", "RPN"], max_depth=5)
+		model = seq2seq.Seq2Seq(enc, dec, ["source"], ["middle0", "annotation"], decoder_train_field_names=["middle0", "annotation", "target_tree"])
 
 	model.to(device)
+	
 
 	model_path = os.path.join('models', args.model, 'checkpoint.pt')
 	model.load_state_dict(torch.load(model_path))

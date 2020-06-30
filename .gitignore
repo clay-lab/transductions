@@ -141,8 +141,12 @@ dmypy.json
 cython_debug/
 
 .DS_Store
+.vscode/
+
+# Project specific
 logs/
+results/
 demo_savefile.txt
 sandbox.ipynb
-.vscode/
+
 

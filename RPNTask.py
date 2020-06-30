@@ -103,3 +103,27 @@ def tree2index_form(tree):
         index_layers.append(next_layer_indices)
         
     return list(reversed(index_layers))
+
+def my_transform(t):
+    if t[0].label() == "RPN":
+        return polish2reversePolish(t)
+    elif t[0].label() == "POLISH":
+        return t
+    else:
+        assert False, "tree not annotated as expected"
+
+if False:
+    import tree_loaders
+
+    SRC = tree_loaders.TreeField(collapse_unary=True)
+    SRC_SEQ = tree_loaders.TreeSequenceField(SRC, lower=True)
+
+    EXTRACT = tree_loaders.TreeExtractorField(tree_transformation_fun=lambda t: t[0], collapse_unary=False)
+    TAR = tree_loaders.TreeField(my_transform, collapse_unary=True)
+    TAR_SEQ = tree_loaders.TreeSequenceField(TAR, inner_order="pre", inner_symbol="NULL", lower=True)
+
+    fields = {"source_tree": SRC, "annotation": EXTRACT, "target_tree": TAR}
+
+    for name, n in zip(["train", "test", "val"], [5000, 5000, 5000]):
+        ds = tree_loaders.PCFGDataset(polish_annotated, n, fields, min_length=5, max_length=15)
+        tree_loaders.write_dataset(ds, f"./data/arithmetic.{name}")
