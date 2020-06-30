@@ -3,12 +3,15 @@
 # Code for testing a trained model on provided datasets.
 
 from cmd import Cmd
-from seq2seq import Seq2Seq
+
 from typing import List, Dict
 from tqdm import tqdm
 import torch
 from torchtext.data import Field, TabularDataset, BucketIterator
 import os
+
+from seq2seq import Seq2Seq
+from metrics import SentenceLevelAccuracy
 
 class Model():
 
@@ -37,7 +40,7 @@ class ModelREPL(Cmd):
 		with open(tempfile, 'w') as f:
 			transformation, source = args.split(' ', 1)
 			f.write('{0}\t{1}\t{0}\n'.format(source, transformation))
-			f.write('{0}\t{1}\t{0}'.format(source, transformation))
+			f.write('{0}\t{1}\t{0}\n'.format(source, transformation))
 
 		# SRC = Field(lower=True, eos_token="<eos>")
 		# TRG = Field(lower=True, eos_token="<eos>")
@@ -59,7 +62,7 @@ class ModelREPL(Cmd):
 			sentence = self.model.scores2sentence(prediction, self.model.decoder.vocab)
 			print(sentence[0])
 
-		os.remove(tempfile)
+		# os.remove(tempfile)
 
 	def do_quit(self, args):
 		"""
@@ -100,13 +103,17 @@ def test(model: Seq2Seq, name: str, data: Dict):
 
 	for key, iterator in data.items():
 
-		keyless = key[:-len('.test')]
-		outfile = os.path.join('results', name + '-' + keyless + '.tsv')
+		# Prepare output files
+		# keyless = key[:-len('.test')]
+		outfile = os.path.join('results', name + '-' + key + '.tsv')
 		print('Testing model on {}'.format(key))
 		print('Writing results to {}'.format(outfile))
 		with open(outfile, 'w') as f:
 			f.write('{0}\t{1}\t{2}\n'.format('source', 'target', 'prediction'))
 
+		# Create accuracy meters
+		meters = {}
+		meters['sentence-level-accuracy'] = SentenceLevelAccuracy()
 
 		with torch.no_grad():
 			with tqdm(iterator) as t:
@@ -115,11 +122,23 @@ def test(model: Seq2Seq, name: str, data: Dict):
 					# raise SystemExit
 
 					logits = model(batch)
+					logits_max = logits.argmax(2)
+
+					for mkey, meter in meters.items():
+						target_length = batch.target.size()[0]
+						logits_narrow = torch.narrow(logits_max, 0, 0, target_length)
+						meter.process_batch(logits_narrow, batch.target, model)
 					
 					source = model.scores2sentence(batch.source, model.encoder.vocab)
-					prediction = model.scores2sentence(logits.argmax(2), model.decoder.vocab)
+					prediction = model.scores2sentence(logits_max, model.decoder.vocab)
 					target = model.scores2sentence(batch.target, model.decoder.vocab)
 
 					with open(outfile, 'a') as f:
 						for i, s in enumerate(source):
+							# if target[i] != prediction[i]:
+							# 	print('{0} -> {1}'.format(s, prediction[i]))
 							f.write('{0}\t{1}\t{2}\n'.format(s, target[i], prediction[i]))
+
+				for mkey, meter in meters.items():
+					print('{0}:\t{1}'.format(mkey, meter.result()))
+					meter.reset()

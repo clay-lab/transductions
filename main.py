@@ -8,9 +8,11 @@ import json
 from torchtext.data import Field, TabularDataset, BucketIterator, RawField
 
 from models import EncoderRNN, DecoderRNN #, TreeDecoderRNN, TreeEncoderRNN
+from metrics import SentenceLevelAccuracy, TokenLevelAccuracy, SpecTokenAccuracy, AverageMetric
 import training
 import RPNTask
 import seq2seq
+
 import time
 
 import numpy as np
@@ -52,12 +54,12 @@ def train_model(args: Dict):
 	exp_count = 0
 		
 	logging_meters = dict()
-	if args.sentacc: logging_meters['sentence-level-accuracy'] = training.SentenceLevelAccuracy()
-	if args.tokenacc: logging_meters['token-level-accuracy'] = training.TokenLevelAccuracy()
+	if args.sentacc: logging_meters['sentence-level-accuracy'] = SentenceLevelAccuracy()
+	if args.tokenacc: logging_meters['token-level-accuracy'] = TokenLevelAccuracy()
 	if args.tokens is not None:
 		for token in args.tokens.split('_'):
-			logging_meters['{0}-accuracy'.format(token)] = training.SpecTokenAccuracy(token)
-	logging_meters['loss'] = training.AverageMetric()
+			logging_meters['{0}-accuracy'.format(token)] = SpecTokenAccuracy(token)
+	logging_meters['loss'] = AverageMetric()
 
 	while True:
 		exp_path = '{0}-{1}-{2}'.format(exp_name, exp_time, exp_count)
@@ -177,24 +179,16 @@ def test_model(args: Dict):
 	TRANS = SRC if vocab == "SRC" else TRG
 	datafields = [("source", SRC), ("annotation", TRANS), ("target", TRG)]
 
-	vocabsources = set()
-	vocabsources.add(trainedtask + '.train')
-	vocabsources.add(trainedtask + '.val')
-	vocabsources.add(trainedtask + '.test')
-	if args.task is not None:
-		for task in args.task:
-			vocabsources.add(task + '.test')
+	vocabsources = [trainedtask + ext for ext in ['.train', '.test', '.val']]
+	# vocabsources.append(trainedtask + '.train')
+	# vocabsources.append(trainedtask + '.val')
+	# vocabsources.append(trainedtask + '.test')
 
-	datasets = []
-	for v in vocabsources:
-		d = TabularDataset(os.path.join('data', v), format = 'tsv', 
-			skip_header = True, fields = datafields)
-		datasets.append(datasets)
+	datasets = [TabularDataset(os.path.join('data', v), format = 'tsv', 
+		skip_header = True, fields = datafields) for v in vocabsources]
 
-	SRC.build_vocab(*[TabularDataset(os.path.join('data', v), format = 'tsv', 
-			skip_header = True, fields = datafields) for v in vocabsources])
-	TRG.build_vocab(*[TabularDataset(os.path.join('data', v), format = 'tsv', 
-			skip_header = True, fields = datafields) for v in vocabsources])
+	SRC.build_vocab(*datasets)
+	TRG.build_vocab(*datasets)
 
 	enc = EncoderRNN(hidden_size=hidden_size, vocab = SRC.vocab, 
 		recurrent_unit=encoder, num_layers=layers, dropout=dropout)
@@ -205,35 +199,49 @@ def test_model(args: Dict):
 	enc.to(available_device)
 	dec.to(available_device)
 
-	model = seq2seq.Seq2Seq(enc, dec, ["source"], ["middle0", "annotation", "middle1", "source"], decoder_train_field_names=["middle0", "annotation", "middle1", "source", "target"])
+	model = seq2seq.Seq2Seq(enc, dec, ["source"], ["middle0", "annotation", 
+		"middle1", "source"], decoder_train_field_names=["middle0", "annotation", 
+		"middle1", "source", "target"])
 
-	# Does this need to be re-done once the model is loaded?
 	model.to(available_device)
 
 	model_path = os.path.join('models', args.model, 'checkpoint.pt')
 	model.load_state_dict(torch.load(model_path))
 	model.eval()
 
-	if args.task is not None:
-
-		iterators = {}
-		for v in vocabsources:
-			if v.endswith('.test'):
-				d = TabularDataset(os.path.join('data', v), format = 'tsv', skip_header = True, fields = datafields)
-				i = BucketIterator(d, batch_size = 5, device = available_device, 
-					sort_key = lambda x: len(x.target), sort_within_batch = True, 
-					repeat = False)
-				iterators[v] = i
-		# for d in [TabularDataset(os.path.join('data', v), format = 'tsv', skip_header = True, fields = datafields) for v in vocabsources]:
-		# 	i = BucketIterator(d, batch_size = 5, device = available_device, 
-		# 		sort_key = lambda x: len(x.target), sort_within_batch = True, 
-		# 		repeat = False)
-		# 	iterators.append(i)
-
-		# TODO MAKE THE test func work with a DICT insteaf of a LIST??
-		test.test(model, name = args.model, data = iterators)
-	else:
+	if args.task is None:
+		
 		test.repl(model, name = args.model, datafields = datafields)
+	
+	else:
+		
+		iterators = {}
+
+		for t in args.task:
+			t_data = TabularDataset(os.path.join('data', t + '.test'), format = 'tsv', skip_header = True, fields = datafields)
+			iterator = BucketIterator(t_data, batch_size = 5, 
+				device = available_device, sort_key = lambda x: len(x.target), 
+				sort_within_batch = True, repeat = False)
+			iterators[t] = iterator
+
+
+		test.test(model, name = args.model, data = iterators)
+
+
+	# if args.task is not None:
+
+	# 	iterators = {}
+	# 	for v in vocabsources:
+	# 		if v.endswith('.test'):
+	# 			d = TabularDataset(os.path.join('data', v), format = 'tsv', skip_header = True, fields = datafields)
+	# 			i = BucketIterator(d, batch_size = 5, device = available_device, 
+	# 				sort_key = lambda x: len(x.target), sort_within_batch = True, 
+	# 				repeat = False)
+	# 			iterators[v] = i
+
+	# 	test.test(model, name = args.model, data = iterators)
+	# else:
+	# 	test.repl(model, name = args.model, datafields = datafields)
 
 
 def setup_store(args: Dict, logging_dir: str):
@@ -248,12 +256,12 @@ def setup_store(args: Dict, logging_dir: str):
 		store[META_TABLE].append_row(args_dict)
 
 		logging_meters = dict()
-		if args.sentacc: logging_meters['sentence-level-accuracy'] = training.SentenceLevelAccuracy()
-		if args.tokenacc: logging_meters['token-level-accuracy'] = training.TokenLevelAccuracy()
+		if args.sentacc: logging_meters['sentence-level-accuracy'] = SentenceLevelAccuracy()
+		if args.tokenacc: logging_meters['token-level-accuracy'] = TokenLevelAccuracy()
 		if args.tokens is not None:
 			for token in args.tokens.split('-'):
-				logging_meters['{0}-accuracy'.format(token)] = training.SpecTokenAccuracy(token)
-		logging_meters['loss'] = training.AverageMetric()
+				logging_meters['{0}-accuracy'.format(token)] = SpecTokenAccuracy(token)
+		logging_meters['loss'] = AverageMetric()
 
 		# TODO: support columns that aren't float
 		logs_schema = {name: float for name, meter in logging_meters.items()}
@@ -267,13 +275,21 @@ def setup_store(args: Dict, logging_dir: str):
 	return store, logging_meters
 
 def parse_arguments():
+	"""
+	Creates argument parsers for the main entry point.
+
+	@return: A Namespace object containing the arguments passed to the 
+		script, plus any default values for arguments which weren't set.
+	"""
 
 	parser = argparse.ArgumentParser()
 	subparser = parser.add_subparsers()
 
-	# Create the training subparser and add its arguments
 	trn = subparser.add_parser('train')
+	tst = subparser.add_parser('test')
+
 	trn.set_defaults(func = train_model)
+	tst.set_defaults(func = test_model)
 
 	trn.add_argument('-e', '--encoder', 
 		help = 'type of encoder used', type = str, 
@@ -329,10 +345,6 @@ def parse_arguments():
 		help = 'directory in which to place cox store', type = str, 
 		default = 'logs')
 
-	# Create the testing subparser and add its arguments
-	tst = subparser.add_parser('test')
-	tst.set_defaults(func = test_model)
-
 	tst.add_argument('-t', '--task', 
 		help = 'tasks to test model on. If no tasks are provided, you will enter a REPL to test the provided model on custom inputs',
 		type = str, nargs = '+', default = None)
@@ -342,6 +354,10 @@ def parse_arguments():
 	return parser.parse_args()
 
 if __name__ == '__main__':
+	"""
+	Parses the arguments passed on the command line. If `train`, we call
+	the train_model() method; if `test`, we call the test_model() method.
+	"""
 
 	args = parse_arguments()
 	args.func(args)
