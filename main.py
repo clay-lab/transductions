@@ -3,7 +3,6 @@
 
 import os
 import argparse
-import json
 
 from torchtext.data import Field, TabularDataset, BucketIterator, RawField
 
@@ -27,12 +26,52 @@ from typing import Dict
 
 import test
 from typing import List
+import pickle
 
 # these are as good as constants
 LOGS_TABLE = "logs"
 META_TABLE = "metadata"
 CKPT_NAME_LATEST = "latest_ckpt.pt"
 CKPT_NAME_BEST = "best_ckpt.pt"
+
+def get_iterators(args: Dict, source, trans, target):
+	"""
+	Constructs train-val-test splits from the task.{train, val, test} files.
+
+	@param args: dictionary of arguments and their values
+	@returns: a tuple of BucketIterators in (train, val, test) form.
+	"""
+
+	device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+	task_train = args.task + '.train'
+	task_val = args.task + '.val'
+	task_test = args.task + '.test'
+
+	trn_data, val_data, test_data = TabularDataset.splits(
+		path = 'data',
+		train = task_train,
+		validation = task_val,
+		test = task_test,
+		format = 'tsv',
+		skip_header = True,
+		fields = [('source', source), ('annotation', trans), ('target', target)]
+	)
+
+	train, val, test = BucketIterator.splits(
+		(trn_data, val_data, test_data), 
+		batch_size = 5, 
+		device = device, 
+		sort_key = lambda x: len(x.target), 
+		sort_within_batch = True, 
+		repeat = False
+	)
+
+	source.build_vocab(trn_data, val_data, test_data)
+	target.build_vocab(trn_data, val_data, test_data)
+
+	return (train, val, test)
+
 
 def train_model(args: Dict):
 
@@ -86,12 +125,7 @@ def train_model(args: Dict):
 	store, logging_meters = setup_store(args, logging_dir)
 
 	# Device specification
-	available_device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
-
-	# Create Datasets
-	trainingdata = args.task + '.train'
-	validationdata = args.task + '.val'
-	testingdata = args.task + '.test'
+	device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 	
 	if args.input_format == 'trees':
 		SRC_TREE = TreeField(collapse_unary=True)
@@ -108,84 +142,53 @@ def train_model(args: Dict):
 		TRANS = SRC if args.vocab == "SRC" else TRG
 		datafields = [("source", SRC), ("annotation", TRANS), ("target", TRG)]
 
-	train, valid, test = TabularDataset.splits(
-		path = 'data',
-		train = trainingdata,
-		validation = validationdata,
-		test = testingdata,
-		format = 'tsv',
-		skip_header = True,
-		fields = datafields
-	)
+	print(os.path.join(model_dir, 'SRC.vocab'))
+	pickle.dump(SRC, open(os.path.join(model_dir, 'SRC.vocab'), 'wb') )
+	pickle.dump(TRG, open(os.path.join(model_dir, 'TRG.vocab'), 'wb') )
 
-	SRC.build_vocab(train, valid, test)
-	TRG.build_vocab(train, valid, test)
 
-	train_iter, val_iter, test_iter = BucketIterator.splits(
-		(train, valid, test), 
-		batch_size = 5, 
-		device = available_device, 
-		sort_key = lambda x: len(x.target), 
-		sort_within_batch = True, 
-		repeat = False
-	)
+	train_iter, val_iter, test_iter = get_iterators(args, SRC, TRANS, TRG)
 
 	encoder = EncoderRNN(hidden_size=args.hidden_size, vocab = SRC.vocab, recurrent_unit=args.encoder, num_layers=args.layers, dropout=args.dropout)
-	encoder.to(available_device)
+	encoder.to(device)
 	tree_decoder_names = ['Tree']
 	if args.decoder not in tree_decoder_names:
 		dec = DecoderRNN(hidden_size=args.hidden_size, vocab=TRG.vocab, encoder_vocab=SRC.vocab, recurrent_unit=args.decoder, num_layers=args.layers, max_length=args.max_length, attention_type=args.attention, dropout=args.dropout)
-		dec.to(available_device)
+		dec.to(device)
 		model = seq2seq.Seq2Seq(encoder, dec, ["source"], ["middle0", "annotation", "middle1", "source"], decoder_train_field_names=["middle0", "annotation", "middle1", "source", "target"])
-		model.to(available_device)
+		model.to(device)
 	else:
 		assert False
-
-	# if CKPT_NAME_LATEST in os.listdir(store.path):
-	# 	ckpt_path = os.path.join(store.path, CKPT_NAME_LATEST)
-	# 	model.load_state_dict(torch.load(ckpt_path))
 
 	training.train(model, train_iter, val_iter, logging_meters, store, args,
 		save_dir = model_dir, ignore_index=TRG.vocab.stoi['<pad>'])
 
 def test_model(args: Dict):
-	
-	# Load the saved model structure
-	structure_path = os.path.join('models', args.model, 'arguments.txt')
-	structure = {}
-	with open(structure_path, 'r') as f:
-		for line in f:
-			(key, value) = line.split(': ')
-			structure[key] = value.strip()
+
+	logging_dir = os.path.join('logs', args.model)
+	exp_dir = os.listdir(logging_dir)[0]
+	metadata = Store(logging_dir, exp_dir)['metadata'].df
 
 	# Pull out relevant parameters
-	hidden_size = int(structure['hidden_size'])
-	layers = int(structure['layers'])
-	max_length = int(structure['max_length'])
-	dropout = float(structure['dropout'])
-	encoder = str(structure['encoder'])
-	decoder = str(structure['decoder'])
-	attention = str(structure['attention'])
-	if attention == 'None':
+	hidden_size = int(metadata['hidden_size'][0])
+	layers = int(metadata['layers'][0])
+	max_length = int(metadata['max_length'][0])
+	dropout = float(metadata['dropout'][0])
+	encoder = str(metadata['encoder'][0])
+	decoder = str(metadata['decoder'][0])
+	attention = str(metadata['attention'][0])
+	if attention == 'gANOLg==\n':
 		attention = None
-	vocab = str(structure['vocab'])
-	trainedtask = str(structure['task'])
+	vocab = str(metadata['vocab'][0])
+	trainedtask = str(metadata['task'][0])
 
 	# Device specification
-	available_device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+	device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 	# Create datasets and vocabulary
-	SRC = Field(lower=True, eos_token="<eos>") # Source vocab
-	TRG = Field(lower=True, eos_token="<eos>") # Target vocab
+	SRC = pickle.load(open(os.path.join('models', args.model, 'SRC.vocab'), 'rb'))
+	TRG = pickle.load(open(os.path.join('models', args.model, 'TRG.vocab'), 'rb'))
 	TRANS = SRC if vocab == "SRC" else TRG
-	datafields = [("source", SRC), ("annotation", TRANS), ("target", TRG)]
-
-	vocabsources = [trainedtask + ext for ext in ['.train', '.test', '.val']]
-	datasets = [TabularDataset(os.path.join('data', v), format = 'tsv', 
-		skip_header = True, fields = datafields) for v in vocabsources]
-
-	SRC.build_vocab(*datasets)
-	TRG.build_vocab(*datasets)
 
 	enc = EncoderRNN(hidden_size=hidden_size, vocab = SRC.vocab, 
 		recurrent_unit=encoder, num_layers=layers, dropout=dropout)
@@ -193,14 +196,14 @@ def test_model(args: Dict):
 		encoder_vocab=SRC.vocab, recurrent_unit=decoder, num_layers=layers, 
 		max_length=max_length, attention_type=attention, dropout=dropout)
 
-	enc.to(available_device)
-	dec.to(available_device)
+	enc.to(device)
+	dec.to(device)
 
 	model = seq2seq.Seq2Seq(enc, dec, ["source"], ["middle0", "annotation", 
 		"middle1", "source"], decoder_train_field_names=["middle0", "annotation", 
 		"middle1", "source", "target"])
 
-	model.to(available_device)
+	model.to(device)
 
 	model_path = os.path.join('models', args.model, 'checkpoint.pt')
 	model.load_state_dict(torch.load(model_path))
@@ -215,30 +218,15 @@ def test_model(args: Dict):
 		iterators = {}
 
 		for t in args.task:
-			t_data = TabularDataset(os.path.join('data', t + '.test'), format = 'tsv', skip_header = True, fields = datafields)
+			t_data = TabularDataset(os.path.join('data', t + '.test'), 
+				format = 'tsv', skip_header = True, fields = datafields)
 			iterator = BucketIterator(t_data, batch_size = 5, 
-				device = available_device, sort_key = lambda x: len(x.target), 
+				device = device, sort_key = lambda x: len(x.target), 
 				sort_within_batch = True, repeat = False)
 			iterators[t] = iterator
 
 
 		test.test(model, name = args.model, data = iterators)
-
-
-	# if args.task is not None:
-
-	# 	iterators = {}
-	# 	for v in vocabsources:
-	# 		if v.endswith('.test'):
-	# 			d = TabularDataset(os.path.join('data', v), format = 'tsv', skip_header = True, fields = datafields)
-	# 			i = BucketIterator(d, batch_size = 5, device = available_device, 
-	# 				sort_key = lambda x: len(x.target), sort_within_batch = True, 
-	# 				repeat = False)
-	# 			iterators[v] = i
-
-	# 	test.test(model, name = args.model, data = iterators)
-	# else:
-	# 	test.repl(model, name = args.model, datafields = datafields)
 
 def show_model_log(args: Dict):
 
