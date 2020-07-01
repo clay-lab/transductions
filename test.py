@@ -127,7 +127,7 @@ def test(model: Seq2Seq, name: str, data: Dict):
 
 					for mkey, meter in meters.items():
 						target_length = batch.target.size()[0]
-						logits_narrow = torch.narrow(logits_max, 0, 0, target_length)
+						logits_narrow = torch.narrow(logits_max, 0, 0, min(target_length, logits_max.shape[0]))
 						meter.process_batch(logits_narrow, batch.target, model)
 					
 					source = model.scores2sentence(batch.source, model.encoder.vocab)
