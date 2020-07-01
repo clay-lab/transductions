@@ -77,7 +77,6 @@ So, for example, if you had the following setup:
 └──data/
    ├── neg-1.test
    └── neg-2.test
-
 ```
 
 You can test model `negation-29-06-20-0` on the `neg-1` and `neg-2` datasets by issuing the following command:
