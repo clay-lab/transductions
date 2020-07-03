@@ -58,25 +58,33 @@ def evaluate(model: ss.Seq2Seq, val_iter: tt.Iterator, epoch: int,
 		print("Evaluating epoch {0}/{1} on val data".format(epoch + 1, args.epochs))
 		with tqdm(val_iter) as V:
 			for batch in V:
-			# for batch in val_iter:
 				logits = model(batch) # seq length x batch_size x vocab
 				target = batch.target # seq length x batch size
 
 				perm_logits = logits.permute(1, 2, 0)
 				perm_target = batch.target.permute(1, 0) # seq length x batch_size
 
+				# this pads the target up to the length of the prediction
+				# but is it robust to the case where the target is longer than the prediction?
 				pad_len = perm_logits.size()[2] - perm_target.size()[1]
 				pad_token = model.decoder.vocab['<pad>']
 				new_target = F.pad(perm_target, (0, pad_len) , "constant", pad_token)
 
 				batch_loss = criterion(perm_logits, new_target)
+
+				# this padding scheme is the same as in test.py. It pads prediction AND target
+				logits_max = logits.argmax(2)
+				# pad sequence combines them into a single tensor and pads whichever is shorter
+				# then we split along that new dimension to recover separate prediction and target tensors
+				pad_token = model.decoder.vocab['<pad>']
+				padded_combined = pad_sequence([logits_max, batch.target], padding_value=pad_token)
+				prediction_padded, target_padded = padded_combined[:, 0, :], padded_combined[:, 1, :]				
 			
 			for name, meter in logging_meters.items():
 				if name == 'loss':
 					meter.update(batch_loss)
 				else:
-					#meter.process_batch(logits[:target.size()[0], :].argmax(2), target, model)
-					meter.process_batch(logits[:target.size()[0], :].argmax(2), target[:logits.size()[0]], model)
+					meter.process_batch(prediction_padded, target_padded, model)
 		for name, meter in logging_meters.items():
 			stats_dict[name] = meter.result()
 			meter.reset()
