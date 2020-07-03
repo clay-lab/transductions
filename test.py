@@ -8,6 +8,7 @@ from typing import List, Dict
 from tqdm import tqdm
 import torch
 from torchtext.data import Field, TabularDataset, BucketIterator
+from torch.nn.utils.rnn import pad_sequence
 import os
 
 from seq2seq import Seq2Seq
@@ -85,7 +86,7 @@ def repl(model: Seq2Seq, name: str, datafields):
 	prompt = ModelREPL(model, name = name, datafields = datafields)
 	prompt.cmdloop()
 
-def test(model: Seq2Seq, name: str, data: Dict):
+def test(model: Seq2Seq, name: str, data: Dict, meters: Dict):
 	"""
 	Runs model.test() on the provided list of tasks. It is presumed that each
 	task corresponds to a test split of data named `task.test` in the data/
@@ -112,10 +113,6 @@ def test(model: Seq2Seq, name: str, data: Dict):
 		with open(outfile, 'w') as f:
 			f.write('{0}\t{1}\t{2}\n'.format('source', 'target', 'prediction'))
 
-		# Create accuracy meters
-		meters = {}
-		meters['sentence-level-accuracy'] = SentenceLevelAccuracy()
-
 		with torch.no_grad():
 			with tqdm(iterator) as t:
 				for batch in t:
@@ -125,10 +122,14 @@ def test(model: Seq2Seq, name: str, data: Dict):
 					logits = model(batch)
 					logits_max = logits.argmax(2)
 
+					# pad sequence combines them into a single tensor and pads whichever is shorter
+					# then we split along that new dimension to recover separate prediction and target tensors
+					pad_token = model.decoder.vocab['<pad>']
+					padded_combined = pad_sequence([logits_max, batch.target], padding_value=pad_token)
+					prediction_padded, target_padded = padded_combined[:, 0, :], padded_combined[:, 1, :]
+
 					for mkey, meter in meters.items():
-						target_length = batch.target.size()[0]
-						logits_narrow = torch.narrow(logits_max, 0, 0, min(target_length, logits_max.shape[0]))
-						meter.process_batch(logits_narrow, batch.target, model)
+						meter.process_batch(prediction_padded, target_padded, model)
 					
 					source = model.scores2sentence(batch.source, model.encoder.vocab)
 					prediction = model.scores2sentence(logits_max, model.decoder.vocab)

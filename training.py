@@ -13,7 +13,9 @@ from torch.nn.utils.rnn import pad_sequence
 import torch.nn.functional as F
 
 CKPT_NAME_LATEST = 'checkpoint.pt'
-		
+
+# is this being called from anywhere?
+"""		
 def test(model: ss.Seq2Seq, test_iter: tt.Iterator, task: str, filename: str):
 
 	model.eval()
@@ -44,6 +46,7 @@ def test(model: ss.Seq2Seq, test_iter: tt.Iterator, task: str, filename: str):
 						f.write('{0}\t{1}\t{2}\n'.format(
 							sentences[i], target[i], predictions[i])
 						)
+"""
 
 def evaluate(model: ss.Seq2Seq, val_iter: tt.Iterator, epoch: int, 
 		         args: Dict, criterion=None, logging_meters=None, store=None):

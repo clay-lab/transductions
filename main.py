@@ -7,7 +7,7 @@ import argparse
 from torchtext.data import Field, TabularDataset, BucketIterator, RawField
 
 from models import EncoderRNN, DecoderRNN, GRUTridentDecoder #, TreeDecoderRNN, TreeEncoderRNN
-from metrics import SentenceLevelAccuracy, TokenLevelAccuracy, SpecTokenAccuracy, AverageMetric
+from metrics import SentenceLevelAccuracy, TokenLevelAccuracy, SpecTokenAccuracy, LengthAccuracy, AverageMetric
 import training
 import RPNTask
 import seq2seq
@@ -92,7 +92,9 @@ def train_model(args: Dict):
 	exp_name = args.task
 	exp_time = time.strftime('%d-%m-%y', time.gmtime())
 	exp_count = 0
-		
+	
+	# Can we delete this? isn't logging_meters set below in the call to setup_store?
+	"""
 	logging_meters = dict()
 	if args.sentacc: logging_meters['sentence-level-accuracy'] = SentenceLevelAccuracy()
 	if args.tokenacc: logging_meters['token-level-accuracy'] = TokenLevelAccuracy()
@@ -100,6 +102,7 @@ def train_model(args: Dict):
 		for token in args.tokens.split('_'):
 			logging_meters['{0}-accuracy'.format(token)] = SpecTokenAccuracy(token)
 	logging_meters['loss'] = AverageMetric()
+	"""
 
 	while True:
 		exp_path = '{0}-{1}-{2}'.format(exp_name, exp_time, exp_count)
@@ -234,7 +237,14 @@ def test_model(args: Dict):
 		test.repl(model, name = args.model, datafields = datafields)
 	
 	else:
-		
+		logging_meters = dict()
+		if args.sentacc: logging_meters['sentence-level-accuracy'] = SentenceLevelAccuracy()
+		if args.tokenacc: logging_meters['token-level-accuracy'] = TokenLevelAccuracy()
+		if args.lenacc: logging_meters['length-accuracy'] = LengthAccuracy()
+		if args.tokens is not None:
+			for token in args.tokens.split('_'):
+				logging_meters['{0}-accuracy'.format(token)] = SpecTokenAccuracy(token)
+
 		iterators = {}
 
 		for t in args.task:
@@ -246,7 +256,7 @@ def test_model(args: Dict):
 			iterators[t] = iterator
 
 
-		test.test(model, name = args.model, data = iterators)
+		test.test(model, name = args.model, data = iterators, meters = logging_meters)
 
 def show_model_log(args: Dict):
 
@@ -368,6 +378,15 @@ def parse_arguments():
 		type = str, nargs = '+', default = None)
 	tst.add_argument('-m', '--model', help = 'name of model to test', type = str,
 		required = True)
+	tst.add_argument('-sa', '--sentacc', help = 'sentence accuracy', type = bool,
+		default = True)
+	tst.add_argument('-ta', '--tokenacc', help = 'token accuracy', type = bool, 
+		default = True)
+	tst.add_argument('-la', '--lenacc', help = 'length accuracy', type = bool, 
+		default = True)
+	tst.add_argument('-to', '--tokens', 
+		help = 'list of tokens for logit-level-accuracy', type = str, 
+		default = None)
 
 	log.add_argument('-m', '--model', help = 'name of model to show logs of', 
 		type = str, required = True)
