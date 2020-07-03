@@ -432,6 +432,7 @@ class TreeDecoderRNN(nn.Module):
 
         return words_out
 
+"""
 class TridentDecoder(nn.Module):
     def __init__(self, arity, vocab_size, hidden_size, max_depth, null_placement="pre"):
         super(TridentDecoder, self).__init__()
@@ -493,6 +494,7 @@ class TridentDecoder(nn.Module):
 
     def _hidden2children(self, hidden):
         return torch.split(self.to_children(hidden), self.hidden_size, dim=-1)
+"""
 
 class GRUTridentDecoder(nn.Module):
     def __init__(self, arity, vocab, hidden_size, max_depth, all_annotations, null_placement="pre", inner_label="NULL"):
@@ -519,14 +521,6 @@ class GRUTridentDecoder(nn.Module):
         self.per_child_cell = nn.ModuleList()
         for _ in range(self.arity):
             self.per_child_cell.append(nn.GRUCell(self.hidden_size, self.hidden_size))
-        
-    #@property
-    #def null_ix(self):
-    #    return 0
-
-    """def new_annotation_embedding(self):
-        
-        return nn.Parameter(torch.randn(self.hidden_size, requires_grad=True).unsqueeze(0))"""
 
     def forward(self, root_hiddens, annotations, target_trees=None):
         # for some reason the size comes out of Encoder as [1, 5, 256]
@@ -544,11 +538,6 @@ class GRUTridentDecoder(nn.Module):
         root_hidden = root_hidden.unsqueeze(0) # GRUCell expects first dimension to be batch size
         
         annotation_str = str(annotation)
-        """if annotation_str not in self.annotation_embeddings:
-            if self.training:
-                self.annotation_embeddings[annotation_str] = self.new_annotation_embedding()
-            else:
-                assert False"""
         input_embedding = self.annotation_embeddings[annotation_str]
         
         if self.training:
@@ -559,6 +548,7 @@ class GRUTridentDecoder(nn.Module):
             return torch.stack(list(self.forward_eval_helper(root_hidden, input_embedding)))
 
     def forward_train_helper(self, root_hidden, input_embedding, target_tree):
+        # use attention here \/
         production = self.hidden2vocab(root_hidden)[0] # batch ix 0 (but there's only one!)
         if len(target_tree) > 1:
             assert len(target_tree) == self.arity
@@ -566,6 +556,7 @@ class GRUTridentDecoder(nn.Module):
             assert self.null_placement == "pre"
             yield production
             for child_ix in range(self.arity):
+                # not here maybe \/
                 child_hidden = self.per_child_cell[child_ix](input_embedding, root_hidden)
                 yield from self.forward_train_helper(child_hidden, input_embedding, target_tree[child_ix])
         else:
@@ -581,6 +572,29 @@ class GRUTridentDecoder(nn.Module):
         else:
             yield production
 
+# TODO:
+"""
+rather than pushing thru the same input_embedding at every layer, just put it in at the top
+then have 3 separate functions of the parent hidden state to decide the "input word" of the to-child GRU
+so you give the network a size say 13. there are 13 possible inner node "embeddings". so even tho these "words" never get
+outputted or compared to target, it's still learning hallucinated words
+extra parameter: size of this "inner node vocab" 
+Look up "Class-based Language Model" Fernando Pereira. ~~ Formal Grammar and Information Theory: Together Again ~~
+"""
+
+"""
+for predicate task, some nodes should have two children and some should have three
+so we would need a classifier at each step to tell us how many children *this* inner node has
+we set a max number of children (4) and then we keep 4 to-child GRUs in reserve. if we predict 
+"3 children" for this step, just use the first 3
+"""
+
+"""
+also add attention
+"""
+
+
+"""
 class AltGRUTridentDecoder(nn.Module):
     def __init__(self, arity, vocab_size, hidden_size, max_depth, null_placement="pre"):
         super(GRUTridentDecoder, self).__init__()
@@ -638,3 +652,4 @@ class AltGRUTridentDecoder(nn.Module):
                 yield from self.forward_eval_helper(child_hidden, depth+1)
         else:
             yield production
+"""

@@ -93,17 +93,6 @@ def train_model(args: Dict):
 	exp_time = time.strftime('%d-%m-%y', time.gmtime())
 	exp_count = 0
 	
-	# Can we delete this? isn't logging_meters set below in the call to setup_store?
-	"""
-	logging_meters = dict()
-	if args.sentacc: logging_meters['sentence-level-accuracy'] = SentenceLevelAccuracy()
-	if args.tokenacc: logging_meters['token-level-accuracy'] = TokenLevelAccuracy()
-	if args.tokens is not None:
-		for token in args.tokens.split('_'):
-			logging_meters['{0}-accuracy'.format(token)] = SpecTokenAccuracy(token)
-	logging_meters['loss'] = AverageMetric()
-	"""
-
 	while True:
 		exp_path = '{0}-{1}-{2}'.format(exp_name, exp_time, exp_count)
 		if os.path.isdir(os.path.join(args.outdir, exp_path)):

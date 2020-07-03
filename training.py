@@ -14,40 +14,6 @@ import torch.nn.functional as F
 
 CKPT_NAME_LATEST = 'checkpoint.pt'
 
-# is this being called from anywhere?
-"""		
-def test(model: ss.Seq2Seq, test_iter: tt.Iterator, task: str, filename: str):
-
-	model.eval()
-
-	if not os.path.exists('results'):
-		os.makedirs('results')
-		
-	outfile = os.path.join('results', filename + '.tsv')
-	with open(outfile, 'w') as f:
-		f.write('{0}\t{1}\t{2}\n'.format('source', 'target', 'prediction'))
-	with torch.no_grad():
-		print("Testing on test data")
-		# for batch in test_iter:
-		with tqdm(test_iter) as t:
-			for batch in t:
-
-				logits = model(batch)
-				target = batch.target 
-				# predictions = logits[:target.size()[0], :].argmax(2)
-				predictions = logits.argmax(2)
-				sentences = model.scores2sentence(batch.source, model.encoder.vocab)
-				# predictions = model.scores2sentence(predictions, model.decoder.vocab)
-				predictions = model.scores2sentence(logits.argmax(2), model.decoder.vocab)
-				target = model.scores2sentence(target, model.decoder.vocab)
-
-				with open(outfile, 'a') as f:
-					for i, _ in enumerate(sentences):
-						f.write('{0}\t{1}\t{2}\n'.format(
-							sentences[i], target[i], predictions[i])
-						)
-"""
-
 def evaluate(model: ss.Seq2Seq, val_iter: tt.Iterator, epoch: int, 
 		         args: Dict, criterion=None, logging_meters=None, store=None):
 
