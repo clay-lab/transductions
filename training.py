@@ -27,25 +27,23 @@ def evaluate(model: ss.Seq2Seq, val_iter: tt.Iterator, epoch: int,
 				logits = model(batch) # seq length x batch_size x vocab
 				target = batch.target # seq length x batch size
 
-				perm_logits = logits.permute(1, 2, 0)
-				perm_target = batch.target.permute(1, 0) # seq length x batch_size
-
-				# this pads the target up to the length of the prediction
-				# but is it robust to the case where the target is longer than the prediction?
-				pad_len = perm_logits.size()[2] - perm_target.size()[1]
-				pad_token = model.decoder.vocab['<pad>']
-				new_target = F.pad(perm_target, (0, pad_len) , "constant", pad_token)
-
-				batch_loss = criterion(perm_logits, new_target)
-
-				# this padding scheme is the same as in test.py. It pads prediction AND target
-				logits_max = logits.argmax(2)
+				logits_max = logits.argmax(2) # seq length x batch_size
 				# pad sequence combines them into a single tensor and pads whichever is shorter
 				# then we split along that new dimension to recover separate prediction and target tensors
 				pad_token = model.decoder.vocab['<pad>']
 				padded_combined = pad_sequence([logits_max, batch.target], padding_value=pad_token)
 				prediction_padded, target_padded = padded_combined[:, 0, :], padded_combined[:, 1, :]				
 			
+				# This block pads first dimension of logits_padded to be target_padded.shape[0]
+				logits_padded = torch.Tensor(target_padded.shape[0], logits.shape[1], logits.shape[2])
+				logits_padded.fill_(pad_token)
+				logits_padded[:logits.shape[0], :, :] = logits
+				# logits_padded = logits # THIS IS WRONG!!!! sometimes logits might have to be padded up to the length of target_padded
+
+				perm_logits = logits_padded.permute(1, 2, 0) # batch_size x vocab x seq length
+				target_padded_perm = target_padded.permute(1, 0) # seq length x batch_size
+				batch_loss = criterion(perm_logits, target_padded_perm)
+
 			for name, meter in logging_meters.items():
 				if name == 'loss':
 					meter.update(batch_loss)
@@ -93,7 +91,7 @@ def train(model: ss.Seq2Seq, train_iterator: tt.Iterator,
 				optimizer.step()
 
 				logging_meters['loss'].update(batch_loss.item())
-				# T.set_postfix(loss=logging_meters['loss'].result())
+				T.set_postfix(loss=logging_meters['loss'].result())
 
 		eval_stats = evaluate(model, validation_iter, epoch, args, criterion,
 		                      logging_meters=logging_meters, store=store)
