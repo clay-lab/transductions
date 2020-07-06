@@ -92,6 +92,9 @@ def train_model(args: Dict):
 	exp_name = args.task
 	exp_time = time.strftime('%d-%m-%y', time.gmtime())
 	exp_count = 0
+
+	if not os.path.isdir('models'):
+		os.mkdir('models')
 	
 	while True:
 		exp_path = '{0}-{1}-{2}'.format(exp_name, exp_time, exp_count)
