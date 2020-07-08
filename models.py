@@ -582,6 +582,8 @@ so you give the network a size say 13. there are 13 possible inner node "embeddi
 outputted or compared to target, it's still learning hallucinated words
 extra parameter: size of this "inner node vocab" 
 Look up "Class-based Language Model" Fernando Pereira. ~~ Formal Grammar and Information Theory: Together Again ~~
+
+take a softmax and take average of the embeddings associated with all the inner node vocab words weighted by that softmax
 """
 
 """
@@ -595,6 +597,9 @@ we set a max number of children (4) and then we keep 4 to-child GRUs in reserve.
 also add attention
 """
 
+"""
+another long term option: instead of having the GRUs point down, have them point across. At each layer of the tree, we run a sequential GRU *across* all the branches
+"""
 
 class GRUTridentDecoderAttn(nn.Module):
     def __init__(self, arity, vocab, hidden_size, max_depth, all_annotations, encoder_vocab, attention_type=None, null_placement="pre", inner_label="INNER", skip_label="<skip>"):
