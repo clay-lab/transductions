@@ -188,13 +188,17 @@ def test_model(args: Dict):
 	if input_format == 'trees':		
 		SRC = pickle.load(open(os.path.join('models', args.model, 'SRC.vocab'), 'rb'))
 		TRG = pickle.load(open(os.path.join('models', args.model, 'TRG.vocab'), 'rb'))
-		TRG.inner_order = None # don't print the annotations about tree structure (the "None"s) when converting tree to sequence
+
+		# do we actually need SRC_TREE or TRG_TREE in test mode?
 		SRC_TREE = pickle.load(open(os.path.join('models', args.model, 'SRC_TREE.vocab'), 'rb'))
 		TRG_TREE = pickle.load(open(os.path.join('models', args.model, 'TRG_TREE.vocab'), 'rb'))
 		TRANS = RawField()
 		datafields = [(("source_tree", "source"), (SRC_TREE, SRC)), 
 			("annotation", TRANS), 
 			(("target_tree", "target"), (TRG_TREE, TRG))]
+
+		TRG.inner_order = None # don't print the annotations about tree structure (the "None"s) when converting tree to sequence
+		TRG.tree_field.tree_transformation_fun = None # don't add padding symbols to normalize tree arity
 	else:
 		# Create datasets and vocabulary
 		SRC = pickle.load(open(os.path.join('models', args.model, 'SRC.vocab'), 'rb'))
@@ -202,7 +206,6 @@ def test_model(args: Dict):
 		TRANS = SRC if vocab == "SRC" else TRG
 		datafields = [("source", SRC), ("annotation", TRANS), ("target", TRG)]
 
-	
 	enc = EncoderRNN(hidden_size=hidden_size, vocab = SRC.vocab, 
 		recurrent_unit=encoder, num_layers=layers, dropout=dropout)
 
@@ -217,8 +220,12 @@ def test_model(args: Dict):
 			"middle1", "source", "target"])
 	else:
 		# TODO: replace max depth with max length -- to find depth just take log_3 max length
-		dec = GRUTridentDecoder(arity=3, vocab=TRG.vocab, hidden_size=hidden_size, all_annotations=["POLISH", "RPN"], max_depth=5)
-		model = seq2seq.Seq2Seq(enc, dec, ["source"], ["middle0", "annotation"], decoder_train_field_names=["middle0", "annotation", "target_tree"])
+		#dec = GRUTridentDecoder(arity=3, vocab=TRG.vocab, hidden_size=hidden_size, all_annotations=["POLISH", "RPN"], max_depth=5)
+		#model = seq2seq.Seq2Seq(enc, dec, ["source"], ["middle0", "annotation"], decoder_train_field_names=["middle0", "annotation", "target_tree"])
+
+		arity = 4
+		dec = GRUTridentDecoderAttn(arity=arity, vocab=TRG.vocab, hidden_size=hidden_size, max_depth=5, all_annotations=["POLISH", "RPN"], encoder_vocab=SRC.vocab, attention_type="additive")
+		model = seq2seq.Seq2Seq(enc, dec, ["source"], ["middle0", "annotation", "middle1", "source"], decoder_train_field_names=["middle0", "annotation", "middle1", "source", "target_tree"])
 
 	model.to(device)
 	
