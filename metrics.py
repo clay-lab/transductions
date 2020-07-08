@@ -71,7 +71,7 @@ class TokenLevelAccuracy(AverageMetric):
 	def process_batch(self, prediction, target, model):
 		# TODO pad_token should be a parameter or something 
 		pad_token = model.decoder.vocab['<pad>']
-		correct = (prediction == target).sum()
+		correct = (prediction == target).sum() - ((prediction == target) & (target == pad_token)).sum()
 		total = (target != pad_token).sum()
 		self.update(correct, total)
 
