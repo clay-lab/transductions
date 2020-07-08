@@ -6,7 +6,7 @@ import argparse
 
 from torchtext.data import Field, TabularDataset, BucketIterator, RawField
 
-from models import EncoderRNN, DecoderRNN, GRUTridentDecoder #, TreeDecoderRNN, TreeEncoderRNN
+from models import EncoderRNN, DecoderRNN, GRUTridentDecoder, GRUTridentDecoderAttn
 from metrics import SentenceLevelAccuracy, TokenLevelAccuracy, SpecTokenAccuracy, LengthAccuracy, AverageMetric
 import training
 import RPNTask
@@ -21,7 +21,7 @@ from torch import optim
 import cox.store
 from cox.store import Store
 from tqdm import tqdm
-from tree_loaders import TreeField, TreeSequenceField
+from tree_loaders import TreeField, TreeSequenceField, pad_arity_factory
 from typing import Dict
 
 import test
@@ -114,11 +114,13 @@ def train_model(args: Dict):
 	device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 	
 	if args.input_format == 'trees':
+		arity = 4
+
 		SRC_TREE = TreeField(collapse_unary=True)
 		SRC = TreeSequenceField(SRC_TREE)
 		TRANS = RawField()
-		TRG_TREE = TreeField(collapse_unary=True)
-		TRG = TreeSequenceField(TRG_TREE, inner_order="pre", inner_symbol="NULL", is_target=True)
+		TRG_TREE = TreeField(tree_transformation_fun=pad_arity_factory(arity), collapse_unary=True)
+		TRG = TreeSequenceField(TRG_TREE, inner_order="pre", inner_symbol="INNER", is_target=True)
 		datafields = [(("source_tree", "source"), (SRC_TREE, SRC)), 
 			("annotation", TRANS), 
 			(("target_tree", "target"), (TRG_TREE, TRG))]
@@ -150,10 +152,11 @@ def train_model(args: Dict):
 		dec = DecoderRNN(hidden_size=args.hidden_size, vocab=TRG.vocab, encoder_vocab=SRC.vocab, recurrent_unit=args.decoder, num_layers=args.layers, max_length=args.max_length, attention_type=args.attention, dropout=args.dropout)
 		model = seq2seq.Seq2Seq(encoder, dec, ["source"], ["middle0", "annotation", "middle1", "source"], decoder_train_field_names=["middle0", "annotation", "middle1", "source", "target"])
 	else:
-		#dec = TridentDecoder(arity=3, vocab_size=len(TRG.vocab), hidden_size=args.hidden_size, max_depth=5)
-		dec = GRUTridentDecoder(arity=3, vocab=TRG.vocab, hidden_size=args.hidden_size, all_annotations=["POLISH", "RPN"], max_depth=5)
-		model = seq2seq.Seq2Seq(encoder, dec, ["source"], ["middle0", "annotation"], decoder_train_field_names=["middle0", "annotation", "target_tree"])
-	
+		# dec = GRUTridentDecoder(arity=3, vocab=TRG.vocab, hidden_size=args.hidden_size, all_annotations=["POLISH", "RPN"], max_depth=5)
+		# model = seq2seq.Seq2Seq(encoder, dec, ["source"], ["middle0", "annotation"], decoder_train_field_names=["middle0", "annotation", "target_tree"])
+		dec = GRUTridentDecoderAttn(arity=arity, vocab=TRG.vocab, hidden_size=args.hidden_size, max_depth=5, all_annotations=["POLISH", "RPN"], encoder_vocab=SRC.vocab, attention_type="additive")
+		model = seq2seq.Seq2Seq(encoder, dec, ["source"], ["middle0", "annotation", "middle1", "source"], decoder_train_field_names=["middle0", "annotation", "middle1", "source", "target_tree"])
+
 	model.to(device)
 
 	training.train(model, train_iter, val_iter, logging_meters, store, args,

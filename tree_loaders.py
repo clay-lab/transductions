@@ -88,7 +88,41 @@ class TreeSequenceField(Field):
         tree = self.tree_field.preprocess(x)
         seqstr = " ".join(self.tree2seq(tree))
         return super(TreeSequenceField, self).preprocess(seqstr)
-    
+
+# We implement this as a functor b/c it needs to be picklable
+class pad_arity_factory:
+    def __init__(self, arity, pad_token="<skip>"):
+        self.arity = arity
+        self.pad_token = pad_token
+
+    def __call__(self, tree):
+        if not isinstance(tree, nltk.tree.Tree):
+            # tree is a leaf
+            return tree
+        else:
+            #cls = type(tree)
+            cls = nltk.tree.Tree
+            children = [self(child) for child in tree]
+            # important to skip unary productions since trees will have POS -> word productions that we want to ignore
+            if (1 < len(tree)) and (len(tree) < self.arity): 
+                children += [self.pad_token] * (self.arity - len(tree))
+
+            return cls(tree.label(), children)
+
+def generic_tree_swap(tree, trans_children, ops_tags=None):
+
+    if not isinstance(tree, nltk.tree.Tree):
+        # tree is a leaf
+        return tree
+    else:
+        #cls = type(tree)
+        cls = nltk.tree.Tree
+        children = [generic_tree_swap(child, trans_children, ops_tags=ops_tags) for child in tree]
+        if (ops_tags is None) or (tree.label() in ops_tags):
+            children = trans_children(children)
+        #return cls(tree.label(), children, prob=-1)
+        return cls(tree.label(), children)
+
 """
 we want to be able to encode which kind of trasnformation was used as a separate column
 encode in the grammar itself?

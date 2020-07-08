@@ -62,7 +62,7 @@ def train(model: ss.Seq2Seq, train_iterator: tt.Iterator,
 	        validation_iter: tt.Iterator, logging_meters: Dict, 
 	        store: cx.Store, args: Dict, save_dir: str, ignore_index=None):
 
-	optimizer = optim.SGD(model.parameters(), lr=args.learning_rate)
+	optimizer = optim.Adam(model.parameters(), lr=args.learning_rate)
 	criterion = nn.CrossEntropyLoss(weight=None, ignore_index=ignore_index)
 	
 
