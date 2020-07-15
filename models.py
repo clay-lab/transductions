@@ -179,7 +179,7 @@ class DecoderRNN(nn.Module):
         
         source_mask = create_mask(source, self.encoder_vocab)
         #initialize x and h to given initial values. 
-        x, h = x0.squeeze(0), h0
+        x, h = x0, h0
         # print(x0.size())
         # print()
         #print('x before', x, x0, self.vocab.stoi)

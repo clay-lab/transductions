@@ -71,7 +71,7 @@ class ModelREPL(Cmd):
 		"""
 		raise SystemExit
 
-def repl(model: Seq2Seq, name: str, datafields):
+def repl(model: Seq2Seq, args, datafields):
 	"""
 	Enters an interactive read-evaluate-print loop (REPL) with the provided 
 	model, where you enter a sequence into the prompt and the model evaluates
@@ -83,10 +83,10 @@ def repl(model: Seq2Seq, name: str, datafields):
 
 	"""
 
-	prompt = ModelREPL(model, name = name, datafields = datafields)
+	prompt = ModelREPL(model, name = args.model, datafields = datafields)
 	prompt.cmdloop()
 
-def test(model: Seq2Seq, name: str, data: Dict, meters: Dict):
+def test(model: Seq2Seq, args, data: Dict, meters: Dict):
 	"""
 	Runs model.test() on the provided list of tasks. It is presumed that each
 	task corresponds to a test split of data named `task.test` in the data/
@@ -97,17 +97,29 @@ def test(model: Seq2Seq, name: str, data: Dict, meters: Dict):
 	@param data: A list of TabularDatasets.
 	"""
 
+	# name = args.model
+
+	base_exp_dir = os.path.join(args.exp_dir, args.task)
+	structure_name = args.structure
+	model_name = args.model
+
+	model_dir = os.path.join(base_exp_dir, structure_name, model_name)
+	results_dir = os.path.join(model_dir, 'results')
+
+	if not os.path.isdir(results_dir):
+		os.mkdir(results_dir)
+
 	available_device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 	model.eval()
 
-	if not os.path.exists('results'):
-		os.makedir('results')
+	# if not os.path.exists('results'):
+	# 	os.makedir('results')
 
 	for key, iterator in data.items():
 
 		# Prepare output files
 		# keyless = key[:-len('.test')]
-		outfile = os.path.join('results', name + '-' + key + '.tsv')
+		outfile = os.path.join(results_dir, key + '.tsv')
 		print('Testing model on {}'.format(key))
 		print('Writing results to {}'.format(outfile))
 		with open(outfile, 'w') as f:

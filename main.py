@@ -6,7 +6,7 @@ import argparse
 
 from torchtext.data import Field, TabularDataset, BucketIterator, RawField
 
-from models import EncoderRNN, DecoderRNN, GRUTridentDecoder #, TreeDecoderRNN, TreeEncoderRNN
+from models import EncoderRNN, DecoderRNN, GRUTridentDecoder#, GRUTridentDecoderAttn
 from metrics import SentenceLevelAccuracy, TokenLevelAccuracy, SpecTokenAccuracy, LengthAccuracy, AverageMetric
 import training
 import RPNTask
@@ -21,7 +21,7 @@ from torch import optim
 import cox.store
 from cox.store import Store
 from tqdm import tqdm
-from tree_loaders import TreeField, TreeSequenceField
+from tree_loaders import TreeField, TreeSequenceField#, pad_arity_factory
 from typing import Dict
 
 import test
@@ -34,7 +34,7 @@ META_TABLE = "metadata"
 CKPT_NAME_LATEST = "latest_ckpt.pt"
 CKPT_NAME_BEST = "best_ckpt.pt"
 
-def get_iterators(args: Dict, source, target, datafields):
+def get_iterators(args: Dict, source, target, datafields, loc):
 	"""
 	Constructs train-val-test splits from the task.{train, val, test} files.
 
@@ -49,7 +49,7 @@ def get_iterators(args: Dict, source, target, datafields):
 	task_test = args.task + '.test'
 
 	trn_data, val_data, test_data = TabularDataset.splits(
-		path = 'data',
+		path = loc,
 		train = task_train,
 		validation = task_val,
 		test = task_test,
@@ -75,74 +75,123 @@ def get_iterators(args: Dict, source, target, datafields):
 
 def train_model(args: Dict):
 
-	# Create directories where model and logs will be saved.
-	# Directory structure is as follows:
-	#
-	# models/
-	#   task-month-day-year-N/
-	#     model.pt
-	# 
-	# logs/
-	#   task-month-day-year-N/
-	#     <some random hash>/
-	#       COX DATA HERE?
-	# 
-	# where `N` is incremented automatically to ensure a unique path
+	"""
+	Experiments have the following directory structure:
 
-	exp_name = args.task
-	exp_time = time.strftime('%d-%m-%y', time.gmtime())
-	exp_count = 0
+	EXPDIR/
+		task-a/
+		task-b/
+		TASK/
+			data/
+				TASK.train
+				TASK.val
+				TASK.test
+				other-test.test
+				another-test.test
+			ENC-DEC-ATTN/
+				model-1/
+				model-2/
+				model-3/
+					logs/RANDOM-HASH/...
+					model.pt
+					SRC.vocab
+					TRG.vocab
+					...
 
-	if not os.path.isdir('models'):
-		os.mkdir('models')
-	
+	The EXP-DIR is passed in with the -E/--exp-dir flag on the command line.
+	TASK is passed in with the -t/--task flag. ENC, DEC, ATTN are similar.
+
+	In order to run an experiment, the trainer will expect a data/ subdir with
+	a full train and val split. Everything else will be generated during 
+	training.
+	"""
+
+	# Get all paths needed for model training
+	base_exp_dir = args.exp_dir
+	task = args.task
+	model_structure = '{0}-{1}-{2}'.format(args.encoder, args.decoder, args.attention)
+	model_count = 1
+
+	if not os.path.isdir(base_exp_dir):
+		print('ERROR: The provided experiment directory \'{0}\' is not a valid directory.'.format(base_exp_dir))
+		raise SystemError
+
+	exp_path = os.path.join(base_exp_dir, task)
+
+	if not os.path.isdir(exp_path):
+		print('ERROR: The provided task directory \'{0}\' is not a valid directory.'.format(exp_path))
+		raise SystemError
+
+	data_dir = os.path.join(exp_path, 'data')
+
+	if not os.path.isdir(data_dir):
+		print('ERROR: The provided data directory \'{0}\' is not a valid directory.'.format(data_dir))
+		raise SystemError
+
+	for v in ['.train', '.val']:
+		if not os.path.isfile(os.path.join(data_dir, args.task + v)):
+			print('ERROR: You must provide a \'{0}\' file for training.'.format(v))
+			raise SystemError
+
+	structure_dir = os.path.join(exp_path, model_structure)
+	if not os.path.isdir(structure_dir):
+		os.mkdir(structure_dir)
+
 	while True:
-		exp_path = '{0}-{1}-{2}'.format(exp_name, exp_time, exp_count)
-		if os.path.isdir(os.path.join(args.outdir, exp_path)):
-			exp_count += 1
+		model_name = 'model-{0}'.format(model_count)
+		if os.path.isdir(os.path.join(structure_dir, model_name)):
+			model_count += 1
 		else:
-			os.mkdir(os.path.join(args.outdir, exp_path))
-			os.mkdir(os.path.join('models', exp_path))
+			model_dir = os.path.join(structure_dir, model_name)
+			log_dir = os.path.join(model_dir, 'logs')
+			os.mkdir(model_dir)
+			os.mkdir(log_dir)
 			break
 
-	logging_dir = os.path.join(args.outdir, exp_path)
-	model_dir = os.path.join('models', exp_path)
-
-	store, logging_meters = setup_store(args, logging_dir)
-
-	# Device specification
+	store, logging_meters = setup_store(args, log_dir)
 	device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-	
-	if args.input_format == 'trees':
+
+	arity=6
+
+	if args.source_format == 'trees' and args.target_format == 'trees':
 		SRC_TREE = TreeField(collapse_unary=True)
 		SRC = TreeSequenceField(SRC_TREE)
 		TRANS = RawField()
-		TRG_TREE = TreeField(collapse_unary=True)
+		TRG_TREE = TreeField(tree_transformation_fun=pad_arity_factory(arity),collapse_unary=True)
 		TRG = TreeSequenceField(TRG_TREE, inner_order="pre", inner_symbol="NULL", is_target=True)
 		datafields = [(("source_tree", "source"), (SRC_TREE, SRC)), 
 			("annotation", TRANS), 
 			(("target_tree", "target"), (TRG_TREE, TRG))]
-		
-		train_iter, val_iter, test_iter = get_iterators(args, SRC, TRG, datafields)
-
-		print(os.path.join(model_dir, 'SRC.vocab'))
-		pickle.dump(SRC, open(os.path.join(model_dir, 'SRC.vocab'), 'wb') )
-		pickle.dump(TRG, open(os.path.join(model_dir, 'TRG.vocab'), 'wb') )
-		pickle.dump(SRC_TREE, open(os.path.join(model_dir, 'SRC_TREE.vocab'), 'wb') )
-		pickle.dump(TRG_TREE, open(os.path.join(model_dir, 'TRG_TREE.vocab'), 'wb') )
-	
-	else:
+	elif args.source_format == 'trees': # (trees, sequences)
+		SRC_TREE = TreeField(collapse_unary=True)
+		SRC = TreeSequenceField(SRC_TREE)
+		TRANS = RawField()
+		TRG = Field(lower=True, eos_token="<eos>") # Target vocab
+		datafields = [(("source_tree", "source"), (SRC_TREE, SRC)), 
+			("annotation", TRANS), ("target", TRG)]
+	elif args.target_format == 'trees': # (sequences, trees)
+		SRC = Field(lower=True, eos_token="<eos>") # Source vocab
+		TRANS = RawField()
+		TRG_TREE = TreeField(tree_transformation_fun=pad_arity_factory(arity), collapse_unary=True)
+		TRG = TreeSequenceField(TRG_TREE, inner_order="pre", inner_symbol="NULL", is_target=True)
+		datafields = [("source", SRC), ("annotation", TRANS), 
+			(("target_tree", "target"), (TRG_TREE, TRG))]
+	else: # (sequences, sequences)
 		SRC = Field(lower=True, eos_token="<eos>") # Source vocab
 		TRG = Field(lower=True, eos_token="<eos>") # Target vocab
 		TRANS = SRC if args.vocab == "SRC" else TRG
 		datafields = [("source", SRC), ("annotation", TRANS), ("target", TRG)]
 
-		train_iter, val_iter, test_iter = get_iterators(args, SRC, TRG, datafields)
+	# Get iterators
+	train_iter, val_iter, test_iter = get_iterators(args, SRC, TRG, datafields, data_dir)
 
-		print(os.path.join(model_dir, 'SRC.vocab'))
-		pickle.dump(SRC, open(os.path.join(model_dir, 'SRC.vocab'), 'wb') )
-		pickle.dump(TRG, open(os.path.join(model_dir, 'TRG.vocab'), 'wb') )
-
+	# Pickle vocabularies. This must happen after iterators are created.
+	pickle.dump(SRC, open(os.path.join(model_dir, 'SRC.vocab'), 'wb') )
+	pickle.dump(TRG, open(os.path.join(model_dir, 'TRG.vocab'), 'wb') )
+	if args.target_format == 'trees':
+		pickle.dump(TRG_TREE, open(os.path.join(model_dir, 'TRG_TREE.vocab'), 'wb') )
+	if args.source_format == 'trees':
+		pickle.dump(SRC_TREE, open(os.path.join(model_dir, 'SRC_TREE.vocab'), 'wb') )
 
 	encoder = EncoderRNN(hidden_size=args.hidden_size, vocab = SRC.vocab, recurrent_unit=args.encoder, num_layers=args.layers, dropout=args.dropout)
 	tree_decoder_names = ['Tree']
@@ -151,8 +200,8 @@ def train_model(args: Dict):
 		model = seq2seq.Seq2Seq(encoder, dec, ["source"], ["middle0", "annotation", "middle1", "source"], decoder_train_field_names=["middle0", "annotation", "middle1", "source", "target"])
 	else:
 		#dec = TridentDecoder(arity=3, vocab_size=len(TRG.vocab), hidden_size=args.hidden_size, max_depth=5)
-		dec = GRUTridentDecoder(arity=3, vocab=TRG.vocab, hidden_size=args.hidden_size, all_annotations=["POLISH", "RPN"], max_depth=5)
-		model = seq2seq.Seq2Seq(encoder, dec, ["source"], ["middle0", "annotation"], decoder_train_field_names=["middle0", "annotation", "target_tree"])
+		dec = GRUTridentDecoderAttn(arity=arity, vocab=TRG.vocab, hidden_size=args.hidden_size, max_depth=5, all_annotations=["sem"], encoder_vocab=SRC.vocab, attention_type="additive")
+		model = seq2seq.Seq2Seq(encoder, dec, ["source"], ["middle0", "annotation", "middle1", "source"], decoder_train_field_names=["middle0", "annotation", "middle1", "source", "target_tree"])
 	
 	model.to(device)
 
@@ -161,9 +210,18 @@ def train_model(args: Dict):
 
 def test_model(args: Dict):
 
-	logging_dir = os.path.join('logs', args.model)
-	exp_dir = os.listdir(logging_dir)[0]
-	metadata = Store(logging_dir, exp_dir)['metadata'].df
+	base_exp_dir = os.path.join(args.exp_dir, args.task)
+	structure_name = args.structure
+	model_name = args.model
+	data_dir = os.path.join(base_exp_dir, 'data')
+
+	model_dir = os.path.join(base_exp_dir, structure_name, model_name)
+
+	logging_dir = os.path.join(model_dir, 'logs')
+	if 'training' in os.listdir(logging_dir):
+		metadata = Store(logging_dir, 'training')['metadata'].df
+	else:
+		metadata = os.listdir(logging_dir)[0]
 
 	# Pull out relevant parameters
 	hidden_size = int(metadata['hidden_size'][0])
@@ -173,7 +231,7 @@ def test_model(args: Dict):
 	encoder = str(metadata['encoder'][0])
 	decoder = str(metadata['decoder'][0])
 	attention = str(metadata['attention'][0])
-	if attention == 'gANOLg==\n':
+	if '==' in attention:
 		attention = None
 	vocab = str(metadata['vocab'][0])
 	trainedtask = str(metadata['task'][0])
@@ -183,22 +241,21 @@ def test_model(args: Dict):
 	device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 	
 	if input_format == 'trees':		
-		SRC = pickle.load(open(os.path.join('models', args.model, 'SRC.vocab'), 'rb'))
-		TRG = pickle.load(open(os.path.join('models', args.model, 'TRG.vocab'), 'rb'))
+		SRC = pickle.load(open(os.path.join(model_dir, 'SRC.vocab'), 'rb'))
+		TRG = pickle.load(open(os.path.join(model_dir, 'TRG.vocab'), 'rb'))
 		TRG.inner_order = None # don't print the annotations about tree structure (the "None"s) when converting tree to sequence
-		SRC_TREE = pickle.load(open(os.path.join('models', args.model, 'SRC_TREE.vocab'), 'rb'))
-		TRG_TREE = pickle.load(open(os.path.join('models', args.model, 'TRG_TREE.vocab'), 'rb'))
+		SRC_TREE = pickle.load(open(os.path.join(model_dir, 'SRC_TREE.vocab'), 'rb'))
+		TRG_TREE = pickle.load(open(os.path.join(model_dir, 'TRG_TREE.vocab'), 'rb'))
 		TRANS = RawField()
 		datafields = [(("source_tree", "source"), (SRC_TREE, SRC)), 
 			("annotation", TRANS), 
 			(("target_tree", "target"), (TRG_TREE, TRG))]
 	else:
 		# Create datasets and vocabulary
-		SRC = pickle.load(open(os.path.join('models', args.model, 'SRC.vocab'), 'rb'))
-		TRG = pickle.load(open(os.path.join('models', args.model, 'TRG.vocab'), 'rb'))
+		SRC = pickle.load(open(os.path.join(model_dir, 'SRC.vocab'), 'rb'))
+		TRG = pickle.load(open(os.path.join(model_dir, 'TRG.vocab'), 'rb'))
 		TRANS = SRC if vocab == "SRC" else TRG
 		datafields = [("source", SRC), ("annotation", TRANS), ("target", TRG)]
-
 	
 	enc = EncoderRNN(hidden_size=hidden_size, vocab = SRC.vocab, 
 		recurrent_unit=encoder, num_layers=layers, dropout=dropout)
@@ -214,19 +271,20 @@ def test_model(args: Dict):
 			"middle1", "source", "target"])
 	else:
 		# TODO: replace max depth with max length -- to find depth just take log_3 max length
-		dec = GRUTridentDecoder(arity=3, vocab=TRG.vocab, hidden_size=hidden_size, all_annotations=["POLISH", "RPN"], max_depth=5)
+		dec = GRUTridentDecoder(arity=7, vocab=TRG.vocab, hidden_size=hidden_size, all_annotations=["POLISH", "RPN"], max_depth=5)
 		model = seq2seq.Seq2Seq(enc, dec, ["source"], ["middle0", "annotation"], decoder_train_field_names=["middle0", "annotation", "target_tree"])
 
 	model.to(device)
 	
+	print(attention)
 
-	model_path = os.path.join('models', args.model, 'checkpoint.pt')
+	model_path = os.path.join(model_dir, 'checkpoint.pt')
 	model.load_state_dict(torch.load(model_path))
 	model.eval()
 
-	if args.task is None:
+	if args.files is None:
 		
-		test.repl(model, name = args.model, datafields = datafields)
+		test.repl(model, args = args, datafields = datafields)
 	
 	else:
 		logging_meters = dict()
@@ -239,16 +297,16 @@ def test_model(args: Dict):
 
 		iterators = {}
 
-		for t in args.task:
-			t_data = TabularDataset(os.path.join('data', t + '.test'), 
+		for f in args.files:
+			f_data = TabularDataset(os.path.join(data_dir, f + '.test'), 
 				format = 'tsv', skip_header = True, fields = datafields)
-			iterator = BucketIterator(t_data, batch_size = 5, 
+			iterator = BucketIterator(f_data, batch_size = 5, 
 				device = device, sort_key = lambda x: len(x.target), 
 				sort_within_batch = True, repeat = False)
-			iterators[t] = iterator
+			iterators[f] = iterator
 
 
-		test.test(model, name = args.model, data = iterators, meters = logging_meters)
+		test.test(model, args = args, data = iterators, meters = logging_meters)
 
 def show_model_log(args: Dict):
 
@@ -264,7 +322,7 @@ def show_model_log(args: Dict):
 
 def setup_store(args: Dict, logging_dir: str):
 
-	store = cox.store.Store(logging_dir, args.expname)
+	store = cox.store.Store(logging_dir, 'training')
 
 	if args.expname is None:
 		# store metadata
@@ -359,15 +417,24 @@ def parse_arguments():
 	trn.add_argument('-to', '--tokens', 
 		help = 'list of tokens for logit-level-accuracy', type = str, 
 		default = None)
+	trn.add_argument('-E', '--exp-dir',
+		help='experiment directory', type=str, required=True)
+	trn.add_argument('-S', '--source-format',
+		type = str, choices = ['sequences', 'trees'], default = 'sequences',
+		help = 'format of source data')
+	trn.add_argument('-T', '--target-format',
+		type = str, choices = ['sequences', 'trees'], default = 'sequences',
+		help = 'format of target data')
+
 	trn.add_argument('-exp', '--expname', help = 'experiment name', 
 		type = str, default = None)
-	trn.add_argument('-o', '--outdir', 
-		help = 'directory in which to place cox store', type = str, 
-		default = 'logs')
+	# trn.add_argument('-o', '--outdir', 
+	# 	help = 'directory in which to place cox store', type = str, 
+	# 	default = 'logs')
 
 	tst.add_argument('-t', '--task', 
-		help = 'tasks to test model on. If no tasks are provided, you will enter a REPL to test the provided model on custom inputs',
-		type = str, nargs = '+', default = None)
+		help = 'name of task model was trained on',
+		type = str, default = None)
 	tst.add_argument('-m', '--model', help = 'name of model to test', type = str,
 		required = True)
 	tst.add_argument('-sa', '--sentacc', help = 'sentence accuracy', type = bool,
@@ -379,11 +446,19 @@ def parse_arguments():
 	tst.add_argument('-to', '--tokens', 
 		help = 'list of tokens for logit-level-accuracy', type = str, 
 		default = None)
+	tst.add_argument('-E', '--exp-dir',
+		help = 'experiment directory', type=str, required=True)
+	tst.add_argument('-S', '--structure',
+		help = 'structure of model', type=str, required=True)
+	tst.add_argument('-f', '--files',
+		help = 'testing files', type=str, nargs = '+')
 
 	log.add_argument('-m', '--model', help = 'name of model to show logs of', 
 		type = str, required = True)
 	log.add_argument('-exp', '--expname', help = 'experiment name', 
 		type = str, default = None)
+	log.add_argument('-E', '--exp-dir',
+		help = 'experiment directory', type=str, required=True)
 
 	return parser.parse_args()
 
