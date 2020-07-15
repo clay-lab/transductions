@@ -200,7 +200,7 @@ class DecoderRNN(nn.Module):
             y, h, a = self.forwardStep(x, h, encoder_outputs, source_mask)
             outputs[i] = y
             attention[i] = a
-            decoder_hiddens[i] = h[-1] if self.recurrent_unit_type is not "LSTM" else h[0][-1]
+            decoder_hiddens[i] = h[-1] if self.recurrent_unit_type != "LSTM" else h[0][-1]
             #print('y shape', y.shape, 'target shape', target.shape)
             if (evaluation | (random.random() > tf_ratio)):
                 x = y.argmax(dim=1)
