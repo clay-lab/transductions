@@ -44,11 +44,11 @@ def evaluate(model: ss.Seq2Seq, val_iter: tt.Iterator, epoch: int,
 				target_padded_perm = target_padded.permute(1, 0) # seq length x batch_size
 				batch_loss = criterion(perm_logits, target_padded_perm)
 
-			for name, meter in logging_meters.items():
-				if name == 'loss':
-					meter.update(batch_loss)
-				else:
-					meter.process_batch(prediction_padded, target_padded, model)
+				for name, meter in logging_meters.items():
+					if name == 'loss':
+						meter.update(batch_loss)
+					else:
+						meter.process_batch(prediction_padded, target_padded, model)
 		for name, meter in logging_meters.items():
 			stats_dict[name] = meter.result()
 			meter.reset()

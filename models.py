@@ -166,6 +166,9 @@ class DecoderRNN(nn.Module):
         # exit()
         batch_size = encoder_outputs.shape[1]
         outputs = torch.zeros(self.max_length, batch_size, self.vocab_size, device = avd)
+        # pad index should have a greater logit than all other words in vocab so that if we never reset this row, 
+        # the argmax will pick out pad as the vocab word
+        outputs[:,:,self.pad_index] = 1.0  
         decoder_hiddens = torch.zeros(self.max_length, batch_size, self.hidden_size, device = avd)
         attention = torch.zeros(self.max_length, batch_size, encoder_outputs.shape[0], device = avd)
 
@@ -213,7 +216,10 @@ class DecoderRNN(nn.Module):
                 break
                 
         # exit()
-        return outputs[:gen_length]#, decoder_hiddens[:i+1], attention[:i+1]
+        if self.train:
+            return outputs[:gen_length]#, decoder_hiddens[:i+1], attention[:i+1]
+        else:
+            return outputs[:i+1]
 
 # GRU modified such that its hidden states are not bounded
 class UnsquashedGRU(nn.Module):
