@@ -1,5 +1,6 @@
 from abc import abstractmethod
 import seq2seq as ss
+import numpy as np
 
 class AverageMetric:
 	"""

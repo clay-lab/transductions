@@ -14,6 +14,9 @@ import os
 from seq2seq import Seq2Seq
 from metrics import SentenceLevelAccuracy
 
+from main import setup_store
+import numpy as np
+
 class Model():
 
 	def __init__(self, name: str):
@@ -86,14 +89,14 @@ def repl(model: Seq2Seq, args, datafields):
 	prompt = ModelREPL(model, name = args.model, datafields = datafields)
 	prompt.cmdloop()
 
-def test(model: Seq2Seq, args, data: Dict, meters: Dict):
+def test(model: Seq2Seq, args, data: Dict):
 	"""
 	Runs model.test() on the provided list of tasks. It is presumed that each
 	task corresponds to a test split of data named `task.test` in the data/
 	directory.
 
 	@param model: The provided Seq2Seq model.
-	@param name: The name of the model.
+	@param args: The namespace of arguments passed on the command line. 
 	@param data: A list of TabularDatasets.
 	"""
 
@@ -105,20 +108,21 @@ def test(model: Seq2Seq, args, data: Dict, meters: Dict):
 
 	model_dir = os.path.join(base_exp_dir, structure_name, model_name)
 	results_dir = os.path.join(model_dir, 'results')
+	logging_dir = os.path.join(model_dir, 'logs')
 
 	if not os.path.isdir(results_dir):
 		os.mkdir(results_dir)
 
 	available_device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
-	model.eval()
 
-	# if not os.path.exists('results'):
-	# 	os.makedir('results')
+	model.eval()
 
 	for key, iterator in data.items():
 
+		store, meters = setup_store(args, logging_dir, logname = key)
+		stats_dict = {}
+
 		# Prepare output files
-		# keyless = key[:-len('.test')]
 		outfile = os.path.join(results_dir, key + '.tsv')
 		print('Testing model on {}'.format(key))
 		print('Writing results to {}'.format(outfile))
@@ -128,8 +132,6 @@ def test(model: Seq2Seq, args, data: Dict, meters: Dict):
 		with torch.no_grad():
 			with tqdm(iterator) as t:
 				for batch in t:
-
-					# raise SystemExit
 
 					logits = model(batch)
 					logits_max = logits.argmax(2)
@@ -149,10 +151,11 @@ def test(model: Seq2Seq, args, data: Dict, meters: Dict):
 
 					with open(outfile, 'a') as f:
 						for i, s in enumerate(source):
-							# if target[i] != prediction[i]:
-							# 	print('{0} -> {1}'.format(s, prediction[i]))
 							f.write('{0}\t{1}\t{2}\n'.format(s, target[i], prediction[i]))
 
 				for mkey, meter in meters.items():
 					print('{0}:\t{1}'.format(mkey, meter.result()))
+					stats_dict[mkey] = meter.result()
 					meter.reset()
+			if store is not None:
+				store["logs"].append_row(stats_dict)

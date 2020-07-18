@@ -29,8 +29,6 @@ from typing import List
 import pickle
 
 # these are as good as constants
-LOGS_TABLE = "logs"
-META_TABLE = "metadata"
 CKPT_NAME_LATEST = "latest_ckpt.pt"
 CKPT_NAME_BEST = "best_ckpt.pt"
 
@@ -71,7 +69,6 @@ def get_iterators(args: Dict, source, target, datafields, loc):
 	target.build_vocab(trn_data, val_data, test_data)
 
 	return (train, val, test)
-
 
 def train_model(args: Dict):
 
@@ -287,13 +284,6 @@ def test_model(args: Dict):
 		test.repl(model, args = args, datafields = datafields)
 	
 	else:
-		logging_meters = dict()
-		if args.sentacc: logging_meters['sentence-level-accuracy'] = SentenceLevelAccuracy()
-		if args.tokenacc: logging_meters['token-level-accuracy'] = TokenLevelAccuracy()
-		if args.lenacc: logging_meters['length-accuracy'] = LengthAccuracy()
-		if args.tokens is not None:
-			for token in args.tokens.split('_'):
-				logging_meters['{0}-accuracy'.format(token)] = SpecTokenAccuracy(token)
 
 		iterators = {}
 
@@ -306,23 +296,31 @@ def test_model(args: Dict):
 			iterators[f] = iterator
 
 
-		test.test(model, args = args, data = iterators, meters = logging_meters)
+		test.test(model, args = args, data = iterators)
 
 def show_model_log(args: Dict):
 
-	logging_dir = os.path.join('logs', args.model)
-	exp_dir = os.listdir(logging_dir)[0]
+	base_exp_dir = os.path.join(args.exp_dir, args.task)
+	structure_name = args.structure
+	model_name = args.model
+	data_dir = os.path.join(base_exp_dir, 'data')
+	model_dir = os.path.join(base_exp_dir, structure_name, model_name)
+	logging_dir = os.path.join(model_dir, 'logs')
+	# exp_dir = os.path.join(logging_dir, args.log)
 
-	store = Store(logging_dir, exp_dir)
+	store = Store(logging_dir, args.log)
 	metadata = store['metadata'].df
 	logs = store['logs'].df
 
 	print(metadata)
 	print(logs)
 
-def setup_store(args: Dict, logging_dir: str):
+def setup_store(args: Dict, logging_dir: str, logname = 'training'):
 
-	store = cox.store.Store(logging_dir, 'training')
+	LOGS_TABLE = "logs"
+	META_TABLE = "metadata"
+
+	store = cox.store.Store(logging_dir, logname)
 
 	if args.expname is None:
 		# store metadata
@@ -425,12 +423,8 @@ def parse_arguments():
 	trn.add_argument('-T', '--target-format',
 		type = str, choices = ['sequences', 'trees'], default = 'sequences',
 		help = 'format of target data')
-
 	trn.add_argument('-exp', '--expname', help = 'experiment name', 
 		type = str, default = None)
-	# trn.add_argument('-o', '--outdir', 
-	# 	help = 'directory in which to place cox store', type = str, 
-	# 	default = 'logs')
 
 	tst.add_argument('-t', '--task', 
 		help = 'name of task model was trained on',
@@ -452,13 +446,20 @@ def parse_arguments():
 		help = 'structure of model', type=str, required=True)
 	tst.add_argument('-f', '--files',
 		help = 'testing files', type=str, nargs = '+')
+	tst.add_argument('-exp', '--expname', help = 'experiment name', 
+		type = str, default = None)
 
 	log.add_argument('-m', '--model', help = 'name of model to show logs of', 
 		type = str, required = True)
-	log.add_argument('-exp', '--expname', help = 'experiment name', 
+	log.add_argument('-t', '--task', help = 'task name', 
 		type = str, default = None)
 	log.add_argument('-E', '--exp-dir',
 		help = 'experiment directory', type=str, required=True)
+	log.add_argument('-S', '--structure',
+		help = 'structure of model', type=str, required=True)
+	log.add_argument('-l', '--log',
+		help = 'name of log', type=str, default='training')
+
 
 	return parser.parse_args()
 
