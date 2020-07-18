@@ -301,12 +301,8 @@ def test_model(args: Dict):
 def show_model_log(args: Dict):
 
 	base_exp_dir = os.path.join(args.exp_dir, args.task)
-	structure_name = args.structure
-	model_name = args.model
-	data_dir = os.path.join(base_exp_dir, 'data')
-	model_dir = os.path.join(base_exp_dir, structure_name, model_name)
+	model_dir = os.path.join(base_exp_dir, args.structure, args.model)
 	logging_dir = os.path.join(model_dir, 'logs')
-	# exp_dir = os.path.join(logging_dir, args.log)
 
 	store = Store(logging_dir, args.log)
 	metadata = store['metadata'].df
