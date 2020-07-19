@@ -207,7 +207,7 @@ python main.py test -E EXP_DIR -t TASK_NAME -S ENC-DEC-ATTN -m MODEL-#
 This will load the following prompt on screen:
 
 ```
-Enter sequences into the MODEL-# model for evalutaion.                                                      
+Enter sequences into the MODEL-# model for evalutaion.
 > 
 ```
 
