@@ -12,10 +12,10 @@ ATTN=$5
 
 MAIL='jackson.petty@yale.edu'
 EXPPATH="$EXPDIR/$TASK/$ENC-$DEC-$ATTN" 
-if NUM=$(find $EXPPATH/* -maxdepth 0 -type d | wc -l | tr -d '[:space:]') ; then
+if NUM=$(find $EXPPATH/ -maxdepth 0 -type d | wc -l | tr -d '[:space:]') ; then
 	echo ''
 else
-	NUM=0
+	NUM=1
 fi
 
 
