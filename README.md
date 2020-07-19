@@ -248,3 +248,15 @@ This will print out the contents of `MODEL-#/logs/LOG` to the screen. The `-l,
 --log` argument will default to `training` if no log is specified, since this 
 log always exists.
 
+
+## Submitting files on GRACE
+
+`transductions` comes with a bash script to automate the deployment of a testing run to the GRACE cluster at Yale. Once logged into your GRACE account,
+issue the following command.
+
+```
+./batcher.sh EXPDIR TASK ENC DEC ATTN
+```
+
+This will generate the SBATCH script `TASK-ENC-DEC-ATTN.sh` and then run `sbatch TASK-ENC-DEC-ATTN.sh`, submitting the job. You can (and should) configure this script before using it to suit your needs. In particular, please change the email address.
+
