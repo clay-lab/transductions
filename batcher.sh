@@ -18,10 +18,10 @@ else
 	NUM=0
 fi
 
+
+ATTNCMD = '-a $ATTN'
 if ATTN='None' ; then
 	ATTNCMD = ''
-else
-	ATTNCMD = '-a $ATTN'
 fi
 
 cat > "$TASK-$ENC-$DEC-$ATTN.sh" << EOF1
