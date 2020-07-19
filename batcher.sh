@@ -32,3 +32,4 @@ export PATH=\$HOME/anaconda3/bin:\$PATH
 python main.py train -t "$TASK" -a $ATTN -E $EXPDIR -e $ENC -d $DEC
 EOF1
 
+sbatch $TASK-$ENC-$DEC-$ATTN.sh
