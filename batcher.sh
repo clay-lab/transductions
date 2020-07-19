@@ -36,7 +36,7 @@ cat > "$TASK-$ENC-$DEC-$ATTN.sh" << EOF1
 #SBATCH --output="$TASK-$ENC-$DEC-$ATTN-$NUM.out"
 
 export PATH=\$HOME/anaconda3/bin:\$PATH
-python main.py train -t $TASK $ATTNCMD -E $EXPDIR -e $ENC -d $DEC
+python main.py train -t $TASK $ATTNCMD -E $EXPDIR -e $ENC -d $DEC -ep 100
 EOF1
 
 sbatch $TASK-$ENC-$DEC-$ATTN.sh
