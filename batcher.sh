@@ -18,6 +18,12 @@ else
 	NUM=0
 fi
 
+if ATTN='None' ; then
+	ATTNCMD = ''
+else
+	ATTNCMD = '-a $ATTN'
+fi
+
 cat > "$TASK-$ENC-$DEC-$ATTN.sh" << EOF1
 #! /usr/bin/env bash
 #SBATCH --job-name=$TASK-$ENC-$DEC-$ATTN-$NUM
@@ -30,7 +36,7 @@ cat > "$TASK-$ENC-$DEC-$ATTN.sh" << EOF1
 #SBATCH --output="$TASK-$ENC-$DEC-$ATTN-$NUM.out"
 
 export PATH=\$HOME/anaconda3/bin:\$PATH
-python main.py train -t "$TASK" -a $ATTN -E $EXPDIR -e $ENC -d $DEC
+python main.py train -t $TASK $ATTNCMD -E $EXPDIR -e $ENC -d $DEC
 EOF1
 
 sbatch $TASK-$ENC-$DEC-$ATTN.sh
