@@ -20,12 +20,13 @@ fi
 
 cat > "$TASK-$ENC-$DEC-$ATTN.sh" << EOF1
 #! /usr/bin/env bash
-#SBATCH --job-name = "$TASK-$ENC-$DEC-$ATTN-$NUM"
+#SBATCH --job-name=$TASK-$ENC-$DEC-$ATTN-$NUM
 #SBATCH --ntasks=1 --nodes=1
+#SBATCH --mem-per-cpu=500
 #SBATCH --cpus-per-task=4
 #SBATCH --time = 1:00:00
 #SBATCH --mail-type=FAIL, END
-#SBATCH --mail-user="$MAIL"
+#SBATCH --mail-user=$MAIL
 #SBATCH --output="$TASK-$ENC-$DEC-$ATTN-$NUM.out"
 
 export PATH=\$HOME/anaconda3/bin:\$PATH
