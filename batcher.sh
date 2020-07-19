@@ -12,7 +12,11 @@ ATTN=$5
 
 MAIL='jackson.petty@yale.edu'
 EXPPATH="$EXPDIR/$TASK/$ENC-$DEC-$ATTN" 
-NUM=$(find $EXPPATH/* -maxdepth 0 -type d | wc -l | tr -d '[:space:]')
+if NUM=$(find $EXPPATH/* -maxdepth 0 -type d | wc -l | tr -d '[:space:]') ; then
+	echo ''
+else
+	NUM=0
+fi
 
 cat > "$TASK-$ENC-$DEC-$ATTN.sh" << EOF1
 #! /usr/bin/env bash
