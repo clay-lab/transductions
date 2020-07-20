@@ -31,7 +31,7 @@ fi
 # echo "Attention command:"
 # echo $ATTNCMD
 
-if [[ $# > 5 ]]; then
+if (( $# > 5 )); then
 	FCMD="-f ${@:6}"
 else
 	FCMD=""
