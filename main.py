@@ -326,7 +326,8 @@ def show_model_log(args: Dict):
 	store = Store(logging_dir, args.log)
 	frame = store[args.table].df
 
-	print(frame)
+	with pd.option_context('display.max_rows', None, 'display.max_columns', None):
+		print(frame)
 
 def setup_store(args: Dict, logging_dir: str, logname = 'training'):
 
