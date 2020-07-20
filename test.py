@@ -49,8 +49,7 @@ class ModelREPL(Cmd):
 		# SRC = Field(lower=True, eos_token="<eos>")
 		# TRG = Field(lower=True, eos_token="<eos>")
 		# datafields = [("source", SRC), ("annotation", TRG), ("target", TRG)]
-		dataset = TabularDataset(tempfile, format = 'tsv', fields = self.datafields, 
-			skip_header = False)
+		dataset = TabularDataset(tempfile, format = 'tsv', fields = self.datafields, skip_header = False)
 		# SRC.build_vocab(dataset)
 		# TRG.build_vocab(dataset)
 		iterator = BucketIterator(dataset, batch_size = 2,

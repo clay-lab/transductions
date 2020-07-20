@@ -32,6 +32,21 @@ import pickle
 CKPT_NAME_LATEST = "latest_ckpt.pt"
 CKPT_NAME_BEST = "best_ckpt.pt"
 
+def gen_gen_iterators(args: Dict, source, target, datafields, loc):
+
+	device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+	gen_files = args.files
+	iterators = {}
+	for f in gen_files:
+		dataset = TabularDataset(os.path.join(loc, f+'.test'), format='tsv', skip_header=True, fields=datafields)
+		iterator = BucketIterator(dataset, batch_size = 5,
+				sort_key = lambda x: len(x.target), sort_within_batch = True, 
+				repeat = False)
+		iterators[f] = iterator
+
+	return iterators
+
 def get_iterators(args: Dict, source, target, datafields, loc):
 	"""
 	Constructs train-val-test splits from the task.{train, val, test} files.
@@ -182,6 +197,11 @@ def train_model(args: Dict):
 	# Get iterators
 	train_iter, val_iter, test_iter = get_iterators(args, SRC, TRG, datafields, data_dir)
 
+	if args.files is not None:
+		gen_iters = gen_gen_iterators(args, SRC, TRG, datafields, data_dir)
+	else:
+		gen_iters = None
+
 	# Pickle vocabularies. This must happen after iterators are created.
 	pickle.dump(SRC, open(os.path.join(model_dir, 'SRC.vocab'), 'wb') )
 	pickle.dump(TRG, open(os.path.join(model_dir, 'TRG.vocab'), 'wb') )
@@ -196,14 +216,13 @@ def train_model(args: Dict):
 		dec = DecoderRNN(hidden_size=args.hidden_size, vocab=TRG.vocab, encoder_vocab=SRC.vocab, recurrent_unit=args.decoder, num_layers=args.layers, max_length=args.max_length, attention_type=args.attention, dropout=args.dropout)
 		model = seq2seq.Seq2Seq(encoder, dec, ["source"], ["middle0", "annotation", "middle1", "source"], decoder_train_field_names=["middle0", "annotation", "middle1", "source", "target"])
 	else:
-		#dec = TridentDecoder(arity=3, vocab_size=len(TRG.vocab), hidden_size=args.hidden_size, max_depth=5)
 		dec = GRUTridentDecoderAttn(arity=arity, vocab=TRG.vocab, hidden_size=args.hidden_size, max_depth=5, all_annotations=["sem"], encoder_vocab=SRC.vocab, attention_type="additive")
 		model = seq2seq.Seq2Seq(encoder, dec, ["source"], ["middle0", "annotation", "middle1", "source"], decoder_train_field_names=["middle0", "annotation", "middle1", "source", "target_tree"])
 	
 	model.to(device)
 
 	training.train(model, train_iter, val_iter, logging_meters, store, args,
-		save_dir = model_dir, ignore_index=TRG.vocab.stoi['<pad>'])
+		save_dir = model_dir, ignore_index=TRG.vocab.stoi['<pad>'], gen_iters = gen_iters)
 
 def test_model(args: Dict):
 
@@ -305,11 +324,9 @@ def show_model_log(args: Dict):
 	logging_dir = os.path.join(model_dir, 'logs')
 
 	store = Store(logging_dir, args.log)
-	metadata = store['metadata'].df
-	logs = store['logs'].df
+	frame = store[args.table].df
 
-	print(metadata)
-	print(logs)
+	print(frame)
 
 def setup_store(args: Dict, logging_dir: str, logname = 'training'):
 
@@ -333,9 +350,21 @@ def setup_store(args: Dict, logging_dir: str, logname = 'training'):
 				logging_meters['{0}-accuracy'.format(token)] = SpecTokenAccuracy(token)
 		logging_meters['loss'] = AverageMetric()
 
-		# TODO: support columns that aren't float
-		logs_schema = {name: float for name, meter in logging_meters.items()}
-		store.add_table(LOGS_TABLE, logs_schema)
+		# # TODO: support columns that aren't float
+		# logs_schema = {name: float for name, meter in logging_meters.items()}
+		# store.add_table(LOGS_TABLE, logs_schema)
+
+		# Validation data
+		val_schema = {name: float for name, meter in logging_meters.items()}
+		store.add_table('validation', val_schema)
+
+		# Generalization data. We exclude loss from this since it is not
+		# meaningful as the distributions for the generalization datasets are 
+		# intentionally distinct from the distribution of the train/val data.
+		if args.files is not None:
+			for f in args.files:
+				g_schema = {name: float for name, meter in logging_meters.items() if name != 'loss'}
+				store.add_table(f, g_schema)
 	else:
 		# TODO: check that the parameters match
 		# TODO: load logging meters
@@ -421,6 +450,8 @@ def parse_arguments():
 		help = 'format of target data')
 	trn.add_argument('-exp', '--expname', help = 'experiment name', 
 		type = str, default = None)
+	trn.add_argument('-f', '--files',
+		help = 'testing files', type=str, nargs = '+')
 
 	tst.add_argument('-t', '--task', 
 		help = 'name of task model was trained on',
@@ -455,6 +486,8 @@ def parse_arguments():
 		help = 'structure of model', type=str, required=True)
 	log.add_argument('-l', '--log',
 		help = 'name of log', type=str, default='training')
+	log.add_argument('-T', '--table',
+		help='name of table in log', type=str, default='metadata')
 
 
 	return parser.parse_args()

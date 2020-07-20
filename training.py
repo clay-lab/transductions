@@ -15,13 +15,13 @@ import torch.nn.functional as F
 CKPT_NAME_LATEST = 'checkpoint.pt'
 
 def evaluate(model: ss.Seq2Seq, val_iter: tt.Iterator, epoch: int, 
-		         args: Dict, criterion=None, logging_meters=None, store=None):
+		         args: Dict, criterion=None, logging_meters=None, store=None, dname='validation'):
 
 	model.eval()
 	stats_dict = dict()
 
 	with torch.no_grad():
-		print("Evaluating epoch {0}/{1} on val data".format(epoch + 1, args.epochs))
+		print("Evaluating epoch {0}/{1} on {2} data".format(epoch + 1, args.epochs, dname))
 		with tqdm(val_iter) as V:
 			for batch in V:
 				logits = model(batch) # seq length x batch_size x vocab
@@ -50,17 +50,18 @@ def evaluate(model: ss.Seq2Seq, val_iter: tt.Iterator, epoch: int,
 					else:
 						meter.process_batch(prediction_padded, target_padded, model)
 		for name, meter in logging_meters.items():
-			stats_dict[name] = meter.result()
+			if name != 'loss' or dname == 'validation':
+				stats_dict[name] = meter.result()
 			meter.reset()
 
 		if store is not None:
-			store["logs"].append_row(stats_dict)
+			store[dname].append_row(stats_dict)
 
 	return stats_dict
 
 def train(model: ss.Seq2Seq, train_iterator: tt.Iterator, 
 	        validation_iter: tt.Iterator, logging_meters: Dict, 
-	        store: cx.Store, args: Dict, save_dir: str, ignore_index=None):
+	        store: cx.Store, args: Dict, save_dir: str, ignore_index=None, gen_iters=None):
 
 	optimizer = optim.SGD(model.parameters(), lr=args.learning_rate)
 	criterion = nn.CrossEntropyLoss(weight=None, ignore_index=ignore_index)
@@ -78,7 +79,7 @@ def train(model: ss.Seq2Seq, train_iterator: tt.Iterator,
 		print("Training epoch {0}/{1} on train data".format(epoch + 1, args.epochs))
 		with tqdm(train_iterator) as T:
 			for batch in T:
-			# for batch in train_iterator:
+
 				optimizer.zero_grad()
 
 				decoder_outputs = model(batch)
@@ -94,13 +95,24 @@ def train(model: ss.Seq2Seq, train_iterator: tt.Iterator,
 				T.set_postfix(loss=logging_meters['loss'].result())
 
 		eval_stats = evaluate(model, validation_iter, epoch, args, criterion,
-		                      logging_meters=logging_meters, store=store)
+		                      logging_meters=logging_meters, store=store, dname='validation')
 
 		for name, stat in eval_stats.items():
 			if 'accuracy' in name:
 				stat = stat * 100
 			sign = '%' if 'accuracy' in name else ''
 			print('{:<25s} {:.5} {:s}'.format(name, stat, sign))
+
+		if gen_iters is not None:
+			for k, v in gen_iters.items():
+				iter_stats = evaluate(model, v, epoch, args, criterion, logging_meters=logging_meters, store=store, dname=str(k))
+
+				for name, stat in iter_stats.items():
+					if 'accuracy' in name:
+						stat = stat * 100
+					sign = '%' if 'accuracy' in name else ''
+					print('{:<25s} {:.5} {:s}'.format(name, stat, sign))
+
 
 		early_stopping(eval_stats['loss'], model)
 		if early_stopping.early_stop:
