@@ -24,6 +24,8 @@ from tqdm import tqdm
 from tree_loaders import TreeField, TreeSequenceField#, pad_arity_factory
 from typing import Dict
 
+import pandas as pd
+
 import test
 from typing import List
 import pickle
