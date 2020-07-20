@@ -19,10 +19,21 @@ else
 fi
 
 
-ATTNCMD='-a $ATTN'
-if ATTN='None' ; then
-	ATTNCMD=''
+if [[ $ATTN -ne 'None' ]]; then
+	ATTNCMD="-a $ATTN"
+else
+	ATTNCMD=""
 fi
+
+echo $ATTNCMD
+
+if [[ $# > 5 ]]; then
+	FCMD="-f ${@:6}"
+else
+	FCMD=""
+fi
+
+echo $FCMD
 
 cat > "$TASK-$ENC-$DEC-$ATTN.sh" << EOF1
 #! /usr/bin/env bash
@@ -36,7 +47,7 @@ cat > "$TASK-$ENC-$DEC-$ATTN.sh" << EOF1
 #SBATCH --output="$TASK-$ENC-$DEC-$ATTN-$NUM.out"
 
 export PATH=\$HOME/anaconda3/bin:\$PATH
-python main.py train -t $TASK $ATTNCMD -E $EXPDIR -e $ENC -d $DEC -ep 100
+python main.py train -t $TASK $ATTNCMD -E $EXPDIR -e $ENC -d $DEC -ep 100 -f ${@:6}
 EOF1
 
 sbatch $TASK-$ENC-$DEC-$ATTN.sh
