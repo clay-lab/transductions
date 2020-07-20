@@ -40,6 +40,8 @@ fi
 # echo "Files command:"
 # echo $FCMD
 
+echo "Writing to $TASK-$ENC-$DEC-$ATTN.sh"
+
 cat > "$TASK-$ENC-$DEC-$ATTN.sh" << EOF1
 #! /usr/bin/env bash
 #SBATCH --job-name=$TASK-$ENC-$DEC-$ATTN-$NUM
@@ -54,5 +56,7 @@ cat > "$TASK-$ENC-$DEC-$ATTN.sh" << EOF1
 export PATH=\$HOME/anaconda3/bin:\$PATH
 python main.py train -t $TASK $ATTNCMD -E $EXPDIR -e $ENC -d $DEC -ep 100 $FCMD
 EOF1
+
+echo "Running sbatch on $TASK-$ENC-$DEC-$ATTN.sh"
 
 sbatch $TASK-$ENC-$DEC-$ATTN.sh
