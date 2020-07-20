@@ -19,13 +19,17 @@ else
 fi
 
 
-if [[ $ATTN -ne 'None' ]]; then
-	ATTNCMD="-a $ATTN"
-else
+# echo "Attention:"
+# echo $ATTN
+
+if [ "$ATTN" = "None" ]; then
 	ATTNCMD=""
+else
+	ATTNCMD="-a $ATTN"
 fi
 
-echo $ATTNCMD
+# echo "Attention command:"
+# echo $ATTNCMD
 
 if [[ $# > 5 ]]; then
 	FCMD="-f ${@:6}"
@@ -33,7 +37,8 @@ else
 	FCMD=""
 fi
 
-echo $FCMD
+# echo "Files command:"
+# echo $FCMD
 
 cat > "$TASK-$ENC-$DEC-$ATTN.sh" << EOF1
 #! /usr/bin/env bash
@@ -47,7 +52,7 @@ cat > "$TASK-$ENC-$DEC-$ATTN.sh" << EOF1
 #SBATCH --output="$TASK-$ENC-$DEC-$ATTN-$NUM.out"
 
 export PATH=\$HOME/anaconda3/bin:\$PATH
-python main.py train -t $TASK $ATTNCMD -E $EXPDIR -e $ENC -d $DEC -ep 100 -f ${@:6}
+python main.py train -t $TASK $ATTNCMD -E $EXPDIR -e $ENC -d $DEC -ep 100 $FCMD
 EOF1
 
 sbatch $TASK-$ENC-$DEC-$ATTN.sh
