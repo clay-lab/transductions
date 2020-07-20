@@ -11,6 +11,7 @@ from typing import Dict
 import cox.store as cx
 from torch.nn.utils.rnn import pad_sequence
 import torch.nn.functional as F
+import re
 
 CKPT_NAME_LATEST = 'checkpoint.pt'
 
@@ -55,7 +56,7 @@ def evaluate(model: ss.Seq2Seq, val_iter: tt.Iterator, epoch: int,
 			meter.reset()
 
 		if store is not None:
-			store[dname].append_row(stats_dict)
+			store[re.sub(r'\W+', '', dname)].append_row(stats_dict)
 
 	return stats_dict
 

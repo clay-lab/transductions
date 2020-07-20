@@ -25,6 +25,7 @@ from tree_loaders import TreeField, TreeSequenceField#, pad_arity_factory
 from typing import Dict
 
 import pandas as pd
+import re
 
 import test
 from typing import List
@@ -367,7 +368,8 @@ def setup_store(args: Dict, logging_dir: str, logname = 'training'):
 		if args.files is not None:
 			for f in args.files:
 				g_schema = {name: float for name, meter in logging_meters.items() if name != 'loss'}
-				store.add_table(f, g_schema)
+				print('Adding {0} to table'.format(re.sub(r'\W+', '', f)))
+				store.add_table(re.sub(r'\W+', '', f), g_schema)
 	else:
 		# TODO: check that the parameters match
 		# TODO: load logging meters
