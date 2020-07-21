@@ -39,10 +39,11 @@ def gen_gen_iterators(args: Dict, source, target, datafields, loc):
 
 	device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-	gen_files = args.files
+	gen_files = [f[:-5] for f in os.listdir(loc) if os.path.isfile(os.path.join(loc, f)) and f.endswith('.test')]
+	print(gen_files)
 	iterators = {}
 	for f in gen_files:
-		dataset = TabularDataset(os.path.join(loc, f+'.test'), format='tsv', skip_header=True, fields=datafields)
+		dataset = TabularDataset(os.path.join(loc, f + '.test'), format='tsv', skip_header=True, fields=datafields)
 		iterator = BucketIterator(dataset, batch_size = 5,
 				sort_key = lambda x: len(x.target), sort_within_batch = True, 
 				repeat = False)
@@ -163,7 +164,9 @@ def train_model(args: Dict):
 			os.mkdir(log_dir)
 			break
 
-	store, logging_meters = setup_store(args, log_dir)
+	gen_files = [f[:-5] for f in os.listdir(data_dir) if os.path.isfile(os.path.join(data_dir, f)) and f.endswith('.test')]
+
+	store, logging_meters = setup_store(args, log_dir, gen_files)
 	device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 	arity=6
@@ -199,11 +202,7 @@ def train_model(args: Dict):
 
 	# Get iterators
 	train_iter, val_iter, test_iter = get_iterators(args, SRC, TRG, datafields, data_dir)
-
-	if args.files is not None:
-		gen_iters = gen_gen_iterators(args, SRC, TRG, datafields, data_dir)
-	else:
-		gen_iters = None
+	gen_iters = gen_gen_iterators(args, SRC, TRG, datafields, data_dir)
 
 	# Pickle vocabularies. This must happen after iterators are created.
 	pickle.dump(SRC, open(os.path.join(model_dir, 'SRC.vocab'), 'wb') )
@@ -334,7 +333,7 @@ def show_model_log(args: Dict):
 	with pd.option_context('display.max_rows', None, 'display.max_columns', None):
 		print(frame)
 
-def setup_store(args: Dict, logging_dir: str, logname = 'training'):
+def setup_store(args: Dict, logging_dir: str, gen_files: List, logname = 'training'):
 
 	LOGS_TABLE = "logs"
 	META_TABLE = "metadata"
@@ -367,11 +366,10 @@ def setup_store(args: Dict, logging_dir: str, logname = 'training'):
 		# Generalization data. We exclude loss from this since it is not
 		# meaningful as the distributions for the generalization datasets are 
 		# intentionally distinct from the distribution of the train/val data.
-		if args.files is not None:
-			for f in args.files:
-				g_schema = {name: float for name, meter in logging_meters.items() if name != 'loss'}
-				print('Adding {0} to table'.format(re.sub(r'\W+', '', f)))
-				store.add_table(re.sub(r'\W+', '', f), g_schema)
+		for f in gen_files:
+			g_schema = {name: float for name, meter in logging_meters.items() if name != 'loss'}
+			print('Adding {0} to table'.format(re.sub(r'\W+', '', f)))
+			store.add_table(re.sub(r'\W+', '', f), g_schema)
 	else:
 		# TODO: check that the parameters match
 		# TODO: load logging meters
