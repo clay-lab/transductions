@@ -20,7 +20,7 @@ def evaluate(model: ss.Seq2Seq, val_iter: tt.Iterator, epoch: int,
 
 	model.eval()
 	stats_dict = dict()
-
+	device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 	with torch.no_grad():
 		print("Evaluating epoch {0}/{1} on {2} data".format(epoch + 1, args.epochs, dname))
 		with tqdm(val_iter) as V:
@@ -41,8 +41,8 @@ def evaluate(model: ss.Seq2Seq, val_iter: tt.Iterator, epoch: int,
 				logits_padded[:logits.shape[0], :, :] = logits
 				# logits_padded = logits # THIS IS WRONG!!!! sometimes logits might have to be padded up to the length of target_padded
 
-				perm_logits = logits_padded.permute(1, 2, 0) # batch_size x vocab x seq length
-				target_padded_perm = target_padded.permute(1, 0) # seq length x batch_size
+				perm_logits = logits_padded.permute(1, 2, 0).to(device) # batch_size x vocab x seq length
+				target_padded_perm = target_padded.permute(1, 0).to(device) # seq length x batch_size
 				batch_loss = criterion(perm_logits, target_padded_perm)
 
 				for name, meter in logging_meters.items():
