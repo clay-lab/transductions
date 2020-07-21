@@ -120,7 +120,7 @@ def train(model: ss.Seq2Seq, train_iterator: tt.Iterator,
 						stat = stat * 100
 					sign = '%' if 'accuracy' in name else ''
 					print('{:<25s} {:.5} {:s}'.format(name, stat, sign))
-					outfile.write(['{:<25s} {:.5} {:s}'.format(name, stat, sign)])
+					outfile.write('{:<25s} {:.5} {:s}'.format(name, stat, sign))
 
 
 		early_stopping(eval_stats['loss'], model)
