@@ -224,8 +224,10 @@ def train_model(args: Dict):
 	
 	model.to(device)
 
+	out_file = os.path.join(model_dir, 'out_file.txt')
+
 	training.train(model, train_iter, val_iter, logging_meters, store, args,
-		save_dir = model_dir, ignore_index=TRG.vocab.stoi['<pad>'], gen_iters = gen_iters)
+		save_dir = model_dir, ignore_index=TRG.vocab.stoi['<pad>'], gen_iters = gen_iters, out_file=out_file)
 
 def test_model(args: Dict):
 
