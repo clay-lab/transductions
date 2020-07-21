@@ -1,8 +1,0 @@
-source	transformation	target
-Alice sees herself	sem	see ( alice , alice )
-Alice meets herself	sem	meet ( alice , alice )
-Alice likes herself	sem	like ( alice , alice )
-Alice dislikes herself	sem	dislike ( alice , alice )
-Alice throws herself	sem	throw ( alice , alice )
-Alice notices herself	sem	notice ( alice , alice )
-Alice knows herself	sem	know ( alice , alice )
