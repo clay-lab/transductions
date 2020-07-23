@@ -118,7 +118,7 @@ def test(model: Seq2Seq, args, data: Dict):
 
 	for key, iterator in data.items():
 
-		store, meters = setup_store(args, logging_dir, logname = key)
+		store, meters = setup_store(args, logging_dir, logname = key, gen_files = args.files, test=True)
 		stats_dict = {}
 
 		# Prepare output files
@@ -153,8 +153,10 @@ def test(model: Seq2Seq, args, data: Dict):
 							f.write('{0}\t{1}\t{2}\n'.format(s, target[i], prediction[i]))
 
 				for mkey, meter in meters.items():
-					print('{0}:\t{1}'.format(mkey, meter.result()))
-					stats_dict[mkey] = meter.result()
+					if mkey != 'loss':
+						print('{0}:\t{1}'.format(mkey, meter.result()))
+						stats_dict[mkey] = meter.result()
 					meter.reset()
 			if store is not None:
+				# print(store)
 				store["logs"].append_row(stats_dict)

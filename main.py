@@ -238,6 +238,7 @@ def test_model(args: Dict):
 	model_dir = os.path.join(base_exp_dir, structure_name, model_name)
 
 	logging_dir = os.path.join(model_dir, 'logs')
+
 	if 'training' in os.listdir(logging_dir):
 		metadata = Store(logging_dir, 'training')['metadata'].df
 	else:
@@ -333,7 +334,7 @@ def show_model_log(args: Dict):
 	with pd.option_context('display.max_rows', None, 'display.max_columns', None):
 		print(frame)
 
-def setup_store(args: Dict, logging_dir: str, gen_files: List, logname = 'training'):
+def setup_store(args: Dict, logging_dir: str, gen_files: List, logname = 'training', test=False):
 
 	LOGS_TABLE = "logs"
 	META_TABLE = "metadata"
@@ -359,17 +360,22 @@ def setup_store(args: Dict, logging_dir: str, gen_files: List, logname = 'traini
 		# logs_schema = {name: float for name, meter in logging_meters.items()}
 		# store.add_table(LOGS_TABLE, logs_schema)
 
-		# Validation data
-		val_schema = {name: float for name, meter in logging_meters.items()}
-		store.add_table('validation', val_schema)
+		if not test:
+			# Validation data
+			val_schema = {name: float for name, meter in logging_meters.items()}
+			store.add_table('validation', val_schema)
 
-		# Generalization data. We exclude loss from this since it is not
-		# meaningful as the distributions for the generalization datasets are 
-		# intentionally distinct from the distribution of the train/val data.
-		for f in gen_files:
-			g_schema = {name: float for name, meter in logging_meters.items() if name != 'loss'}
-			print('Adding {0} to table'.format(re.sub(r'\W+', '', f)))
-			store.add_table(re.sub(r'\W+', '', f), g_schema)
+			# Generalization data. We exclude loss from this since it is not
+			# meaningful as the distributions for the generalization datasets are 
+			# intentionally distinct from the distribution of the train/val data.
+			for f in gen_files:
+				g_schema = {name: float for name, meter in logging_meters.items() if name != 'loss'}
+				print('Adding {0} table'.format(re.sub(r'\W+', '', f)))
+				store.add_table(re.sub(r'\W+', '', f), g_schema)
+		else:
+			log_schema = {name: float for name, meter in logging_meters.items() if name != 'loss'}
+			print('Adding logs table')
+			store.add_table('logs', log_schema)
 	else:
 		# TODO: check that the parameters match
 		# TODO: load logging meters
