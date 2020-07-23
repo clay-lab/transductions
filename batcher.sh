@@ -10,7 +10,7 @@ ENC=$3
 DEC=$4
 ATTN=$5
 
-MAIL='jackson.petty@yale.edu'
+MAIL='example@example.com'
 EXPPATH="$EXPDIR/$TASK/$ENC-$DEC-$ATTN" 
 if NUM=$(find $EXPPATH/ -maxdepth 0 -type d | wc -l | tr -d '[:space:]') ; then
 	echo ''
