@@ -12,15 +12,11 @@ ATTN=$5
 
 MAIL='example@example.com'
 EXPPATH="$EXPDIR/$TASK/$ENC-$DEC-$ATTN" 
-if NUM=$(find $EXPPATH/ -maxdepth 0 -type d | wc -l | tr -d '[:space:]') ; then
-	echo ''
+if find $EXPPATH/ -maxdepth 1 -type d | wc -l | tr -d '[:space:]' ; then
+	NUM=$(find $EXPPATH/ -maxdepth 1 -type d | wc -l | tr -d '[:space:]')
 else
 	NUM=1
 fi
-
-
-# echo "Attention:"
-# echo $ATTN
 
 if [ "$ATTN" = "None" ]; then
 	ATTNCMD=""
@@ -28,19 +24,7 @@ else
 	ATTNCMD="-a $ATTN"
 fi
 
-# echo "Attention command:"
-# echo $ATTNCMD
-
-if (( $# > 5 )); then
-	FCMD="-f ${@:6}"
-else
-	FCMD=""
-fi
-
-# echo "Files command:"
-# echo $FCMD
-
-echo "Writing to $TASK-$ENC-$DEC-$ATTN.sh"
+echo "Creating $TASK-$ENC-$DEC-$ATTN.sh"
 
 cat > "$TASK-$ENC-$DEC-$ATTN.sh" << EOF1
 #! /usr/bin/env bash
@@ -54,9 +38,10 @@ cat > "$TASK-$ENC-$DEC-$ATTN.sh" << EOF1
 #SBATCH --output="$TASK-$ENC-$DEC-$ATTN-$NUM.out"
 
 export PATH=\$HOME/anaconda3/bin:\$PATH
-python main.py train -t $TASK $ATTNCMD -E $EXPDIR -e $ENC -d $DEC -ep 100 $FCMD
+python main.py train -t $TASK $ATTNCMD -E $EXPDIR -e $ENC -d $DEC -ep 100
 EOF1
 
 echo "Running sbatch on $TASK-$ENC-$DEC-$ATTN.sh"
+echo "Output is printed to $TASK-$ENC-$DEC-$ATTN-$NUM.out"
 
 sbatch $TASK-$ENC-$DEC-$ATTN.sh
