@@ -17,6 +17,11 @@ from metrics import SentenceLevelAccuracy
 from main import setup_store
 import numpy as np
 
+from sklearn.decomposition import PCA
+from sklearn.manifold import TSNE
+
+import matplotlib.pyplot as plt
+
 class Model():
 
 	def __init__(self, name: str):
@@ -160,3 +165,23 @@ def test(model: Seq2Seq, args, data: Dict):
 			if store is not None:
 				# print(store)
 				store["logs"].append_row(stats_dict)
+
+	# Identify embeddings
+	pca = PCA(n_components=45)
+	weights = model.encoder.embedding.weight.detach().numpy()
+
+	embeddings_pca = pca.fit_transform(weights)
+
+	tsne = TSNE(n_components=2, learning_rate=500., init="pca", random_state=1)
+	embeddings_tsne = tsne.fit_transform(embeddings_pca)
+
+	# Plot
+	fig, ax = plt.subplots(figsize=(7,5))
+
+	for i in range(len(model.encoder.vocab)):
+		w = model.encoder.vocab.itos[i]
+		ax.text(embeddings_tsne[i, 0], embeddings_tsne[i, 1], w)
+	ax.set_xlim(embeddings_tsne[:, 0].min() - 1, embeddings_tsne[:, 0].max() + 1)
+	ax.set_ylim(embeddings_tsne[:, 1].min() - 1, embeddings_tsne[:, 1].max() + 1)
+
+	plt.savefig(os.path.join(results_dir, 'embeddings.pdf'))
