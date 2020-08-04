@@ -21,6 +21,7 @@ from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
 
 import matplotlib.pyplot as plt
+import matplotlib
 
 class Model():
 
@@ -167,21 +168,27 @@ def test(model: Seq2Seq, args, data: Dict):
 				store["logs"].append_row(stats_dict)
 
 	# Identify embeddings
-	pca = PCA(n_components=45)
+	pca = PCA(n_components=2)
 	weights = model.encoder.embedding.weight.detach().numpy()
 
 	embeddings_pca = pca.fit_transform(weights)
 
 	tsne = TSNE(n_components=2, learning_rate=500., init="pca", random_state=1)
-	embeddings_tsne = tsne.fit_transform(embeddings_pca)
+	embeddings_tsne = tsne.fit_transform(weights)
+
+	# Customize plot
+	params = {'font.family': 'KpRoman'}
+	matplotlib.rcParams.update(params)
+
 
 	# Plot
 	fig, ax = plt.subplots(figsize=(7,5))
 
 	for i in range(len(model.encoder.vocab)):
 		w = model.encoder.vocab.itos[i]
-		ax.text(embeddings_tsne[i, 0], embeddings_tsne[i, 1], w)
-	ax.set_xlim(embeddings_tsne[:, 0].min() - 1, embeddings_tsne[:, 0].max() + 1)
-	ax.set_ylim(embeddings_tsne[:, 1].min() - 1, embeddings_tsne[:, 1].max() + 1)
+		ax.text(embeddings_pca[i, 0], embeddings_pca[i, 1], w)
+	ax.set_xlim(embeddings_pca[:, 0].min() - 1, embeddings_pca[:, 0].max() + 1)
+	ax.set_ylim(embeddings_pca[:, 1].min() - 1, embeddings_pca[:, 1].max() + 1)
+	ax.set_title("Embeddings for {0} {1} {2}".format(args.task, args.structure, args.model))
 
 	plt.savefig(os.path.join(results_dir, 'embeddings.pdf'))
