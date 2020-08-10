@@ -89,7 +89,7 @@ def get_iterators(args: Dict, source, target, datafields, loc):
 
 	return (train, val, test)
 
-def make_datafields(source_format, target_format, tree_transformation_fun=None):
+def make_datafields(source_format, target_format, trans_location='TRG', tree_transformation_fun=None):
 	if source_format == 'trees':
 		SRC_TREE = TreeField(collapse_unary=True)
 		SRC = TreeSequenceField(SRC_TREE)
@@ -106,7 +106,12 @@ def make_datafields(source_format, target_format, tree_transformation_fun=None):
 		TRG = Field(lower=True, eos_token="<eos>") # Target vocab
 		trg_section = ("target", TRG)
 
-	TRANS = RawField()
+	# this is temporary -- just until we fix TRANS for the sequence data
+	if (source_format == 'trees') or (target_format == 'trees'):
+		TRANS = RawField()
+	else:
+		TRANS = SRC if args.vocab == "SRC" else TRG
+
 	datafields = [src_section, ("annotation", TRANS), trg_section]
 
 	return SRC, TRANS, TRG, datafields
@@ -191,17 +196,15 @@ def train_model(args: Dict):
 	store, logging_meters = setup_store(args, log_dir, gen_files)
 	device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-	arity=6
-
-	SRC, TRANS, TRG, datafields = make_datafields(args.source_format, args.target_format, tree_transformation_fun=pad_arity_factory(arity))
+	SRC, TRANS, TRG, datafields = make_datafields(args.source_format, args.target_format, trans_location=args.vocab, tree_transformation_fun=pad_arity_factory(args.arity))
 
 	# Get iterators
 	train_iter, val_iter, test_iter = get_iterators(args, SRC, TRG, datafields, data_dir)
 	gen_iters = gen_gen_iterators(args, SRC, TRG, datafields, data_dir)
 
 	# Pickle vocabularies. This must happen after iterators are created.
-	pickle.dump(SRC, open(os.path.join(model_dir, 'SRC.vocab'), 'wb') )
-	pickle.dump(TRG, open(os.path.join(model_dir, 'TRG.vocab'), 'wb') )
+	pickle.dump(SRC.vocab, open(os.path.join(model_dir, 'SRC.vocab'), 'wb') )
+	pickle.dump(TRG.vocab, open(os.path.join(model_dir, 'TRG.vocab'), 'wb') )
 	#if args.target_format == 'trees':
 	#	pickle.dump(TRG_TREE, open(os.path.join(model_dir, 'TRG_TREE.vocab'), 'wb') )
 	#if args.source_format == 'trees':
@@ -213,7 +216,7 @@ def train_model(args: Dict):
 		dec = DecoderRNN(hidden_size=args.hidden_size, vocab=TRG.vocab, encoder_vocab=SRC.vocab, recurrent_unit=args.decoder, num_layers=args.layers, max_length=args.max_length, attention_type=args.attention, dropout=args.dropout)
 		model = seq2seq.Seq2Seq(encoder, dec, ["source"], ["middle0", "annotation", "middle1", "source"], decoder_train_field_names=["middle0", "annotation", "middle1", "source", "target"])
 	else:
-		dec = GRUTridentDecoderAttn(arity=arity, vocab=TRG.vocab, hidden_size=args.hidden_size, max_depth=5, all_annotations=["POLISH", "RPN"], encoder_vocab=SRC.vocab, attention_type="additive")
+		dec = GRUTridentDecoderAttn(arity=args.arity, vocab=TRG.vocab, hidden_size=args.hidden_size, max_depth=5, all_annotations=["POLISH", "RPN"], encoder_vocab=SRC.vocab, attention_type="additive")
 		model = seq2seq.Seq2Seq(encoder, dec, ["source"], ["middle0", "annotation", "middle1", "source"], decoder_train_field_names=["middle0", "annotation", "middle1", "source", "target_tree"])
 	
 	model.to(device)
@@ -251,28 +254,25 @@ def test_model(args: Dict):
 		attention = None
 	vocab = str(metadata['vocab'][0])
 	trainedtask = str(metadata['task'][0])
-	input_format = str(metadata['input_format'][0])
+	source_format = str(metadata['source_format'][0])
+	target_format = str(metadata['target_format'][0])
+	arity = int(metadata['arity'][0])
+	vocab = str(metadata['vocab'][0])
 
 	# Device specification
 	device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
-	if input_format == 'trees':		
-		SRC = pickle.load(open(os.path.join(model_dir, 'SRC.vocab'), 'rb'))
-		TRG = pickle.load(open(os.path.join(model_dir, 'TRG.vocab'), 'rb'))
-		TRG.inner_order = None # don't print the annotations about tree structure (the "None"s) when converting tree to sequence
-		SRC_TREE = pickle.load(open(os.path.join(model_dir, 'SRC_TREE.vocab'), 'rb'))
-		TRG_TREE = pickle.load(open(os.path.join(model_dir, 'TRG_TREE.vocab'), 'rb'))
-		TRANS = RawField()
-
-		TRG.inner_order = None # don't print the annotations about tree structure (the "None"s) when converting tree to sequence
-		TRG.tree_field.tree_transformation_fun = None # don't add padding symbols to normalize tree arity
-	else:
-		# Create datasets and vocabulary
-		SRC = pickle.load(open(os.path.join(model_dir, 'SRC.vocab'), 'rb'))
-		TRG = pickle.load(open(os.path.join(model_dir, 'TRG.vocab'), 'rb'))
-		TRANS = SRC if vocab == "SRC" else TRG
-		datafields = [("source", SRC), ("annotation", TRANS), ("target", TRG)]
+								
+	SRC, TRANS, TRG, _ = make_datafields(args.source_format, args.target_format,
+										trans_location=args.vocab,
+										tree_transformation_fun=None)				# don't add padding symbols to normalize tree arity
+	TRG.inner_order = None # don't print the annotations about tree structure (the "None"s) when converting tree to sequence
 	
+	src_vocab = pickle.load(open(os.path.join(model_dir, 'SRC.vocab'), 'rb'))
+	SRC.vocab = src_vocab
+	target_vocab = pickle.load(open(os.path.join(model_dir, 'TRG.vocab'), 'rb'))
+	TRG.vocab = target_vocab
+
+	# we ignore the datafields object made by `make_datafields` since we don't care about the source and target trees
 	datafields = [("source", SRC), ("annotation", TRANS), ("target", TRG)]
 
 	enc = EncoderRNN(hidden_size=hidden_size, vocab = SRC.vocab, 
@@ -289,7 +289,6 @@ def test_model(args: Dict):
 			"middle1", "source", "target"])
 	else:
 		# TODO: replace max depth with max length -- to find depth just take log_3 max length
-		arity = 4
 		dec = GRUTridentDecoderAttn(arity=arity, vocab=TRG.vocab, hidden_size=hidden_size, max_depth=5, all_annotations=["POLISH", "RPN"], encoder_vocab=SRC.vocab, attention_type="additive")
 		model = seq2seq.Seq2Seq(enc, dec, ["source"], ["middle0", "annotation", "middle1", "source"], decoder_train_field_names=["middle0", "annotation", "middle1", "source", "target_tree"])
 
@@ -407,6 +406,9 @@ def parse_arguments():
 	trn.add_argument('-d', '--decoder', 
 		help = 'type of decoder used', type = str, 
 		choices = ['GRU', 'LSTM', 'SRN', 'Tree'], default = 'GRU')
+	trn.add_argument('-ar', '--arity', 
+		help = 'Arity of tree learned by tree decoder', type = int, 
+		default = 2)
 	trn.add_argument('-t', '--task', help = 'task model is trained to perform', 
 		type = str, required = True)
 	trn.add_argument('-a', '--attention', help = 'type of attention used', 
