@@ -168,6 +168,9 @@ class DecoderRNN(nn.Module):
         # exit()
         batch_size = encoder_outputs.shape[1]
         outputs = torch.zeros(self.max_length, batch_size, self.vocab_size, device = avd)
+        # pad index should have a greater logit than all other words in vocab so that if we never reset this row, 
+        # the argmax will pick out pad as the vocab word
+        outputs[:,:,self.pad_index] = 1.0  
         decoder_hiddens = torch.zeros(self.max_length, batch_size, self.hidden_size, device = avd)
         attention = torch.zeros(self.max_length, batch_size, encoder_outputs.shape[0], device = avd)
 
@@ -181,7 +184,7 @@ class DecoderRNN(nn.Module):
         
         source_mask = create_mask(source, self.encoder_vocab)
         #initialize x and h to given initial values. 
-        x, h = x0.squeeze(0), h0
+        x, h = x0, h0
         # print(x0.size())
         # print()
         #print('x before', x, x0, self.vocab.stoi)
@@ -199,7 +202,7 @@ class DecoderRNN(nn.Module):
             y, h, a = self.forwardStep(x, h, encoder_outputs, source_mask)
             outputs[i] = y
             attention[i] = a
-            decoder_hiddens[i] = h[-1] if self.recurrent_unit_type is not "LSTM" else h[0][-1]
+            decoder_hiddens[i] = h[-1] if self.recurrent_unit_type != "LSTM" else h[0][-1]
             #print('y shape', y.shape, 'target shape', target.shape)
             if (evaluation | (random.random() > tf_ratio)):
                 x = y.argmax(dim=1)
@@ -215,7 +218,10 @@ class DecoderRNN(nn.Module):
                 break
                 
         # exit()
-        return outputs[:gen_length]#, decoder_hiddens[:i+1], attention[:i+1]
+        if self.train:
+            return outputs[:gen_length]#, decoder_hiddens[:i+1], attention[:i+1]
+        else:
+            return outputs[:i+1]
 
 # GRU modified such that its hidden states are not bounded
 class UnsquashedGRU(nn.Module):
