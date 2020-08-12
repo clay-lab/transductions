@@ -89,7 +89,7 @@ def get_iterators(args: Dict, source, target, datafields, loc):
 
 	return (train, val, test)
 
-def make_datafields(source_format, target_format, trans_location='TRG', tree_transformation_fun=None):
+def make_datafields(source_format, target_format, trans_location='TRG', tree_transformation_fun=None, tgt_tree_inner_label="INNER"):
 	if source_format == 'trees':
 		SRC_TREE = TreeField(collapse_unary=True)
 		SRC = TreeSequenceField(SRC_TREE)
@@ -100,17 +100,21 @@ def make_datafields(source_format, target_format, trans_location='TRG', tree_tra
 
 	if target_format == 'trees':
 		TRG_TREE = TreeField(tree_transformation_fun=tree_transformation_fun, collapse_unary=True)
-		TRG = TreeSequenceField(TRG_TREE, inner_order="pre", inner_symbol="NULL", is_target=True)
+		TRG = TreeSequenceField(TRG_TREE, inner_order="pre", inner_symbol=tgt_tree_inner_label, is_target=True)
 		trg_section = (("target_tree", "target"), (TRG_TREE, TRG))
 	else:
 		TRG = Field(lower=True, eos_token="<eos>") # Target vocab
 		trg_section = ("target", TRG)
 
 	# this is temporary -- just until we fix TRANS for the sequence data
-	if (source_format == 'trees') or (target_format == 'trees'):
+	if args.vocab == "SRC":
+		TRANS = SRC
+	elif args.vocab == "TRG":
+		TRANS = TRG
+	elif args.vocab == "RAW":
 		TRANS = RawField()
-	else:
-		TRANS = SRC if args.vocab == "SRC" else TRG
+	elif args.vocab == "OWN":
+		TRANS = Field()
 
 	datafields = [src_section, ("annotation", TRANS), trg_section]
 
@@ -196,7 +200,8 @@ def train_model(args: Dict):
 	store, logging_meters = setup_store(args, log_dir, gen_files)
 	device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-	SRC, TRANS, TRG, datafields = make_datafields(args.source_format, args.target_format, trans_location=args.vocab, tree_transformation_fun=pad_arity_factory(args.arity))
+	tgt_tree_inner_label = "INNER"
+	SRC, TRANS, TRG, datafields = make_datafields(args.source_format, args.target_format, trans_location=args.vocab, tree_transformation_fun=pad_arity_factory(args.arity), tgt_tree_inner_label=tgt_tree_inner_label)
 
 	# Get iterators
 	train_iter, val_iter, test_iter = get_iterators(args, SRC, TRG, datafields, data_dir)
@@ -216,7 +221,7 @@ def train_model(args: Dict):
 		dec = DecoderRNN(hidden_size=args.hidden_size, vocab=TRG.vocab, encoder_vocab=SRC.vocab, recurrent_unit=args.decoder, num_layers=args.layers, max_length=args.max_length, attention_type=args.attention, dropout=args.dropout)
 		model = seq2seq.Seq2Seq(encoder, dec, ["source"], ["middle0", "annotation", "middle1", "source"], decoder_train_field_names=["middle0", "annotation", "middle1", "source", "target"])
 	else:
-		dec = GRUTridentDecoderAttn(arity=args.arity, vocab=TRG.vocab, hidden_size=args.hidden_size, max_depth=5, all_annotations=["POLISH", "RPN"], encoder_vocab=SRC.vocab, attention_type="additive")
+		dec = GRUTridentDecoderAttn(arity=args.arity, vocab=TRG.vocab, hidden_size=args.hidden_size, max_depth=5, all_annotations=["POLISH", "RPN"], encoder_vocab=SRC.vocab, attention_type="additive", inner_label=tgt_tree_inner_label)
 		model = seq2seq.Seq2Seq(encoder, dec, ["source"], ["middle0", "annotation", "middle1", "source"], decoder_train_field_names=["middle0", "annotation", "middle1", "source", "target_tree"])
 	
 	model.to(device)
@@ -261,19 +266,18 @@ def test_model(args: Dict):
 
 	# Device specification
 	device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-								
-	SRC, TRANS, TRG, _ = make_datafields(args.source_format, args.target_format,
+
+	tgt_tree_inner_label = "INNER"							
+	SRC, TRANS, TRG, datafields = make_datafields(args.source_format, args.target_format,
 										trans_location=args.vocab,
-										tree_transformation_fun=None)				# don't add padding symbols to normalize tree arity
+										tree_transformation_fun=None,					# don't add padding symbols to normalize tree arity
+										tgt_tree_inner_label=tgt_tree_inner_label)				
 	TRG.inner_order = None # don't print the annotations about tree structure (the "None"s) when converting tree to sequence
 	
 	src_vocab = pickle.load(open(os.path.join(model_dir, 'SRC.vocab'), 'rb'))
 	SRC.vocab = src_vocab
 	target_vocab = pickle.load(open(os.path.join(model_dir, 'TRG.vocab'), 'rb'))
 	TRG.vocab = target_vocab
-
-	# we ignore the datafields object made by `make_datafields` since we don't care about the source and target trees
-	datafields = [("source", SRC), ("annotation", TRANS), ("target", TRG)]
 
 	enc = EncoderRNN(hidden_size=hidden_size, vocab = SRC.vocab, 
 		recurrent_unit=encoder, num_layers=layers, dropout=dropout)
@@ -289,7 +293,7 @@ def test_model(args: Dict):
 			"middle1", "source", "target"])
 	else:
 		# TODO: replace max depth with max length -- to find depth just take log_3 max length
-		dec = GRUTridentDecoderAttn(arity=arity, vocab=TRG.vocab, hidden_size=hidden_size, max_depth=5, all_annotations=["POLISH", "RPN"], encoder_vocab=SRC.vocab, attention_type="additive")
+		dec = GRUTridentDecoderAttn(arity=arity, vocab=TRG.vocab, hidden_size=hidden_size, max_depth=5, all_annotations=["POLISH", "RPN"], encoder_vocab=SRC.vocab, attention_type="additive", inner_label=tgt_tree_inner_label)
 		model = seq2seq.Seq2Seq(enc, dec, ["source"], ["middle0", "annotation", "middle1", "source"], decoder_train_field_names=["middle0", "annotation", "middle1", "source", "target_tree"])
 
 	model.to(device)
@@ -432,7 +436,7 @@ def parse_arguments():
 		type = float, default = 0.005)
 	trn.add_argument('-v', '--vocab', 
 		help = 'which vocabulary contains the transformation annotation', 
-		type = str, choices = ['SRC', 'TRG'], default = 'TRG')
+		type = str, choices = ['SRC', 'TRG', 'RAW', 'OWN'], default = 'TRG')
 	trn.add_argument('-do', '--dropout', help = 'how much dropout to use', 
 		type = float, default=0.0)
 	#trn.add_argument('-i', '--input-format', 
@@ -475,6 +479,9 @@ def parse_arguments():
 	tst.add_argument('-T', '--target-format',
 		type = str, choices = ['sequences', 'trees'], default = 'sequences',
 		help = 'format of target data')
+	tst.add_argument('-v', '--vocab', 
+		help = 'which vocabulary contains the transformation annotation', 
+		type = str, choices = ['SRC', 'TRG'], default = 'TRG')
 	tst.add_argument('-sa', '--sentacc', help = 'sentence accuracy', type = bool,
 		default = True)
 	tst.add_argument('-ta', '--tokenacc', help = 'token accuracy', type = bool, 
