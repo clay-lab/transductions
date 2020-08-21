@@ -51,7 +51,7 @@ def gen_gen_iterators(args: Dict, source, target, datafields, loc):
 
 	return iterators
 
-def get_iterators(args: Dict, source, target, datafields, loc):
+def get_iterators(args: Dict, source, trans, target, datafields, loc):
 	"""
 	Constructs train-val-test splits from the task.{train, val, test} files.
 
@@ -85,6 +85,7 @@ def get_iterators(args: Dict, source, target, datafields, loc):
 	)
 
 	source.build_vocab(trn_data, val_data, test_data)
+	trans.build_vocab(trn_data, val_data, test_data)
 	target.build_vocab(trn_data, val_data, test_data)
 
 	return (train, val, test)
@@ -202,13 +203,17 @@ def train_model(args: Dict):
 
 	tgt_tree_inner_label = "INNER"
 	SRC, TRANS, TRG, datafields = make_datafields(args.source_format, args.target_format, trans_location=args.vocab, tree_transformation_fun=pad_arity_factory(args.arity), tgt_tree_inner_label=tgt_tree_inner_label)
+	tree_decoder_names = ['Tree']
+	if args.decoder not in tree_decoder_names:
+		TRG.inner_order = None # don't print the annotations about tree structure (the "None"s) when converting tree to sequence
 
 	# Get iterators
-	train_iter, val_iter, test_iter = get_iterators(args, SRC, TRG, datafields, data_dir)
+	train_iter, val_iter, test_iter = get_iterators(args, SRC, TRANS, TRG, datafields, data_dir)
 	gen_iters = gen_gen_iterators(args, SRC, TRG, datafields, data_dir)
 
 	# Pickle vocabularies. This must happen after iterators are created.
 	pickle.dump(SRC.vocab, open(os.path.join(model_dir, 'SRC.vocab'), 'wb') )
+	pickle.dump(TRANS.vocab, open(os.path.join(model_dir, 'TRANS.vocab'), 'wb') )
 	pickle.dump(TRG.vocab, open(os.path.join(model_dir, 'TRG.vocab'), 'wb') )
 	#if args.target_format == 'trees':
 	#	pickle.dump(TRG_TREE, open(os.path.join(model_dir, 'TRG_TREE.vocab'), 'wb') )
@@ -219,10 +224,10 @@ def train_model(args: Dict):
 	tree_decoder_names = ['Tree']
 	if args.decoder not in tree_decoder_names:
 		dec = DecoderRNN(hidden_size=args.hidden_size, vocab=TRG.vocab, encoder_vocab=SRC.vocab, recurrent_unit=args.decoder, num_layers=args.layers, max_length=args.max_length, attention_type=args.attention, dropout=args.dropout)
-		model = seq2seq.Seq2Seq(encoder, dec, ["source"], ["middle0", "annotation", "middle1", "source"], decoder_train_field_names=["middle0", "annotation", "middle1", "source", "target"])
+		model = seq2seq.VectorSeq2Seq("annotation", TRANS.vocab, args.hidden_size, encoder, dec, ["source"], ["middle0", "trans_vec", "middle1", "source"], decoder_train_field_names=["middle0", "trans_vec", "middle1", "source", "target"])
 	else:
-		dec = GRUTridentDecoderAttn(arity=args.arity, vocab=TRG.vocab, hidden_size=args.hidden_size, max_depth=5, all_annotations=["POLISH", "RPN"], encoder_vocab=SRC.vocab, attention_type="additive", inner_label=tgt_tree_inner_label)
-		model = seq2seq.Seq2Seq(encoder, dec, ["source"], ["middle0", "annotation", "middle1", "source"], decoder_train_field_names=["middle0", "annotation", "middle1", "source", "target_tree"])
+		dec = GRUTridentDecoderAttn(arity=args.arity, vocab=TRG.vocab, hidden_size=args.hidden_size, max_depth=5, encoder_vocab=SRC.vocab, attention_type="additive", inner_label=tgt_tree_inner_label)
+		model = seq2seq.VectorSeq2Seq("annotation", TRANS.vocab, args.hidden_size, encoder, dec, ["source"], ["middle0", "trans_vec", "middle1", "source"], decoder_train_field_names=["middle0", "trans_vec", "middle1", "source", "target_tree"])
 	
 	model.to(device)
 
@@ -252,8 +257,8 @@ def test_model(args: Dict):
 	layers = int(metadata['layers'][0])
 	max_length = int(metadata['max_length'][0])
 	dropout = float(metadata['dropout'][0])
-	encoder = str(metadata['encoder'][0])
-	decoder = str(metadata['decoder'][0])
+	encoder_name = str(metadata['encoder'][0])
+	decoder_name = str(metadata['decoder'][0])
 	attention = str(metadata['attention'][0])
 	if '==' in attention:
 		attention = None
@@ -276,25 +281,25 @@ def test_model(args: Dict):
 	
 	src_vocab = pickle.load(open(os.path.join(model_dir, 'SRC.vocab'), 'rb'))
 	SRC.vocab = src_vocab
+	trans_vocab = pickle.load(open(os.path.join(model_dir, 'TRANS.vocab'), 'rb'))
+	TRANS.vocab = trans_vocab
 	target_vocab = pickle.load(open(os.path.join(model_dir, 'TRG.vocab'), 'rb'))
 	TRG.vocab = target_vocab
 
 	enc = EncoderRNN(hidden_size=hidden_size, vocab = SRC.vocab, 
-		recurrent_unit=encoder, num_layers=layers, dropout=dropout)
+		recurrent_unit=encoder_name, num_layers=layers, dropout=dropout)
 
 	tree_decoder_names = ['Tree']
-	if decoder not in tree_decoder_names:
+	if decoder_name not in tree_decoder_names:
 		dec = DecoderRNN(hidden_size=hidden_size, vocab=TRG.vocab, 
-			encoder_vocab=SRC.vocab, recurrent_unit=decoder, num_layers=layers, 
+			encoder_vocab=SRC.vocab, recurrent_unit=decoder_name, num_layers=layers, 
 			max_length=max_length, attention_type=attention, dropout=dropout)
 
-		model = seq2seq.Seq2Seq(enc, dec, ["source"], ["middle0", "annotation", 
-			"middle1", "source"], decoder_train_field_names=["middle0", "annotation", 
-			"middle1", "source", "target"])
+		model = seq2seq.VectorSeq2Seq("annotation", TRANS.vocab, hidden_size, enc, dec, ["source"], ["middle0", "trans_vec", "middle1", "source"], decoder_train_field_names=["middle0", "trans_vec", "middle1", "source", "target"])
 	else:
 		# TODO: replace max depth with max length -- to find depth just take log_3 max length
-		dec = GRUTridentDecoderAttn(arity=arity, vocab=TRG.vocab, hidden_size=hidden_size, max_depth=5, all_annotations=["POLISH", "RPN"], encoder_vocab=SRC.vocab, attention_type="additive", inner_label=tgt_tree_inner_label)
-		model = seq2seq.Seq2Seq(enc, dec, ["source"], ["middle0", "annotation", "middle1", "source"], decoder_train_field_names=["middle0", "annotation", "middle1", "source", "target_tree"])
+		dec = GRUTridentDecoderAttn(arity=arity, vocab=TRG.vocab, hidden_size=hidden_size, max_depth=5, encoder_vocab=SRC.vocab, attention_type="additive", inner_label=tgt_tree_inner_label)
+		model = seq2seq.VectorSeq2Seq("annotation", TRANS.vocab, hidden_size, enc, dec, ["source"], ["middle0", "trans_vec", "middle1", "source"], decoder_train_field_names=["middle0", "trans_vec", "middle1", "source", "target_tree"])
 
 	model.to(device)
 	
@@ -436,7 +441,7 @@ def parse_arguments():
 		type = float, default = 0.005)
 	trn.add_argument('-v', '--vocab', 
 		help = 'which vocabulary contains the transformation annotation', 
-		type = str, choices = ['SRC', 'TRG', 'RAW', 'OWN'], default = 'TRG')
+		type = str, choices = ['SRC', 'TRG', 'RAW', 'OWN'], default = 'OWN')
 	trn.add_argument('-do', '--dropout', help = 'how much dropout to use', 
 		type = float, default=0.0)
 	#trn.add_argument('-i', '--input-format', 
@@ -481,7 +486,7 @@ def parse_arguments():
 		help = 'format of target data')
 	tst.add_argument('-v', '--vocab', 
 		help = 'which vocabulary contains the transformation annotation', 
-		type = str, choices = ['SRC', 'TRG'], default = 'TRG')
+		type = str, choices = ['SRC', 'TRG', 'RAW', 'OWN'], default = 'OWN')
 	tst.add_argument('-sa', '--sentacc', help = 'sentence accuracy', type = bool,
 		default = True)
 	tst.add_argument('-ta', '--tokenacc', help = 'token accuracy', type = bool, 

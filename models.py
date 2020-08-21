@@ -121,7 +121,6 @@ class DecoderRNN(nn.Module):
                 self.attn = DotproductAttention()
 
     def forwardStep(self, x, h, encoder_outputs, source_mask):
-        x = self.embedding(x)
         #Apply ReLU to embedded input?
         rnn_input = F.relu(x)
 
@@ -163,7 +162,7 @@ class DecoderRNN(nn.Module):
         avd = next(self.parameters()).device
 
         # annotation field eos token (main.py) turns x0 from [1,5] to [2,5]. Resolve by taking the first row
-        x0 = x0[0]
+        #x0 = x0[0]
         # print(x0)
         # exit()
         batch_size = encoder_outputs.shape[1]
@@ -205,14 +204,15 @@ class DecoderRNN(nn.Module):
             decoder_hiddens[i] = h[-1] if self.recurrent_unit_type != "LSTM" else h[0][-1]
             #print('y shape', y.shape, 'target shape', target.shape)
             if (evaluation | (random.random() > tf_ratio)):
-                x = y.argmax(dim=1)
+                x_ix = y.argmax(dim=1)
             else:
-                x = target[i]  
+                x_ix = target[i]  
+            x = self.embedding(x_ix)
             #stop if all of the examples in the batch include eos or pad
             # print('x after', x, output_complete_flag)
             # print(self.eos_index)
             
-            output_complete_flag += ((x == self.eos_index) | (x == self.pad_index))
+            output_complete_flag += ((x_ix == self.eos_index) | (x_ix == self.pad_index))
             # print('x after AGAIN', x, output_complete_flag)
             if all(output_complete_flag):
                 break
@@ -505,7 +505,7 @@ class TridentDecoder(nn.Module):
 """
 
 class GRUTridentDecoder(nn.Module):
-    def __init__(self, arity, vocab, hidden_size, max_depth, all_annotations, null_placement="pre", inner_label="INNER"):
+    def __init__(self, arity, vocab, hidden_size, max_depth, null_placement="pre", inner_label="INNER"):
         super(GRUTridentDecoder, self).__init__()
 
         self.arity = arity
@@ -520,33 +520,26 @@ class GRUTridentDecoder(nn.Module):
 
         self.hidden2vocab = nn.Sequential(nn.Linear(self.hidden_size, 2*self.hidden_size), nn.Sigmoid(), nn.Linear(2*self.hidden_size, self.vocab_size))
         
-        # in regular nn.Embedding, weights are initialized from N(0,1) so we'll do that too
-        # unsqueeze because first dimension must be batch
-        self.annotation_embeddings = nn.ParameterDict({str(a): nn.Parameter(torch.randn(self.hidden_size, requires_grad=True).unsqueeze(0)) for a in all_annotations})
-
         # IDEA: in the future, have just one GRU for all the children but feed in a different input for each instead of always using this same dumb vector 
         #self.null_vector = torch.zeros(self.hidden_size, requires_grad=False).unsqueeze(0)
         self.per_child_cell = nn.ModuleList()
         for _ in range(self.arity):
             self.per_child_cell.append(nn.GRUCell(self.hidden_size, self.hidden_size))
 
-    def forward(self, root_hiddens, annotations, target_trees=None):
+    def forward(self, root_hiddens, annotation_embeddings, target_trees=None):
         # for some reason the size comes out of Encoder as [1, 5, 256]
         root_hiddens = root_hiddens.squeeze()
 
         batch_size = root_hiddens.shape[0]
-        assert batch_size == len(annotations)
+        assert batch_size == annotation_embeddings.shape[0]
         batch_outs = []
         for eg_ix in range(batch_size):
-            batch_outs.append(self.forward_nobatch(root_hiddens[eg_ix, :], annotations[eg_ix], target_tree=(None if target_trees is None else target_trees[eg_ix])))
+            batch_outs.append(self.forward_nobatch(root_hiddens[eg_ix, :], annotation_embeddings[eg_ix, :], target_tree=(None if target_trees is None else target_trees[eg_ix])))
 
         return nn.utils.rnn.pad_sequence(batch_outs, padding_value=self.vocab['<pad>'])
 
-    def forward_nobatch(self, root_hidden, annotation, target_tree=None):
+    def forward_nobatch(self, root_hidden, input_embedding, target_tree=None):
         root_hidden = root_hidden.unsqueeze(0) # GRUCell expects first dimension to be batch size
-        
-        annotation_str = str(annotation)
-        input_embedding = self.annotation_embeddings[annotation_str]
         
         if self.training:
             # assumption: every non-terminal node either has 3 children which are all non-terminals, or is the parent of one terminal node
@@ -608,7 +601,7 @@ another long term option: instead of having the GRUs point down, have them point
 """
 
 class GRUTridentDecoderAttn(nn.Module):
-    def __init__(self, arity, vocab, hidden_size, max_depth, all_annotations, encoder_vocab, attention_type=None, null_placement="pre", inner_label="INNER", skip_label="<skip>"):
+    def __init__(self, arity, vocab, hidden_size, max_depth, encoder_vocab, attention_type=None, null_placement="pre", inner_label="INNER", skip_label="<skip>"):
         super(GRUTridentDecoderAttn, self).__init__()
 
         self.arity = arity
@@ -626,10 +619,6 @@ class GRUTridentDecoderAttn(nn.Module):
 
         self.hidden2vocab = nn.Sequential(nn.Linear(self.hidden_size, 2*self.hidden_size), nn.Sigmoid(), nn.Linear(2*self.hidden_size, self.vocab_size))
         
-        # in regular nn.Embedding, weights are initialized from N(0,1) so we'll do that too
-        # unsqueeze because first dimension must be batch
-        self.annotation_embeddings = nn.ParameterDict({str(a): nn.Parameter(torch.randn(self.hidden_size, requires_grad=True).unsqueeze(0)) for a in all_annotations})
-
         # location-based attention
         if attention_type == "location":
             self.attn = PositionAttention(hidden_size, max_length = self.max_length)
@@ -652,24 +641,21 @@ class GRUTridentDecoderAttn(nn.Module):
         for _ in range(self.arity):
             self.per_child_cell.append(nn.GRUCell(self.input_size, self.hidden_size))
 
-    def forward(self, root_hiddens, annotations, encoder_outputs, sources, target_trees=None):
+    def forward(self, root_hiddens, annotation_embeddings, encoder_outputs, sources, target_trees=None):
         # for some reason the size comes out of Encoder as [1, 5, 256]
         root_hiddens = root_hiddens.squeeze()
         source_mask = create_mask(sources, self.encoder_vocab)
 
         batch_size = root_hiddens.shape[0]
-        assert batch_size == len(annotations)
+        assert batch_size == annotation_embeddings.shape[0]
         batch_outs = []
         for eg_ix in range(batch_size):
-            batch_outs.append(self.forward_nobatch(root_hiddens[eg_ix, :], annotations[eg_ix], encoder_outputs[:, eg_ix, :], source_mask[eg_ix, :], target_tree=(None if target_trees is None else target_trees[eg_ix])))
+            batch_outs.append(self.forward_nobatch(root_hiddens[eg_ix, :], annotation_embeddings[eg_ix, :].unsqueeze(0), encoder_outputs[:, eg_ix, :], source_mask[eg_ix, :], target_tree=(None if target_trees is None else target_trees[eg_ix])))
 
         return nn.utils.rnn.pad_sequence(batch_outs, padding_value=self.vocab['<pad>'])
 
-    def forward_nobatch(self, root_hidden, annotation, encoder_output, source_mask, target_tree=None):
+    def forward_nobatch(self, root_hidden, input_embedding, encoder_output, source_mask, target_tree=None):
         root_hidden = root_hidden.unsqueeze(0) # GRUCell expects first dimension to be batch size
-        
-        annotation_str = str(annotation)
-        input_embedding = self.annotation_embeddings[annotation_str]
         
         if self.training:
             # assumption: every non-terminal node either has 3 children which are all non-terminals, or is the parent of one terminal node

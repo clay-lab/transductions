@@ -1,5 +1,6 @@
 import numpy as np
 import torch
+import torch.nn as nn
 
 """
 assume encoder and decoder outputs do NOT have softmax yet
@@ -79,15 +80,16 @@ class Seq2Seq(torch.nn.Module):
 class VectorSeq2Seq(Seq2Seq):
     embedding_label = "trans_vec"
 
-    def __init__(self, trans_vocab, encoder, decoder, encoder_field_names, decoder_field_names, encoder_train_field_names=None, decoder_train_field_names=None, middle_field_name="middle"):
+    def __init__(self, trans_label, trans_vocab, hidden_size, encoder, decoder, encoder_field_names, decoder_field_names, encoder_train_field_names=None, decoder_train_field_names=None, middle_field_name="middle"):
         super().__init__(encoder, decoder, encoder_field_names, decoder_field_names, encoder_train_field_names=encoder_train_field_names, decoder_train_field_names=decoder_train_field_names, middle_field_name=middle_field_name)
         
+        self.trans_label = trans_label
         self.vocab = trans_vocab
         self.hidden_size = hidden_size
         self.embedding = nn.Embedding(len(self.vocab), self.hidden_size)
 
     def forward(self, batch):
-        setattr(batch, embedding_label)
+        setattr(batch, self.embedding_label, self.embedding(getattr(batch, self.trans_label)[0,:]))
         return super().forward(batch)
 
     
