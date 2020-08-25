@@ -12,8 +12,8 @@ ATTN=$5
 
 MAIL='example@example.com'
 EXPPATH="$EXPDIR/$TASK/$ENC-$DEC-$ATTN" 
-if find $EXPPATH/ -maxdepth 1 -type d | wc -l | tr -d '[:space:]' ; then
-	NUM=$(find $EXPPATH/ -maxdepth 1 -type d | wc -l | tr -d '[:space:]')
+if NUM=$( { find $EXPPATH/ -maxdepth 1 -type d | wc -l | tr -d '[:space:]' } 2>&1 ) ; then
+	echo "we got one"
 else
 	NUM=1
 fi

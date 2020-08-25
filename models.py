@@ -52,6 +52,10 @@ class EncoderRNN(nn.Module):
                 self.rnn = nn.GRU(hidden_size, hidden_size, num_layers = num_layers, dropout = dropout)
         elif recurrent_unit == "LSTM":
                 self.rnn = nn.LSTM(hidden_size, hidden_size, num_layers = num_layers, dropout = dropout)
+        elif recurrent_unit == 'Transformer':
+                encoder_layer = nn.TransformerEncoderLayer(d_model=256, nhead=8)
+                self.rnn = nn.TransformerEncoder(encoder_layer, hidden_size)
+                # self.rnn = nn.Transformer(hidden_size, hidden_size, num_encoder_layers = num_layers, num_decoder_layers = num_layers, dropout = dropout)
         else:
                 print("Invalid recurrent unit type")
                 raise SystemError
@@ -102,6 +106,10 @@ class DecoderRNN(nn.Module):
         elif recurrent_unit == "LSTM":
                 self.rnn = nn.LSTM(self.embedding_size + (hidden_size if attention_type else 0),
                                       hidden_size, num_layers=num_layers, dropout=dropout)
+        elif recurrent_unit == 'Transformer':
+                decoder_layer = nn.TransformerDecoderLayer(d_model=256, nhead=8)
+                self.rnn = nn.TransformerDecoder(decoder_layer, num_layers=6)
+                # self.rnn = nn.Transformer(self.embedding_size + (hidden_size if attention_type else 0), hidden_size, num_encoder_layers = num_layers, num_decoder_layers = num_layers, dropout = dropout)
         else:
                 print("Invalid recurrent unit type")
 

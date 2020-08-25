@@ -62,14 +62,15 @@ class ModelREPL(Cmd):
 				sort_key = lambda x: len(x.target), sort_within_batch = True, 
 				repeat = False)
 
-		# self.model.encoder.vocab = SRC.vocab
-		# self.model.decoder.vocab = TRG.vocab
-
 		for batch in iterator:
 			logits = self.model(batch)
 			prediction = logits.argmax(2)
 			sentence = self.model.scores2sentence(prediction, self.model.decoder.vocab)
 			print(sentence[0])
+
+			# Plot trajectory
+			enc = self.model.encoder
+			test_indices = torch.tensor([model.text_field.vocab.stoi[word] for word in test_sentence]).view(-1,1)
 
 		os.remove(tempfile)
 

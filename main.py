@@ -405,10 +405,10 @@ def parse_arguments():
 
 	trn.add_argument('-e', '--encoder', 
 		help = 'type of encoder used', type = str, 
-		choices = ['GRU', 'LSTM', 'SRN', 'Tree'], default = 'GRU')
+		choices = ['GRU', 'LSTM', 'SRN', 'Tree', 'Transformer'], default = 'GRU')
 	trn.add_argument('-d', '--decoder', 
 		help = 'type of decoder used', type = str, 
-		choices = ['GRU', 'LSTM', 'SRN', 'Tree'], default = 'GRU')
+		choices = ['GRU', 'LSTM', 'SRN', 'Tree', 'Transformer'], default = 'GRU')
 	trn.add_argument('-t', '--task', help = 'task model is trained to perform', 
 		type = str, required = True)
 	trn.add_argument('-a', '--attention', help = 'type of attention used', 
