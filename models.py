@@ -41,6 +41,7 @@ class EncoderRNN(nn.Module):
         self.rnn_type = recurrent_unit
         self.dropout = nn.Dropout(p=dropout)
         self.vocab = vocab
+        self.recurrent_unit_type = recurrent_unit
 
         self.embedding = nn.Embedding(len(self.vocab), hidden_size)
 
@@ -53,17 +54,27 @@ class EncoderRNN(nn.Module):
         elif recurrent_unit == "LSTM":
                 self.rnn = nn.LSTM(hidden_size, hidden_size, num_layers = num_layers, dropout = dropout)
         elif recurrent_unit == 'Transformer':
-                encoder_layer = nn.TransformerEncoderLayer(d_model=256, nhead=8)
-                self.rnn = nn.TransformerEncoder(encoder_layer, hidden_size)
+                encoder_layer = nn.TransformerEncoderLayer(d_model=hidden_size, nhead=8, dropout=dropout)
+                self.rnn = nn.TransformerEncoder(encoder_layer, num_layers)
                 # self.rnn = nn.Transformer(hidden_size, hidden_size, num_encoder_layers = num_layers, num_decoder_layers = num_layers, dropout = dropout)
         else:
                 print("Invalid recurrent unit type")
                 raise SystemError
 
+    def _generate_square_subsequent_mask(self, sz):
+        mask = (torch.triu(torch.ones(sz, sz)) == 1).transpose(0, 1)
+        mask = mask.float().masked_fill(mask == 0, float('-inf')).masked_fill(mask == 1, float(0.0))
+        return mask
+
     def forward(self, batch):
 
         embedded_source = self.dropout(self.embedding(batch))
-        outputs, state = self.rnn(embedded_source)
+        if self.recurrent_unit_type != 'Transformer':
+            outputs, state = self.rnn(embedded_source)
+        else:
+            # print("input size:", embedded_source.size())
+            outputs = self.rnn(embedded_source)
+            state = outputs[-1]
 
         #final_output = outputs[-1]
         #only return the h (and c) vectors for the last encoder layer 
@@ -72,6 +83,7 @@ class EncoderRNN(nn.Module):
         #    state = (final_hiddens[-1], final_cell[-1]) #take the last layer of hidden and cell
         #else:
         #    state = state[-1] #take the last layer of hidden (for GRU and SRN)
+        # print("Encoded output shape:", outputs.size())
         return state, outputs
 
 # Generic sequential decoder
@@ -107,7 +119,7 @@ class DecoderRNN(nn.Module):
                 self.rnn = nn.LSTM(self.embedding_size + (hidden_size if attention_type else 0),
                                       hidden_size, num_layers=num_layers, dropout=dropout)
         elif recurrent_unit == 'Transformer':
-                decoder_layer = nn.TransformerDecoderLayer(d_model=256, nhead=8)
+                decoder_layer = nn.TransformerDecoderLayer(d_model=hidden_size, nhead=8, dropout=dropout)
                 self.rnn = nn.TransformerDecoder(decoder_layer, num_layers=6)
                 # self.rnn = nn.Transformer(self.embedding_size + (hidden_size if attention_type else 0), hidden_size, num_encoder_layers = num_layers, num_decoder_layers = num_layers, dropout = dropout)
         else:
@@ -125,6 +137,11 @@ class DecoderRNN(nn.Module):
         #dot product attention
         if attention_type == "dotproduct":
                 self.attn = DotproductAttention()
+
+    def _generate_square_subsequent_mask(self, sz):
+        mask = (torch.triu(torch.ones(sz, sz)) == 1).transpose(0, 1)
+        mask = mask.float().masked_fill(mask == 0, float('-inf')).masked_fill(mask == 1, float(0.0))
+        return mask
 
     def forwardStep(self, x, h, encoder_outputs, source_mask):
         x = self.embedding(x)
@@ -157,6 +174,8 @@ class DecoderRNN(nn.Module):
         # print(rnn_input.size())
         # exit()
         batch_size = rnn_input.shape[0] 
+        # print("rnnni Size:", rnn_input.unsqueeze(0).size())
+        # print("h Size:", h.unsqueeze(0).size())
         _, state = self.rnn(rnn_input.unsqueeze(0), h)
         #Only include last h in output computation. for LSTM pass only h (not c)
         h = state[0][-1] if isinstance(state,tuple) else state[-1] 
@@ -167,19 +186,7 @@ class DecoderRNN(nn.Module):
     def forward(self, h0, x0, encoder_outputs, source, target=None, tf_ratio=0.5, evaluation=False):
 
         avd = next(self.parameters()).device
-
-        # annotation field eos token (main.py) turns x0 from [1,5] to [2,5]. Resolve by taking the first row
-        x0 = x0[0]
-        # print(x0)
-        # exit()
-        batch_size = encoder_outputs.shape[1]
-        outputs = torch.zeros(self.max_length, batch_size, self.vocab_size, device = avd)
-        # pad index should have a greater logit than all other words in vocab so that if we never reset this row, 
-        # the argmax will pick out pad as the vocab word
-        outputs[:,:,self.pad_index] = 1.0  
-        decoder_hiddens = torch.zeros(self.max_length, batch_size, self.hidden_size, device = avd)
-        attention = torch.zeros(self.max_length, batch_size, encoder_outputs.shape[0], device = avd)
-
+        
         #if we're evaluating, never use teacher forcing
         if (evaluation or not(torch.is_tensor(target))):
             tf_ratio=0.0
@@ -187,47 +194,77 @@ class DecoderRNN(nn.Module):
         #if we're doing teacher forcing, don't generate past the length of the target
         else: 
             gen_length = target.shape[0]
-        
-        source_mask = create_mask(source, self.encoder_vocab)
-        #initialize x and h to given initial values. 
-        x, h = x0, h0
-        # print(x0.size())
-        # print()
-        #print('x before', x, x0, self.vocab.stoi)
 
-        output_complete_flag = torch.zeros(batch_size, dtype=torch.bool, device = avd)
-        if self.recurrent_unit_type == "LSTM": #Non-LSTM encoder, LSTM decoder: create c
-                if not(isinstance(h0,tuple)):
-                    c0 = torch.zeros(self.num_layers,batch_size, self.hidden_size, device = avd)
-                    h = (h0, c0)
-        elif isinstance(h0,tuple): #LSTM encoder, but not LSTM decoder: ignore c
-            h = h[0]
-        for i in range(gen_length): 
-            # print("\n",i)
-            # print(x.size())
-            y, h, a = self.forwardStep(x, h, encoder_outputs, source_mask)
-            outputs[i] = y
-            attention[i] = a
-            decoder_hiddens[i] = h[-1] if self.recurrent_unit_type != "LSTM" else h[0][-1]
-            #print('y shape', y.shape, 'target shape', target.shape)
-            if (evaluation | (random.random() > tf_ratio)):
-                x = y.argmax(dim=1)
-            else:
-                x = target[i]  
-            #stop if all of the examples in the batch include eos or pad
-            # print('x after', x, output_complete_flag)
-            # print(self.eos_index)
+        # For transformers, see https://github.com/pytorch/examples/blob/master/word_language_model/model.py
+        # Don't compute forward step, just do it all in one
+        if self.recurrent_unit_type == "Transformer":
+            # get mask?
+            # mask = self._generate_square_subsequent_mask(4).to(avd)
             
-            output_complete_flag += ((x == self.eos_index) | (x == self.pad_index))
-            # print('x after AGAIN', x, output_complete_flag)
-            if all(output_complete_flag):
-                break
-                
-        # exit()
-        if self.train:
-            return outputs[:gen_length]#, decoder_hiddens[:i+1], attention[:i+1]
+            N = gen_length - encoder_outputs.size()[0]
+            padded_in = F.pad(encoder_outputs, pad=(0,0,0,0,0,N), mode='constant', value=self.pad_index)
+            # print("padded Size:", padded_in.size())
+            # print("DI Size:", encoder_outputs.size())
+            mask = self._generate_square_subsequent_mask(padded_in.size()[0])
+            output = self.rnn(padded_in, h0, tgt_mask=mask)
+            return output
         else:
-            return outputs[:i+1]
+
+            # annotation field eos token (main.py) turns x0 from [1,5] to [2,5]. Resolve by taking the first row
+            x0 = x0[0]
+            # print(x0)
+            # exit()
+            batch_size = encoder_outputs.shape[1]
+            outputs = torch.zeros(self.max_length, batch_size, self.vocab_size, device = avd)
+            # pad index should have a greater logit than all other words in vocab so that if we never reset this row, 
+            # the argmax will pick out pad as the vocab word
+            outputs[:,:,self.pad_index] = 1.0  
+            decoder_hiddens = torch.zeros(self.max_length, batch_size, self.hidden_size, device = avd)
+            attention = torch.zeros(self.max_length, batch_size, encoder_outputs.shape[0], device = avd)
+            
+            source_mask = create_mask(source, self.encoder_vocab)
+            #initialize x and h to given initial values. 
+            x, h = x0, h0
+            # print(x0.size())
+            # print()
+            #print('x before', x, x0, self.vocab.stoi)
+
+            output_complete_flag = torch.zeros(batch_size, dtype=torch.bool, device = avd)
+            if self.recurrent_unit_type == "LSTM": #Non-LSTM encoder, LSTM decoder: create c
+                    if not(isinstance(h0,tuple)):
+                        c0 = torch.zeros(self.num_layers,batch_size, self.hidden_size, device = avd)
+                        h = (h0, c0)
+            elif isinstance(h0,tuple): #LSTM encoder, but not LSTM decoder: ignore c
+                h = h[0]
+            for i in range(gen_length): 
+                # print("\n",i)
+                # print(x.size())
+                y, h, a = self.forwardStep(x, h, encoder_outputs, source_mask)
+                outputs[i] = y
+                attention[i] = a
+                decoder_hiddens[i] = h[-1] if self.recurrent_unit_type != "LSTM" else h[0][-1]
+                #print('y shape', y.shape, 'target shape', target.shape)
+                if (evaluation | (random.random() > tf_ratio)):
+                    x = y.argmax(dim=1)
+                else:
+                    x = target[i]  
+                #stop if all of the examples in the batch include eos or pad
+                # print('x after', x, output_complete_flag)
+                # print(self.eos_index)
+                
+                output_complete_flag += ((x == self.eos_index) | (x == self.pad_index))
+                # print('x after AGAIN', x, output_complete_flag)
+                if all(output_complete_flag):
+                    break
+
+            print('Afterwards outputs:', outputs[:gen_length].size())
+                    
+            # exit()
+            if self.train:
+                # print("Expexted dimensions:", outputs[:gen_length].size())
+                return outputs[:gen_length]#, decoder_hiddens[:i+1], attention[:i+1]
+            else:
+                return outputs[:i+1]
 
 # GRU modified such that its hidden states are not bounded
 class UnsquashedGRU(nn.Module):

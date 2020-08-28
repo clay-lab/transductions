@@ -89,6 +89,11 @@ def train(model: ss.Seq2Seq, train_iterator: tt.Iterator,
 				pred = decoder_outputs.permute(1, 2, 0)
 				target = batch.target.permute(1, 0)
 
+				# print("Output shape:", decoder_outputs.size())
+				# print("Target shape:", target.size())
+
+				# raise SystemError
+
 				batch_loss = criterion(pred, target)
 
 				batch_loss.backward()
