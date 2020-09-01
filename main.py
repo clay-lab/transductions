@@ -212,7 +212,7 @@ def train_model(args: Dict):
 	if args.source_format == 'trees':
 		pickle.dump(SRC_TREE, open(os.path.join(model_dir, 'SRC_TREE.vocab'), 'wb') )
 
-	encoder = EncoderRNN(hidden_size=args.hidden_size, vocab = SRC.vocab, recurrent_unit=args.encoder, num_layers=args.layers, dropout=args.dropout)
+	encoder = EncoderRNN(hidden_size=args.hidden_size, vocab = SRC.vocab, recurrent_unit=args.encoder, num_layers=args.layers, dropout=args.dropout, max_length=args.max_length)
 	tree_decoder_names = ['Tree']
 	if args.decoder not in tree_decoder_names:
 		dec = DecoderRNN(hidden_size=args.hidden_size, vocab=TRG.vocab, encoder_vocab=SRC.vocab, recurrent_unit=args.decoder, num_layers=args.layers, max_length=args.max_length, attention_type=args.attention, dropout=args.dropout)

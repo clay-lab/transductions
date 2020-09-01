@@ -33,7 +33,7 @@ else:
 # Generic sequential encoder
 class EncoderRNN(nn.Module):
     def __init__(self, hidden_size, vocab, recurrent_unit, num_layers=1, 
-        dropout=0):
+        dropout=0, max_length=0):
         
         super(EncoderRNN, self).__init__()
         self.num_layers = num_layers
@@ -42,6 +42,8 @@ class EncoderRNN(nn.Module):
         self.dropout = nn.Dropout(p=dropout)
         self.vocab = vocab
         self.recurrent_unit_type = recurrent_unit
+        self.max_length = max_length
+        self.pad_index = self.vocab.stoi['<pad>']
 
         self.embedding = nn.Embedding(len(self.vocab), hidden_size)
 
@@ -68,22 +70,23 @@ class EncoderRNN(nn.Module):
 
     def forward(self, batch):
 
-        embedded_source = self.dropout(self.embedding(batch))
         if self.recurrent_unit_type != 'Transformer':
+            
+            embedded_source = self.dropout(self.embedding(batch))
             outputs, state = self.rnn(embedded_source)
         else:
-            # print("input size:", embedded_source.size())
+            N = self.max_length - batch.shape[0]
+            # print("Input batch:", batch.shape)
+            padded_batch = F.pad(batch, 
+                                 pad=(0,0,0,N), 
+                                 mode='constant', 
+                                 value=self.pad_index)
+            
+            # print("Padded batch:", padded_batch.shape)
+            embedded_source = self.dropout(self.embedding(padded_batch))
             outputs = self.rnn(embedded_source)
             state = outputs[-1]
 
-        #final_output = outputs[-1]
-        #only return the h (and c) vectors for the last encoder layer 
-        #if self.rnn_type == 'LSTM':
-        #    final_hiddens, final_cell = state 
-        #    state = (final_hiddens[-1], final_cell[-1]) #take the last layer of hidden and cell
-        #else:
-        #    state = state[-1] #take the last layer of hidden (for GRU and SRN)
-        # print("Encoded output shape:", outputs.size())
         return state, outputs
 
 # Generic sequential decoder
@@ -121,6 +124,8 @@ class DecoderRNN(nn.Module):
         elif recurrent_unit == 'Transformer':
                 decoder_layer = nn.TransformerDecoderLayer(d_model=hidden_size, nhead=8, dropout=dropout)
                 self.rnn = nn.TransformerDecoder(decoder_layer, num_layers=6)
+                # decoder_layer = nn.TransformerEncoderLayer(d_model=hidden_size, nhead=8, dropout=dropout)
+                # self.rnn = nn.TransformerEncoder(decoder_layer, num_layers=6)
                 # self.rnn = nn.Transformer(self.embedding_size + (hidden_size if attention_type else 0), hidden_size, num_encoder_layers = num_layers, num_decoder_layers = num_layers, dropout = dropout)
         else:
                 print("Invalid recurrent unit type")
@@ -141,6 +146,10 @@ class DecoderRNN(nn.Module):
     def _generate_square_subsequent_mask(self, sz):
         mask = (torch.triu(torch.ones(sz, sz)) == 1).transpose(0, 1)
         mask = mask.float().masked_fill(mask == 0, float('-inf')).masked_fill(mask == 1, float(0.0))
+        return mask
+
+    def _generate_square_sequent_mask(self, sz):
+        mask = torch.zeros(sz, sz)
         return mask
 
     def forwardStep(self, x, h, encoder_outputs, source_mask):
@@ -198,15 +207,14 @@ class DecoderRNN(nn.Module):
         # For transformers, see https://github.com/pytorch/examples/blob/master/word_language_model/model.py
         # Don't compute forward step, just do it all in one
         if self.recurrent_unit_type == "Transformer":
-            # get mask?
-            # mask = self._generate_square_subsequent_mask(4).to(avd)
-            
-            N = gen_length - encoder_outputs.size()[0]
-            padded_in = F.pad(encoder_outputs, pad=(0,0,0,0,0,N), mode='constant', value=self.pad_index)
-            # print("padded Size:", padded_in.size())
-            # print("DI Size:", encoder_outputs.size())
-            mask = self._generate_square_subsequent_mask(padded_in.size()[0])
-            output = self.rnn(padded_in, h0, tgt_mask=mask)
+            print("EOutputs:", encoder_outputs.shape)
+            mask = self._generate_square_sequent_mask(encoder_outputs.shape[0])
+
+            print("EO Shape:", encoder_outputs.shape)
+            print("H0 Shape:", h0.shape)
+            print("Mask Shape:", mask.shape)
+
+            output = self.rnn(encoder_outputs, h0, tgt_mask=mask)
             return output
         else:
 
