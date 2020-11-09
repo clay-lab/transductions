@@ -44,6 +44,7 @@ class EncoderRNN(nn.Module):
         self.recurrent_unit_type = recurrent_unit
         self.max_length = max_length
         self.pad_index = self.vocab.stoi['<pad>']
+        self.cls_index = self.vocab.stoi['<cls>']
 
         self.embedding = nn.Embedding(len(self.vocab), hidden_size)
 
@@ -58,6 +59,9 @@ class EncoderRNN(nn.Module):
         elif recurrent_unit == 'Transformer':
                 encoder_layer = nn.TransformerEncoderLayer(d_model=hidden_size, nhead=8, dropout=dropout)
                 self.rnn = nn.TransformerEncoder(encoder_layer, num_layers)
+                self.pos_encoder = PositionalEncoding(self.hidden_size,
+                                                      dropout,
+                                                      self.max_length)
                 # self.rnn = nn.Transformer(hidden_size, hidden_size, num_encoder_layers = num_layers, num_decoder_layers = num_layers, dropout = dropout)
         else:
                 print("Invalid recurrent unit type")
@@ -75,19 +79,69 @@ class EncoderRNN(nn.Module):
             embedded_source = self.dropout(self.embedding(batch))
             outputs, state = self.rnn(embedded_source)
         else:
-            N = self.max_length - batch.shape[0]
+            N = 7 - batch.shape[0]
             # print("Input batch:", batch.shape)
             padded_batch = F.pad(batch, 
                                  pad=(0,0,0,N), 
                                  mode='constant', 
                                  value=self.pad_index)
+
+            padded_batch = F.pad(padded_batch, 
+                                 pad=(1,0,0,0), 
+                                 mode='constant', 
+                                 value=self.cls_index)
+
             
             # print("Padded batch:", padded_batch.shape)
             embedded_source = self.dropout(self.embedding(padded_batch))
-            outputs = self.rnn(embedded_source)
-            state = outputs[-1]
+            pos_embedded_source = self.pos_encoder(embedded_source)
+            outputs = self.rnn(pos_embedded_source)
+            state = outputs[0]
 
         return state, outputs
+
+class PositionalEncoding(nn.Module):
+    r"""Inject some information about the relative or absolute position of the tokens
+        in the sequence. The positional encodings have the same dimension as
+        the embeddings, so that the two can be summed. Here, we use sine and cosine
+        functions of different frequencies.
+    .. math::
+        \text{PosEncoder}(pos, 2i) = sin(pos/10000^(2i/d_model))
+        \text{PosEncoder}(pos, 2i+1) = cos(pos/10000^(2i/d_model))
+        \text{where pos is the word position and i is the embed idx)
+    Args:
+        d_model: the embed dim (required).
+        dropout: the dropout value (default=0.1).
+        max_len: the max. length of the incoming sequence (default=5000).
+    Examples:
+        >>> pos_encoder = PositionalEncoding(d_model)
+    """
+
+    def __init__(self, d_model, dropout=0.1, max_len=5000):
+        super(PositionalEncoding, self).__init__()
+        self.dropout = nn.Dropout(p=dropout)
+
+        pe = torch.zeros(max_len, d_model)
+        position = torch.arange(0, max_len, dtype=torch.float).unsqueeze(1)
+        div_term = torch.exp(torch.arange(0, d_model, 2).float() * (-math.log(10000.0) / d_model))
+        pe[:, 0::2] = torch.sin(position * div_term)
+        pe[:, 1::2] = torch.cos(position * div_term)
+        pe = pe.unsqueeze(0).transpose(0, 1)
+        self.register_buffer('pe', pe)
+
+    def forward(self, x):
+        r"""Inputs of forward function
+        Args:
+            x: the sequence fed to the positional encoder model (required).
+        Shape:
+            x: [sequence length, batch size, embed dim]
+            output: [sequence length, batch size, embed dim]
+        Examples:
+            >>> output = pos_encoder(x)
+        """
+
+        x = x + self.pe[:x.size(0), :]
+        return self.dropout(x)
 
 # Generic sequential decoder
 class DecoderRNN(nn.Module):
@@ -95,8 +149,7 @@ class DecoderRNN(nn.Module):
         super(DecoderRNN, self).__init__()
         self.vocab = vocab
         self.vocab_size = len(vocab)
-        self.eos_index = self.vocab.stoi["<eos>"]
-        
+        self.eos_index = self.vocab.stoi['<eos>']
         self.pad_index = self.vocab.stoi['<pad>']
         self.encoder_vocab = encoder_vocab
         self.hidden_size = hidden_size
@@ -124,6 +177,11 @@ class DecoderRNN(nn.Module):
         elif recurrent_unit == 'Transformer':
                 decoder_layer = nn.TransformerDecoderLayer(d_model=hidden_size, nhead=8, dropout=dropout)
                 self.rnn = nn.TransformerDecoder(decoder_layer, num_layers=6)
+                self.pos_encoder = PositionalEncoding(self.hidden_size,
+                                                      dropout,
+                                                      self.max_length)
+
+                # self.tembedding = nn.Embedding(#VOCABSIZE, HIDDEN_SIZE)
                 # decoder_layer = nn.TransformerEncoderLayer(d_model=hidden_size, nhead=8, dropout=dropout)
                 # self.rnn = nn.TransformerEncoder(decoder_layer, num_layers=6)
                 # self.rnn = nn.Transformer(self.embedding_size + (hidden_size if attention_type else 0), hidden_size, num_encoder_layers = num_layers, num_decoder_layers = num_layers, dropout = dropout)
@@ -184,7 +242,10 @@ class DecoderRNN(nn.Module):
         # exit()
         batch_size = rnn_input.shape[0] 
         # print("rnnni Size:", rnn_input.unsqueeze(0).size())
-        # print("h Size:", h.unsqueeze(0).size())
+        # print("h Size:", h.size())
+        if len(h.shape) == 2:
+            h = h.unsqueeze(0)
+            # print("h unsqueezed Size:", h.size())
         _, state = self.rnn(rnn_input.unsqueeze(0), h)
         #Only include last h in output computation. for LSTM pass only h (not c)
         h = state[0][-1] if isinstance(state,tuple) else state[-1] 
@@ -206,16 +267,23 @@ class DecoderRNN(nn.Module):
 
         # For transformers, see https://github.com/pytorch/examples/blob/master/word_language_model/model.py
         # Don't compute forward step, just do it all in one
-        if self.recurrent_unit_type == "Transformer":
-            print("EOutputs:", encoder_outputs.shape)
-            mask = self._generate_square_sequent_mask(encoder_outputs.shape[0])
+        if self.recurrent_unit_type == 'Transformer':
 
+            print("EOutputs:", encoder_outputs.shape)
             print("EO Shape:", encoder_outputs.shape)
             print("H0 Shape:", h0.shape)
+
+            emb_target = self.embedding(target)
+            pos_target = self.pos_encoder(emb_target)
+            mask = self._generate_square_sequent_mask(pos_target.shape[0])
+
+            print("Target Size:", pos_target.shape)
             print("Mask Shape:", mask.shape)
 
-            output = self.rnn(encoder_outputs, h0, tgt_mask=mask)
+            output = self.rnn(pos_target, encoder_outputs, tgt_mask=mask)
             return output
+
+            # Just loop things here (greedy, or mask makes that unnecessry?)
         else:
 
             # annotation field eos token (main.py) turns x0 from [1,5] to [2,5]. Resolve by taking the first row
@@ -265,7 +333,7 @@ class DecoderRNN(nn.Module):
                 if all(output_complete_flag):
                     break
 
-            print('Afterwards outputs:', outputs[:gen_length].size())
+            # print('Afterwards outputs:', outputs[:gen_length].size())
                     
             # exit()
             if self.train:
