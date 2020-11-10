@@ -1,0 +1,8 @@
+# @package _group_
+epochs: 100
+batch_size: 5
+lr: 0.001
+tolerance: 0.005
+patience: 3
+
+cuda: 0 # -1 means use CPU

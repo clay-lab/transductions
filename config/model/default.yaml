@@ -1,0 +1,17 @@
+# @package _group_
+encoder:
+  unit: SRN
+  type: sequence
+  dropout: 0
+  num_layers: 1
+  hidden_size: 256
+  max_length: 0
+decoder:
+  unit: SRN
+  type: sequence
+  dropout: 0
+  num_layers: 1
+  max_length: 0
+  hidden_size: 256
+  attention: None
+  embedding_size: 256
