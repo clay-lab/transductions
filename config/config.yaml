@@ -1,6 +1,6 @@
 defaults:
   - training: default
   - model: default
-  - experiment: alice-herself
+  - experiment: experiment-1
 
 pretty_print: False
