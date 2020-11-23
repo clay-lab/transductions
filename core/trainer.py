@@ -58,9 +58,6 @@ class Trainer:
           predictions = output
           target = batch.target.permute(1, 0)
 
-          print("Predictions: {}".format(predictions.shape))
-          print("Target: {}".format(target.shape))
-
           loss = criterion(predictions, target)
           loss.backward()
           optimizer.step()
