@@ -86,6 +86,8 @@ def train(model: ss.Seq2Seq, train_iterator: tt.Iterator,
 				optimizer.zero_grad()
 
 				decoder_outputs = model(batch)
+				print(decoder_outputs.shape)
+				raise SystemExit
 				pred = decoder_outputs.permute(1, 2, 0)
 				target = batch.target.permute(1, 0)
 

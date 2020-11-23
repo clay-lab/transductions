@@ -14,7 +14,7 @@ import os
 from seq2seq import Seq2Seq
 from metrics import SentenceLevelAccuracy
 
-from main import setup_store
+from old_main import setup_store
 import numpy as np
 
 from sklearn.decomposition import PCA

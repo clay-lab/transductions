@@ -51,8 +51,15 @@ class Trainer:
           optimizer.zero_grad()
 
           output = self._model(batch)
-          predictions = output.permute(1, 2, 0)
+
+          # Loss expects:
+          #   input:  [batch_size, classes, seq_len]
+          #   target: [batch_size, seq_len]
+          predictions = output
           target = batch.target.permute(1, 0)
+
+          print("Predictions: {}".format(predictions.shape))
+          print("Target: {}".format(target.shape))
 
           loss = criterion(predictions, target)
           loss.backward()

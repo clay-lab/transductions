@@ -1,6 +1,7 @@
 import logging
 import os
 import hydra
+import torch
 from typing import Dict
 import fileinput
 import re
@@ -101,9 +102,10 @@ class TransductionDataset:
 
       self.source_field = Field(lower=True, eos_token="<eos>") 
       self.target_field = Field(lower=True, eos_token="<eos>") 
-      self.transform_data = self.source_field
+      self.transform_field = self.source_field
+
       datafields = [("source", self.source_field), 
-                    ("annotation", self.transform_data), 
+                    ("annotation", self.transform_field), 
                     ("target", self.target_field)]
       
       self._iterators = {}
@@ -154,5 +156,31 @@ class TransductionDataset:
     pickle.dump(self.source_field, open('source.pt', 'wb'))
     pickle.dump(self.target_field, open('target.pt', 'wb'))
 
-
+  def __repr__(self):
+    message = "Dataset: %s \n" % self.__class__.__name__
+    for attr in self.__dict__:
+      message += "{}\n".format(getattr(self, attr))
+    # for attr in self.__dict__:
+    #     if "transform" in attr:
+    #         message += "{}{} {}= {}\n".format(COLORS.IPurple, attr, COLORS.END_NO_TOKEN, getattr(self, attr))
+    # for attr in self.__dict__:
+    #     if attr.endswith("_dataset"):
+    #         dataset = getattr(self, attr)
+    #         if isinstance(dataset, list):
+    #             if len(dataset) > 1:
+    #                 size = ", ".join([str(len(d)) for d in dataset])
+    #             else:
+    #                 size = len(dataset[0])
+    #         elif dataset:
+    #             size = len(dataset)
+    #         else:
+    #             size = 0
+    #         if attr.startswith("_"):
+    #             attr = attr[1:]
+    #         message += "Size of {}{} {}= {}\n".format(COLORS.IPurple, attr, COLORS.END_NO_TOKEN, size)
+    # for key, attr in self.__dict__.items():
+    #     if key.endswith("_sampler") and attr:
+    #         message += "{}{} {}= {}\n".format(COLORS.IPurple, key, COLORS.END_NO_TOKEN, attr)
+    # message += "{}Batch size ={} {}".format(COLORS.IPurple, COLORS.END_NO_TOKEN, self.batch_size)
+    return message
 

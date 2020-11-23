@@ -40,8 +40,13 @@ class Seq2Seq(torch.nn.Module):
         else:
             # enocder has one output
             setattr(batch, self.middle_field_name, middle)
-
+        dec_in = (getattr(batch, fieldname) for fieldname in dec_fields)
+        for d in dec_in:
+            print(d.shape)
         result = self.decoder(*(getattr(batch, fieldname) for fieldname in dec_fields))
+
+        print(result.shape)
+        raise SystemExit
 
         return result
 
