@@ -6,6 +6,23 @@ models and experiments. Transductions relies heavily on
 allowing you to specify model architectures, datasets, and experiments using
 YAML files for easy modularity and reproducibility.
 
+## Defining an experiment
+
+An experiment consists of several parts, including:
+- **Dataset:** The dataset is the training, testing, and evaluation data given 
+    to the model and used to evaluate its performance. The dataset for a given
+    experiment consists of a raw input data source, which lives as a TSV file in
+    the `data/raw/` directory and a configuration file which specifies how the
+    raw data is turned into splits for training, testing, and evaluation, as well
+    as any withholding done to create a generalization set or separate tracking
+    splits to evaluate performance on a specific subset of the full data.
+- **Models:** Models for an experiment are defined by configuration files in the
+    `config/model` directory. These configuration files specify the hyperparameters
+    of the model, and allow an experiment to quickly and briefly specify the
+    types of models to be used.
+- **Training Parameters:** Things like batch size, early stopping, learning rate,
+    and so on are defined by config files in the `config/training/` directory.
+
 ## Running an experiment
 
 Running an experiment involves specifying three run-time Hydra configuration 
@@ -23,16 +40,3 @@ $ python main.py experiment=EXPERIMENT_NAME model=MODEL_NAME training=TRAINING_N
 ```
 which would load values specified in `config/experiment/EXPERIMENT_NAME.yaml` 
 and so on.
-
-
-## Submitting files on GRACE
-
-`transductions` comes with a bash script to automate the deployment of a testing run to the GRACE cluster at Yale. Once logged into your GRACE account,
-issue the following command.
-
-```
-./batcher.sh EXPDIR TASK ENC DEC ATTN
-```
-
-This will generate the SBATCH script `TASK-ENC-DEC-ATTN.sh` and then run `sbatch TASK-ENC-DEC-ATTN.sh`, submitting the job. You can (and should) configure this script before using it to suit your needs. In particular, please change the email address.
-
