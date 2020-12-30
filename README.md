@@ -6,6 +6,48 @@ models and experiments. Transductions relies heavily on
 allowing you to specify model architectures, datasets, and experiments using
 YAML files for easy modularity and reproducibility.
 
+## Training
+
+To train a new model, run the following script:
+```bash
+python train.py
+```
+The `train.py` script is configured through the `train.yaml` file in the `config`
+directory. This YAML file specifies three further configuration options: 
+`hyperparameters`, `model`, and `experiment`, each of which point to more 
+configuration files in their respective directories. If `train.py` is run without
+any further options, it will load the default values for these three config
+files.
+
+Outputs from training runs are stored in the `outputs/` directory. If this 
+directory is not present, it will be created on first run. Each run gets its own
+folder, sorted in a two-part hierarchy of `DATE` and `TIME`. An example output
+directory will look something like this:
+```
+outputs/
+  2021-01-01/
+    08-30-00/
+      .hydra
+      model.pt
+      source.pt
+      target.pt
+      train.log
+```
+The `model.pt` file contains the model weights. `source.pt` and `target.pt`
+contain the source and target fields needed to instantiate vocabularies.
+The `train.log` file records the output of `stdout` and `stderr` as logged
+during training.
+
+### Overriding defaults
+To customize the training runs, add new YAML files in the `experiment`, 
+`hyperparameters`, and `model` directories. You can then load these at runtime
+by providing names to the training script:
+```
+python main.py experiment=EXPERIMENT_NAME model=MODEL_NAME hyperparameteres=HYP_NAME
+```
+These would load the `experiment/EXPERIMENT_NAME.yaml`, 
+`model/MODEL_NAME.yaml`, and `hyperparameteres/HYP_NAME.yaml`, respectively.
+
 ## Defining an experiment
 
 An experiment consists of several parts, including:
