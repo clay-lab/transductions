@@ -1,0 +1,5 @@
+checkpoint_dir: "outputs/2020-12-30/12-09-43"
+
+hydra:
+  run:
+    dir: ${checkpoint_dir}/eval/${now:%Y-%m-%d_%H-%M-%S}

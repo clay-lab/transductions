@@ -8,6 +8,7 @@ import re
 import numpy as np
 from omegaconf import DictConfig
 import pickle
+from torch._C import dtype
 from torchtext.data import Field, TabularDataset, BucketIterator, RawField
 
 log = logging.getLogger(__name__)
@@ -130,6 +131,24 @@ class TransductionDataset:
           self._iterators[split] = iterator
           if split in ['train', 'test', 'val']:
             self._in_sample_data.append(dataset)
+
+  def id_to_token(self, idx_tensor, vocab_str: str):
+    """
+    Returns a tensor containing tokens from the specified vocabulary. 
+
+    Parameters:
+      - idx_tensor (torch.tensor of shape [batch, seq_len]): index tensor of    
+          inputs
+      - vocab_str (str): one of 'source', 'target'
+    """
+
+    vocab = self.source_field.vocab if vocab_str == 'source' else self.target_field.vocab
+    outputs = np.empty(idx_tensor.detach().cpu().numpy().shape, dtype=object)
+
+    for idr, r in enumerate(idx_tensor):
+      for idc, _ in enumerate(r):
+        outputs[idr][idc] = vocab.itos[idx_tensor[idr][idc]]
+    return outputs
 
   def __init__(self, cfg: DictConfig, device):
 
