@@ -14,6 +14,12 @@ class TransductionDataset:
   @property
   def iterators(self):
     return self._iterators
+
+  @property
+  def datafields(self):
+    return [("source", self.source_field), 
+            ("annotation", self.transform_field), 
+            ("target", self.target_field)]
   
   def _process_raw_data(self, cfg: DictConfig):
     """
@@ -99,11 +105,13 @@ class TransductionDataset:
 
       self.source_field = Field(lower=True, eos_token="<eos>") 
       self.target_field = Field(lower=True, eos_token="<eos>") 
+
+      # TODO: THIS SHOULD BE CONFIGURABLE
       self.transform_field = self.source_field
 
-      datafields = [("source", self.source_field), 
-                    ("annotation", self.transform_field), 
-                    ("target", self.target_field)]
+      # datafields = [("source", self.source_field), 
+      #               ("annotation", self.transform_field), 
+      #               ("target", self.target_field)]
       
       self._iterators = {}
       self._in_sample_data = []
@@ -115,7 +123,7 @@ class TransductionDataset:
             path = os.path.join(self._processed_path, file),
             format = 'tsv',
             skip_header = True,
-            fields = datafields)
+            fields = self.datafields)
           iterator = BucketIterator(
             dataset,
             device = self._device,

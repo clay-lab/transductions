@@ -20,6 +20,10 @@ class TransductionModel(torch.nn.Module):
   Provides the base class for transduction models.
   """
 
+  @property
+  def max_len(self):
+    return 3
+
   def __init__(self, cfg: DictConfig, dataset: TransductionDataset, device):
     
     log.info("Initializing model")
@@ -32,7 +36,6 @@ class TransductionModel(torch.nn.Module):
 
     decoder_cfg = cfg.model.decoder
     decoder_vcb = dataset.target_field.vocab
-
 
     if cfg.experiment.dataset.source_format == 'sequence':
       self._encoder = SequenceEncoder(encoder_cfg, encoder_vcb)
