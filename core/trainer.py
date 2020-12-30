@@ -1,8 +1,9 @@
 import logging
 import hydra
 import torch
+import torch.nn as nn
 from tqdm import tqdm
-from omegaconf import OmegaConf
+from omegaconf import DictConfig
 from core.models.TransductionModel import TransductionModel
 from core.dataset.TransductionDataset import TransductionDataset
 
@@ -17,7 +18,8 @@ class Trainer:
     - Visualizer?
   """
 
-  def __init__(self, cfg):
+  def __init__(self, cfg: DictConfig):
+
     self._cfg = cfg
     self._instantiate()
 
@@ -34,11 +36,11 @@ class Trainer:
   
   def train(self):
 
-    self._is_training = True
     log.info("Beginning training")
 
-    criterion = torch.nn.CrossEntropyLoss(weight=None)
-    optimizer = torch.optim.SGD(self._model.parameters(), lr=self._cfg.training.lr)
+    lr = self._cfg.training.lr
+    optimizer = torch.optim.SGD(self._model.parameters(), lr=lr)
+    criterion = nn.CrossEntropyLoss(weight=None)
 
     for epoch in range(self._cfg.training.epochs):
 
@@ -50,14 +52,15 @@ class Trainer:
 
           optimizer.zero_grad()
 
-          output = self._model(batch)
-
           # Loss expects:
-          #   input:  [batch_size, classes, seq_len]
+          #   output:  [batch_size, classes, seq_len]
           #   target: [batch_size, seq_len]
-          predictions = output
+          output = self._model(batch)
           target = batch.target.permute(1, 0)
+          loss = criterion(output, target)
 
-          loss = criterion(predictions, target)
           loss.backward()
+
           optimizer.step()
+
+          T.set_postfix(trn_loss=loss.item())

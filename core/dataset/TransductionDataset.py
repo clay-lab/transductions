@@ -159,7 +159,19 @@ class TransductionDataset:
   def __repr__(self):
     message = "Dataset: %s \n" % self.__class__.__name__
     for attr in self.__dict__:
-      message += "{}\n".format(getattr(self, attr))
+      if '_iterators' in attr:
+        message += "Splits:\n"
+        for s in getattr(self, attr):
+          message += "\t'{}' ({} sequences)\n".format(s, len(getattr(self, attr)[s].dataset) + 1)
+      elif '_path' in attr:
+        clean_name = {'_processed_path' : 'Processed data',
+                      '_raw_path' : 'Raw data'}
+        message += "{}:\t '{}'\n".format(clean_name[attr], getattr(self, attr))
+      elif '_in_sample_data' in attr:
+        message += "In-sample Data:\n"
+        isd = [str(d) for d in getattr(self, attr)]
+        message += "\t{}\n".format(isd)
+      # message += "{}:\t {}\n".format(attr, getattr(self, attr))
     # for attr in self.__dict__:
     #     if "transform" in attr:
     #         message += "{}{} {}= {}\n".format(COLORS.IPurple, attr, COLORS.END_NO_TOKEN, getattr(self, attr))

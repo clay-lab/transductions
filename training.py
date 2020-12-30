@@ -74,6 +74,8 @@ def train(model: ss.Seq2Seq, train_iterator: tt.Iterator,
 
 	early_stopping = EarlyStopping(patience = args.patience, verbose = False,
 		filename = checkpoint_path, delta=0.005)
+
+	print(model)
 	  
 	for epoch in range(args.epochs):
 

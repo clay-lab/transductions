@@ -45,6 +45,6 @@ class SequenceEncoder(torch.nn.Module):
     """
     embedded_source = self._embedding(batch.source)
     dropped = self._dropout(embedded_source)
-    outputs, state = self.unit(embedded_source)
+    outputs, hidden = self.unit(dropped)
 
-    return outputs, state
+    return outputs, hidden

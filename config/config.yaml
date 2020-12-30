@@ -3,4 +3,4 @@ defaults:
   - model: default
   - experiment: experiment-1
 
-pretty_print: False
+pretty_print: True

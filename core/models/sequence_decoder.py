@@ -42,23 +42,23 @@ class SequenceDecoder(torch.nn.Module):
       self.unit = torch.nn.GRU(self._embedding_size, self._hidden_size, num_layers=self._num_layers, dropout=cfg.dropout)
     elif self._unit_type == "LSTM":
       self.unit = torch.nn.LSTM(self._embedding_size, self._hidden_size, num_layers=self._num_layers, dropout=cfg.dropout)
-    elif self._unit_type == 'TRANSFORMER':
-      pass
+    elif self._unit_type == "TRANSFORMER":
+      raise NotImplementedError
     else:
-      raise ValueError('Invalid recurrent unit type "{}".'.format(self._unit_type))
+      raise ValueError("Invalid unit type '{}''.".format(self._unit_type))
   
   def forward(self, batch, target=None):
     
     # During training, force outputs to be the same length as the target
     gen_length = self._max_length if target is None else target.shape[0]
     
-    inputs = torch.squeeze(batch).long()
+    # Strip 0th dimension only!
+    inputs = torch.squeeze(batch, dim=0).long()
+
     embedded = self._embedding(inputs)
     dropped = self._dropout(embedded)
-    output = self.out(dropped)
+    output, hidden = self.unit(dropped)
+    output = self.out(output)
 
-    if target.shape[1] == 1:
-      output = torch.unsqueeze(output, 0)
-    
-    return output[:,:, :gen_length]
+    return output[:,:, :gen_length], hidden
     
