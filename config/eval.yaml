@@ -1,4 +1,4 @@
-checkpoint_dir: "outputs/2020-12-30/12-09-43"
+checkpoint_dir: "outputs/2020-12-30/17-04-16"
 
 hydra:
   run:

@@ -27,7 +27,7 @@ directory will look something like this:
 outputs/
   2021-01-01/
     08-30-00/
-      .hydra
+      .hydra/
       model.pt
       source.pt
       target.pt

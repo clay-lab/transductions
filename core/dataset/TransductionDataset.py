@@ -1,15 +1,11 @@
 import logging
 import os
 import hydra
-import torch
-from typing import Dict
-import fileinput
 import re
 import numpy as np
 from omegaconf import DictConfig
 import pickle
-from torch._C import dtype
-from torchtext.data import Field, TabularDataset, BucketIterator, RawField
+from torchtext.data import Field, TabularDataset, BucketIterator
 
 log = logging.getLogger(__name__)
 
