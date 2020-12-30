@@ -1,3 +1,0 @@
-sentence-level-accuracy   6.6 %
-token-level-accuracy      67.575 %
-loss                      1.3148 
