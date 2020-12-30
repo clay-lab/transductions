@@ -31,34 +31,35 @@ class SequenceDecoder(torch.nn.Module):
 
     self._embedding = torch.nn.Embedding(self.vocab_size, self._hidden_size)
     self._dropout = torch.nn.Dropout(p=cfg.dropout)
-    self.out = torch.nn.Linear(self._hidden_size, self.vocab_size)
 
     if self._num_layers == 1:
       assert cfg.dropout == 0, "Dropout must be zero if num_layers = 1"
 
     if self._unit_type == "SRN":
-      self.unit = torch.nn.RNN(self._embedding_size, self._hidden_size, num_layers=self._num_layers, dropout=cfg.dropout)
+      self._unit = torch.nn.RNN(self._embedding_size, self._hidden_size, num_layers=self._num_layers, dropout=cfg.dropout)
     elif self._unit_type == "GRU":
-      self.unit = torch.nn.GRU(self._embedding_size, self._hidden_size, num_layers=self._num_layers, dropout=cfg.dropout)
+      self._unit = torch.nn.GRU(self._embedding_size, self._hidden_size, num_layers=self._num_layers, dropout=cfg.dropout)
     elif self._unit_type == "LSTM":
-      self.unit = torch.nn.LSTM(self._embedding_size, self._hidden_size, num_layers=self._num_layers, dropout=cfg.dropout)
+      self._unit = torch.nn.LSTM(self._embedding_size, self._hidden_size, num_layers=self._num_layers, dropout=cfg.dropout)
     elif self._unit_type == "TRANSFORMER":
       raise NotImplementedError
     else:
       raise ValueError("Invalid unit type '{}''.".format(self._unit_type))
   
-  def forward(self, batch, target=None):
-    
-    # During training, force outputs to be the same length as the target
-    gen_length = self._max_length if target is None else target.shape[0]
+    self._out = torch.nn.Linear(self._hidden_size, self.vocab_size)
+  
+  def forward(self, input, hidden, cell):
     
     # Strip 0th dimension only!
-    inputs = torch.squeeze(batch, dim=0).long()
+    input = input.unsqueeze(0).long()
 
-    embedded = self._embedding(inputs)
-    dropped = self._dropout(embedded)
-    output, hidden = self.unit(dropped)
-    output = self.out(output)
+    # print("Input:", input.shape)
+    # print("Hidden:", hidden.shape)
+    # print("Cell:", [c.shape for c in cell])
 
-    return output[:,:, :gen_length], hidden
+    embedded = self._dropout(self._embedding(input))
+    output, (hidden, cell) = self._unit(embedded, (hidden, cell))
+    output = self._out(output)
+
+    return output, hidden, cell
     

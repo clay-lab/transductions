@@ -29,22 +29,21 @@ class SequenceEncoder(torch.nn.Module):
     self._dropout = torch.nn.Dropout(p=cfg.dropout)
 
     if self._unit_type == 'SRN':
-      self.unit = torch.nn.RNN(self._hidden_size, self._hidden_size, num_layers = self._num_layers, dropout = cfg.dropout)
+      self._unit = torch.nn.RNN(self._hidden_size, self._hidden_size, num_layers = self._num_layers, dropout = cfg.dropout)
     elif self._unit_type == 'GRU':
-      self.unit = torch.nn.GRU(self._hidden_size, self._hidden_size, num_layers = self._num_layers, dropout = cfg.dropout)
+      self._unit = torch.nn.GRU(self._hidden_size, self._hidden_size, num_layers = self._num_layers, dropout = cfg.dropout)
     elif self._unit_type == 'LSTM':
-      self.unit = torch.nn.LSTM(self._hidden_size, self._hidden_size, num_layers = self._num_layers, dropout = cfg.dropout)
+      self._unit = torch.nn.LSTM(self._hidden_size, self._hidden_size, num_layers = self._num_layers, dropout = cfg.dropout)
     elif self._unit_type == 'TRANSFORMER':
       pass
     else:
       raise ValueError('Invalid recurrent unit type "{}".'.format(self._unit_type))
   
-  def forward(self, batch):
+  def forward(self, source):
     """
       Compute the forward pass.
     """
-    embedded_source = self._embedding(batch.source)
-    dropped = self._dropout(embedded_source)
-    outputs, hidden = self.unit(dropped)
+    embedded = self._dropout(self._embedding(source))
+    outputs, (hidden, cell) = self._unit(embedded)
 
-    return outputs, hidden
+    return hidden, cell

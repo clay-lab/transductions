@@ -2,10 +2,11 @@
 # 
 # Provides the base class for transduction models.
 
-import logging
 import torch
-from torchtext.data.batch import Batch
+import random
+import logging
 from omegaconf import DictConfig
+from torchtext.data.batch import Batch
 
 # library imports
 from core.models.sequence_encoder import SequenceEncoder
@@ -42,11 +43,32 @@ class TransductionModel(torch.nn.Module):
     self._encoder.to(self.device)
     self._decoder.to(self.device)
   
-  def forward(self, batch: Batch):
+  def forward(self, batch: Batch, tf_prob = None):
     """
     Runs the forward pass.
+
+    batch (torchtext Batch): batch of [source, annotation, target]
+    tf_prob (float in range [0, 1]): if present, probability of using teacher
+      forcing.
     """
-    encoded, hidden = self._encoder(batch)
-    decoded, hidden = self._decoder(hidden, batch.target)
-    return decoded
+
+    batch_size = batch.target.shape[1]
+    target_len = batch.target.shape[0]
+    target_voc = self._decoder.vocab_size
+
+    outputs = torch.zeros(target_len, batch_size, target_voc).to(self.device)
+    input = batch.target[0,:]
+
+    hidden, cell = self._encoder(batch.source)
+
+    for t in range(target_len):
+      output, hidden, cell = self._decoder(input, hidden, cell)
+      outputs[t] = output
+
+      if tf_prob:
+        input = output.argmax(1) if random.random() < tf_prob else batch.target[t]
+      else: 
+        input = batch.target[t]
+
+    return outputs
   

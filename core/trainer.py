@@ -55,8 +55,9 @@ class Trainer:
           # Loss expects:
           #   output:  [batch_size, classes, seq_len]
           #   target: [batch_size, seq_len]
-          output = self._model(batch)
+          output = self._model(batch).permute(1, 2, 0)
           target = batch.target.permute(1, 0)
+
           loss = criterion(output, target)
 
           loss.backward()
@@ -64,3 +65,5 @@ class Trainer:
           optimizer.step()
 
           T.set_postfix(trn_loss=loss.item())
+      
+      torch.save(self._model.state_dict(), 'model.pt')
