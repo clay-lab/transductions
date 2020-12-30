@@ -123,7 +123,7 @@ class TransductionDataset:
           iterator = BucketIterator(
             dataset,
             device = self._device,
-            batch_size = cfg.training.batch_size,
+            batch_size = cfg.hyperparameters.batch_size,
             sort_key = lambda x: len(x.target), 
             sort_within_batch = True, 
             repeat = False)

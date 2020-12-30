@@ -39,13 +39,13 @@ class Trainer:
 
     log.info("Beginning training")
 
-    lr = self._cfg.training.lr
+    lr = self._cfg.hyperparameters.lr
     optimizer = torch.optim.SGD(self._model.parameters(), lr=lr)
     criterion = nn.CrossEntropyLoss(weight=None)
 
-    for epoch in range(self._cfg.training.epochs):
+    for epoch in range(self._cfg.hyperparameters.epochs):
 
-      log.info("EPOCH %i / %i", epoch + 1, self._cfg.training.epochs)
+      log.info("EPOCH %i / %i", epoch + 1, self._cfg.hyperparameters.epochs)
 
       self._model.train()
       with tqdm(self._dataset.iterators['train']) as T:

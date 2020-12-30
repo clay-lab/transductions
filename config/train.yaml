@@ -1,5 +1,5 @@
 defaults:
-  - training: default
+  - hyperparameters: default
   - model: default
   - experiment: experiment-1
 
