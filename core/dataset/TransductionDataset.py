@@ -107,34 +107,36 @@ class TransductionDataset:
                                 eos_token='<eos>', init_token='<sos>') 
       self.target_field = Field(lower=True, 
                                 eos_token='<eos>', init_token='<sos>') 
+    else:
+      raise NotImplementedError
 
-      # TODO: THIS SHOULD BE CONFIGURABLE
-      self.transform_field = self.source_field
-      
-      self._iterators = {}
-      self._in_sample_data = []
-      
-      for file in os.listdir(self._processed_path):
-        if file.endswith('.pt'):
-          split = file.split('.')[0]
-          dataset = TabularDataset(
-            path = os.path.join(self._processed_path, file),
-            format = 'tsv',
-            skip_header = True,
-            fields = self.datafields)
-          iterator = BucketIterator(
-            dataset,
-            device = self._device,
-            batch_size = cfg.hyperparameters.batch_size,
-            sort_key = lambda x: len(x.target), 
-            sort_within_batch = True, 
-            repeat = False)
-          
-          self._iterators[split] = iterator
-          if split in ['train', 'test', 'val']:
-            self._in_sample_data.append(dataset)
+    # TODO: THIS SHOULD BE CONFIGURABLE
+    self.transform_field = self.source_field
+    
+    self._iterators = {}
+    self._in_sample_data = []
+    
+    for file in os.listdir(self._processed_path):
+      if file.endswith('.pt'):
+        split = file.split('.')[0]
+        dataset = TabularDataset(
+          path = os.path.join(self._processed_path, file),
+          format = 'tsv',
+          skip_header = True,
+          fields = self.datafields)
+        iterator = BucketIterator(
+          dataset,
+          device = self._device,
+          batch_size = cfg.hyperparameters.batch_size,
+          sort_key = lambda x: len(x.target), 
+          sort_within_batch = True, 
+          repeat = False)
+        
+        self._iterators[split] = iterator
+        if split in ['train', 'test', 'val']:
+          self._in_sample_data.append(dataset)
 
-  def id_to_token(self, idx_tensor, vocab_str: str):
+  def id_to_token(self, idx_tensor, vocab_str: str, show_special = False):
     """
     Returns a tensor containing tokens from the specified vocabulary. 
 
@@ -142,6 +144,7 @@ class TransductionDataset:
       - idx_tensor (torch.tensor of shape [batch, seq_len]): index tensor of    
           inputs
       - vocab_str (str): one of 'source', 'target'
+      - show_special (bool): include special tokens like <pad>, <sos>, <eos>
     """
 
     vocab = self.source_field.vocab if vocab_str == 'source' else self.target_field.vocab
@@ -149,8 +152,15 @@ class TransductionDataset:
 
     for idr, r in enumerate(idx_tensor):
       for idc, _ in enumerate(r):
-        outputs[idr][idc] = vocab.itos[idx_tensor[idr][idc]]
-    return outputs
+        string = vocab.itos[idx_tensor[idr][idc]]
+        if string not in ['<sos>', '<eos>', '<pad>'] or show_special:
+          outputs[idr][idc] = vocab.itos[idx_tensor[idr][idc]]
+    
+    batch_strings = []
+    for r in outputs:
+      batch_strings.append(r[r != np.array(None)])
+
+    return batch_strings
 
   def __init__(self, cfg: DictConfig, device):
 

@@ -113,7 +113,6 @@ class Trainer:
 
   def repl(self, eval_cfg: DictConfig):
 
-
     # Load the pre-trained model weights
     chkpt_dir = hydra.utils.to_absolute_path(eval_cfg.checkpoint_dir)
     model_path = os.path.join(chkpt_dir, 'model.pt')
@@ -148,10 +147,11 @@ class ModelREPL(Cmd):
 
     source = source.split(' ')
     source.append('<eos>')
+    source.insert(0, '<sos>')
     source = [[self._dataset.source_field.vocab.stoi[s]] for s in source]
     source = torch.LongTensor(source)
 
-    transf = [transf, '<eos>']
+    transf = ['<sos>', transf, '<eos>']
     transf = [[self._dataset.transform_field.vocab.stoi[t]] for t in transf]
     transf = torch.LongTensor(transf)
 
@@ -166,10 +166,10 @@ class ModelREPL(Cmd):
     batch = self.batchify(args)
 
     prediction = self._model(batch).permute(1, 2, 0).argmax(1)
-    prediction = self._dataset.id_to_token(prediction, 'target').flatten()
+    prediction = self._dataset.id_to_token(prediction, 'target')[0]
     prediction = ' '.join(prediction)
 
-    source = self._dataset.id_to_token(batch.source, 'source').flatten()
+    source = self._dataset.id_to_token(batch.source.permute(1, 0), 'source')[0]
     source = ' '.join(source)
 
     result = "{} → {}".format(source, prediction)
