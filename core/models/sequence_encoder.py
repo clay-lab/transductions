@@ -44,6 +44,6 @@ class SequenceEncoder(torch.nn.Module):
       Compute the forward pass.
     """
     embedded = self._dropout(self._embedding(source))
-    outputs, (hidden, cell) = self._unit(embedded)
+    outputs, hidden = self._unit(embedded)
 
-    return hidden, cell
+    return outputs, hidden

@@ -48,18 +48,13 @@ class SequenceDecoder(torch.nn.Module):
   
     self._out = torch.nn.Linear(self._hidden_size, self.vocab_size)
   
-  def forward(self, input, hidden, cell):
+  def forward(self, input, hidden):
     
-    # Strip 0th dimension only!
     input = input.unsqueeze(0).long()
 
-    # print("Input:", input.shape)
-    # print("Hidden:", hidden.shape)
-    # print("Cell:", [c.shape for c in cell])
-
     embedded = self._dropout(self._embedding(input))
-    output, (hidden, cell) = self._unit(embedded, (hidden, cell))
+    output, hidden = self._unit(embedded, hidden)
     output = self._out(output)
 
-    return output, hidden, cell
+    return output, hidden
     

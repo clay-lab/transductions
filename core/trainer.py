@@ -70,7 +70,7 @@ class Trainer:
 
           optimizer.step()
 
-          T.set_postfix(trn_loss=loss.item())
+          T.set_postfix(trn_loss='{:4.3f}'.format(loss.item()))
       
       torch.save(self._model.state_dict(), 'model.pt')
 
@@ -97,6 +97,7 @@ class Trainer:
           for batch in T:
 
             print(batch.source)
+            print(batch.annotation)
             raise SystemExit
 
             source = batch.source.permute(1, 0)
@@ -153,19 +154,22 @@ class ModelREPL(Cmd):
     source.append('<eos>')
     transf = [transf, '<eos>']
 
-    source = [[self._dataset.source_field.vocab.stoi[s]] for s in source]
+    source = [[self._dataset.source_field.vocab.stoi[s], self._dataset.source_field.vocab.stoi[s]] for s in source]
     source = torch.LongTensor(source)
 
-    transf = [[self._dataset.transform_field.vocab.stoi[t]] for t in transf]
+    transf = [[self._dataset.transform_field.vocab.stoi[t], self._dataset.transform_field.vocab.stoi[t]] for t in transf]
     transf = torch.LongTensor(transf)
 
-    zrs = [[0] for i in range(self._model.max_len)]
+    zrs = [[0, 0] for i in range(self._model.max_len)]
     target = torch.LongTensor(zrs)
 
     batch = Batch()
     batch.source = source
     batch.annotation = transf
     batch.target = target
+
+    print(batch.source)
+    print(batch.target)
 
     prediction = self._model(batch).permute(1, 2, 0).argmax(1)
     prediction = self._dataset.id_to_token(prediction, 'target').flatten()

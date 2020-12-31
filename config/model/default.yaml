@@ -1,6 +1,6 @@
 # @package _group_
 encoder:
-  unit: LSTM
+  unit: GRU
   type: sequence
   dropout: 0
   num_layers: 1
@@ -9,7 +9,7 @@ encoder:
   embedding_size: 256
   bidirectional: True
 decoder:
-  unit: LSTM
+  unit: GRU
   type: sequence
   dropout: 0
   num_layers: 1

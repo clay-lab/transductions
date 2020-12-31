@@ -55,17 +55,18 @@ class TransductionModel(torch.nn.Module):
       forcing.
     """
 
-    batch_size = batch.target.shape[1]
-    target_len = batch.target.shape[0]
+    batch_size = batch.source.shape[1]
     target_voc = self._decoder.vocab_size
+    target_len = batch.target.shape[0] if hasattr(batch, 'target') else self.max_len
 
     outputs = torch.zeros(target_len, batch_size, target_voc).to(self.device)
     input = batch.target[0,:]
 
-    hidden, cell = self._encoder(batch.source)
+    # outputs, hidden
+    _, hidden = self._encoder(batch.source)
 
     for t in range(target_len):
-      output, hidden, cell = self._decoder(input, hidden, cell)
+      output, hidden = self._decoder(input, hidden)
       outputs[t] = output
 
       if tf_prob:
