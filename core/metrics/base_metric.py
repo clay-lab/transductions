@@ -53,7 +53,11 @@ class TokenAccuracy(BaseMetric):
     self._pad = pad_token_id
   
   def compute(self, prediction: Tensor, target: Tensor):
-    correct = (prediction == target).sum() - \
-              ((prediction == target) & (target == self._pad)).sum()
-    total = (target != self._pad).sum()
+    correct = (prediction == target).sum()
+    total = target.size[1] # TODO: or is this .size[0]? we want seq length...
+
+    if self._pad:
+      correct -= ((prediction == target) & (target == self._pad)).sum()
+      total -= (target != self._pad).sum()
+
     return correct, total
