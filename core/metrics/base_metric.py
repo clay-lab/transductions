@@ -1,0 +1,59 @@
+from abc import abstractmethod
+from torch import Tensor
+
+class BaseMetric:
+  """
+  An abstract metric, to be given a specific implementation.
+  """
+
+  def __init__(self):
+    self.correct = 0.0
+    self.total = 0.0
+  
+  def reset(self):
+    self.correct = 0.0
+    self.total = 0.0
+  
+  def _update(self, correct, total):
+    self.correct += correct
+    self.total += total
+  
+  @abstractmethod
+  def compute(self, prediction: Tensor, target: Tensor):
+    """
+    Should return a tuple of (delta_c, delta_t) representing the
+    number of correct predictions and the number of total predictions in
+    a given batch.
+    """
+    raise NotImplementedError
+
+  def __call__(self, prediction: Tensor, target: Tensor):
+    delta_c, delta_t = self.compute(prediction, target)
+    self._update(delta_c, delta_t)
+
+
+class SequenceAccuracy(BaseMetric):
+  """
+  Computes full-sequence accuracy by tokens. If all tokens in a sequence are
+  correct, the sequence scores 1.0; otherwise, it scores 0.0.
+  """
+
+  def compute(self, prediction: Tensor, target: Tensor):
+    correct = (prediction == target).prod(axis=0)
+    total = correct.size[0]
+    return correct, total
+
+class TokenAccuracy(BaseMetric):
+  """
+  Computes the token-level accuracy; every correct token is +1.0.
+  """
+
+  def __init__(self, pad_token_id = None):
+    super().__init__()
+    self._pad = pad_token_id
+  
+  def compute(self, prediction: Tensor, target: Tensor):
+    correct = (prediction == target).sum() - \
+              ((prediction == target) & (target == self._pad)).sum()
+    total = (target != self._pad).sum()
+    return correct, total
