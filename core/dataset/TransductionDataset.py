@@ -103,15 +103,13 @@ class TransductionDataset:
 
     if source_format == 'sequence' and target_format == 'sequence':
 
-      self.source_field = Field(lower=True, eos_token="<eos>") 
-      self.target_field = Field(lower=True, eos_token="<eos>") 
+      self.source_field = Field(lower=True, 
+                                eos_token='<eos>', init_token='<sos>') 
+      self.target_field = Field(lower=True, 
+                                eos_token='<eos>', init_token='<sos>') 
 
       # TODO: THIS SHOULD BE CONFIGURABLE
       self.transform_field = self.source_field
-
-      # datafields = [("source", self.source_field), 
-      #               ("annotation", self.transform_field), 
-      #               ("target", self.target_field)]
       
       self._iterators = {}
       self._in_sample_data = []

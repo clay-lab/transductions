@@ -96,10 +96,6 @@ class Trainer:
         with tqdm(self._dataset.iterators[key]) as T:
           for batch in T:
 
-            print(batch.source)
-            print(batch.annotation)
-            raise SystemExit
-
             source = batch.source.permute(1, 0)
             prediction = self._model(batch).permute(1, 2, 0)
             target = batch.target.permute(1, 0)
@@ -142,39 +138,41 @@ class ModelREPL(Cmd):
     self.intro = 'Enter sequences into the model for evaluation.'
     self._model = model
     self._dataset = dataset
-
-  def default(self, args):
+  
+  def batchify(self, args):
+    """
+    Turn the REPL input into a batch for the model to process.
+    """
 
     transf, source = args.split(' ', 1)
-    
-    source_txt = source
-    transf_txt = transf
 
     source = source.split(' ')
     source.append('<eos>')
-    transf = [transf, '<eos>']
-
-    source = [[self._dataset.source_field.vocab.stoi[s], self._dataset.source_field.vocab.stoi[s]] for s in source]
+    source = [[self._dataset.source_field.vocab.stoi[s]] for s in source]
     source = torch.LongTensor(source)
 
-    transf = [[self._dataset.transform_field.vocab.stoi[t], self._dataset.transform_field.vocab.stoi[t]] for t in transf]
+    transf = [transf, '<eos>']
+    transf = [[self._dataset.transform_field.vocab.stoi[t]] for t in transf]
     transf = torch.LongTensor(transf)
-
-    zrs = [[0, 0] for i in range(self._model.max_len)]
-    target = torch.LongTensor(zrs)
 
     batch = Batch()
     batch.source = source
     batch.annotation = transf
-    batch.target = target
 
-    print(batch.source)
-    print(batch.target)
+    return batch
+
+  def default(self, args):
+
+    batch = self.batchify(args)
 
     prediction = self._model(batch).permute(1, 2, 0).argmax(1)
     prediction = self._dataset.id_to_token(prediction, 'target').flatten()
+    prediction = ' '.join(prediction)
 
-    result = "{} → {} → {}".format(source_txt, transf_txt, ' '.join(prediction))
+    source = self._dataset.id_to_token(batch.source, 'source').flatten()
+    source = ' '.join(source)
+
+    result = "{} → {}".format(source, prediction)
     log.info(result)
   
   def do_quit(self, args):

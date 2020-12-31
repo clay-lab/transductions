@@ -6,6 +6,7 @@ import torch
 import random
 import logging
 from omegaconf import DictConfig
+from torch._C import dtype
 from torchtext.data.batch import Batch
 
 # library imports
@@ -58,14 +59,16 @@ class TransductionModel(torch.nn.Module):
     batch_size = batch.source.shape[1]
     target_voc = self._decoder.vocab_size
     target_len = batch.target.shape[0] if hasattr(batch, 'target') else self.max_len
+    SOS_TOK = self._decoder._vocabulary.stoi['<sos>']
 
     outputs = torch.zeros(target_len, batch_size, target_voc).to(self.device)
-    input = batch.target[0,:]
+    input = torch.Tensor([SOS_TOK for i in range(batch_size)]).int()
 
     # outputs, hidden
     _, hidden = self._encoder(batch.source)
 
     for t in range(target_len):
+      
       output, hidden = self._decoder(input, hidden)
       outputs[t] = output
 
