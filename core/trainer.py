@@ -52,6 +52,7 @@ class Trainer:
 
       log.info("EPOCH %i / %i", epoch + 1, self._cfg.hyperparameters.epochs)
 
+      log.info("Computing metrics for 'train' dataset")
       self._model.train()
       with tqdm(self._dataset.iterators['train']) as T:
         for batch in T:
@@ -72,6 +73,33 @@ class Trainer:
 
           T.set_postfix(trn_loss='{:4.3f}'.format(loss.item()))
       
+      # Perform val, test, gen, ... passes
+      with torch.no_grad():
+
+        log.info("Computing metrics for 'val' dataset")
+        with tqdm(self._dataset.iterators['val']) as V:
+          for batch in V:
+            pass
+
+        log.info("Computing metrics for 'test' dataset")
+        with tqdm(self._dataset.iterators['test']) as T:
+          for batch in T:
+            pass
+
+        if 'gen' in list(self._dataset.iterators.keys()):
+          log.info("Computing metrics for 'gen' dataset")
+          with tqdm(self._dataset.iterators['gen']) as G:
+            for batch in G:
+              pass
+        
+        other_iters = list(self._dataset.iterators.keys())
+        other_iters = [o for o in other_iters if o not in ['train', 'val', 'test', 'gen']]
+        for itr in other_iters:
+          log.info("Computing metrics for '{}' dataset".format(itr))
+          with tqdm(self._dataset.iterators[itr]) as I:
+            for batch in I:
+              pass
+
       torch.save(self._model.state_dict(), 'model.pt')
 
   def eval(self, eval_cfg: DictConfig):
