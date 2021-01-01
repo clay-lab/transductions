@@ -111,11 +111,9 @@ class TransductionDataset:
     else:
       raise NotImplementedError
 
-    # TODO: THIS SHOULD BE CONFIGURABLE
     if trns_field == 'source':
       self.transform_field = self.source_field
     elif trns_field == 'target':
-      print("Yahtzee!!!")
       self.transform_field = self.target_field
     else:
       log.error("`transform_field` must be either 'source' or 'target'; you supplied {}!".format(trns_field))
@@ -196,42 +194,16 @@ class TransductionDataset:
     pickle.dump(self.target_field, open('target.pt', 'wb'))
 
   def __repr__(self):
-    message = "Dataset: %s \n" % self.__class__.__name__
+    message = "{}(\n".format(self.__class__.__name__)
+    padding = ""
     for attr in self.__dict__:
+      padding += " "
       if '_iterators' in attr:
-        message += "Splits:\n"
-        for s in getattr(self, attr):
-          message += "\t'{}' ({} sequences)\n".format(s, len(getattr(self, attr)[s].dataset) + 1)
-      elif '_path' in attr:
-        clean_name = {'_processed_path' : 'Processed data',
-                      '_raw_path' : 'Raw data'}
-        message += "{}:\t '{}'\n".format(clean_name[attr], getattr(self, attr))
-      elif '_in_sample_data' in attr:
-        message += "In-sample Data:\n"
-        isd = [str(d) for d in getattr(self, attr)]
-        message += "\t{}\n".format(isd)
-      # message += "{}:\t {}\n".format(attr, getattr(self, attr))
-    # for attr in self.__dict__:
-    #     if "transform" in attr:
-    #         message += "{}{} {}= {}\n".format(COLORS.IPurple, attr, COLORS.END_NO_TOKEN, getattr(self, attr))
-    # for attr in self.__dict__:
-    #     if attr.endswith("_dataset"):
-    #         dataset = getattr(self, attr)
-    #         if isinstance(dataset, list):
-    #             if len(dataset) > 1:
-    #                 size = ", ".join([str(len(d)) for d in dataset])
-    #             else:
-    #                 size = len(dataset[0])
-    #         elif dataset:
-    #             size = len(dataset)
-    #         else:
-    #             size = 0
-    #         if attr.startswith("_"):
-    #             attr = attr[1:]
-    #         message += "Size of {}{} {}= {}\n".format(COLORS.IPurple, attr, COLORS.END_NO_TOKEN, size)
-    # for key, attr in self.__dict__.items():
-    #     if key.endswith("_sampler") and attr:
-    #         message += "{}{} {}= {}\n".format(COLORS.IPurple, key, COLORS.END_NO_TOKEN, attr)
-    # message += "{}Batch size ={} {}".format(COLORS.IPurple, COLORS.END_NO_TOKEN, self.batch_size)
+        message += padding + "splits: ["
+        for i, s in enumerate(getattr(self, attr)):
+          if i > 0:
+            message += ', '
+          message += "{} ({} sequences)".format(s, len(getattr(self, attr)[s].dataset) + 1)
+        message += ']'
+    message += ")"
     return message
-
