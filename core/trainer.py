@@ -7,11 +7,12 @@ from tqdm import tqdm
 from omegaconf import DictConfig
 from cmd import Cmd
 from torchtext.data import Batch
-import numpy as np
 
 # Library imports
 from core.models.TransductionModel import TransductionModel
 from core.dataset.TransductionDataset import TransductionDataset
+from core.metrics.base_metric import TokenAccuracy, LossMetric
+from core.metrics.meter import Meter
 
 log = logging.getLogger(__name__)
 
@@ -19,9 +20,8 @@ class Trainer:
   """
   Handles interface between:
     - TransductionModel
-    - Dataset
-    - Checkpoint?
-    - Visualizer?
+    - TransductionDataset
+    - Meter
   """
 
   def __init__(self, cfg: DictConfig):
@@ -48,12 +48,18 @@ class Trainer:
     optimizer = torch.optim.SGD(self._model.parameters(), lr=lr)
     criterion = nn.CrossEntropyLoss(weight=None)
 
+    # Metrics
+    token_acc = TokenAccuracy(self._dataset.target_field.vocab.stoi['<pad>'])
+    avg_loss = LossMetric(criterion)
+    meter = Meter([token_acc, avg_loss])
+
     for epoch in range(self._cfg.hyperparameters.epochs):
 
       log.info("EPOCH %i / %i", epoch + 1, self._cfg.hyperparameters.epochs)
 
       log.info("Computing metrics for 'train' dataset")
       self._model.train()
+
       with tqdm(self._dataset.iterators['train']) as T:
         for batch in T:
 
@@ -68,10 +74,15 @@ class Trainer:
           loss = criterion(output, target)
 
           loss.backward()
-
           optimizer.step()
 
+          # Compute metrics
+          meter(output, target)
+
           T.set_postfix(trn_loss='{:4.3f}'.format(loss.item()))
+        
+        meter.log(stage='train', step=epoch)
+        meter.reset()
       
       # Perform val, test, gen, ... passes
       with torch.no_grad():
@@ -79,18 +90,35 @@ class Trainer:
         log.info("Computing metrics for 'val' dataset")
         with tqdm(self._dataset.iterators['val']) as V:
           for batch in V:
-            pass
+
+            output = self._model(batch).permute(1, 2, 0)
+            target = batch.target.permute(1, 0)
+
+            meter(output, target)
+
+          meter.log(stage='val', step=epoch)
+          meter.reset()
 
         log.info("Computing metrics for 'test' dataset")
         with tqdm(self._dataset.iterators['test']) as T:
           for batch in T:
-            pass
+            
+            output = self._model(batch).permute(1, 2, 0)
+            target = batch.target.permute(1, 0)
+
+          meter.log(stage='test', step=epoch)
+          meter.reset()
 
         if 'gen' in list(self._dataset.iterators.keys()):
           log.info("Computing metrics for 'gen' dataset")
           with tqdm(self._dataset.iterators['gen']) as G:
             for batch in G:
-              pass
+
+              output = self._model(batch).permute(1, 2, 0)
+              target = batch.target.permute(1, 0)
+
+            meter.log(stage='gen', step=epoch)
+            meter.reset()
         
         other_iters = list(self._dataset.iterators.keys())
         other_iters = [o for o in other_iters if o not in ['train', 'val', 'test', 'gen']]
@@ -98,7 +126,12 @@ class Trainer:
           log.info("Computing metrics for '{}' dataset".format(itr))
           with tqdm(self._dataset.iterators[itr]) as I:
             for batch in I:
-              pass
+
+              output = self._model(batch).permute(1, 2, 0)
+              target = batch.target.permute(1, 0)
+
+            meter.log(stage=itr, step=epoch)
+            meter.reset()
 
       torch.save(self._model.state_dict(), 'model.pt')
 
