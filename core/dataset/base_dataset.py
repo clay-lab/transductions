@@ -98,8 +98,9 @@ class TransductionDataset:
     """
     Constructs TabularDatasets and iterators for the processed data.
     """
-    source_format = cfg.experiment.dataset.source_format
-    target_format = cfg.experiment.dataset.target_format
+    source_format = cfg.experiment.dataset.source_format.lower()
+    target_format = cfg.experiment.dataset.target_format.lower()
+    trns_field = cfg.experiment.dataset.transform_field.lower()
 
     if source_format == 'sequence' and target_format == 'sequence':
 
@@ -111,7 +112,14 @@ class TransductionDataset:
       raise NotImplementedError
 
     # TODO: THIS SHOULD BE CONFIGURABLE
-    self.transform_field = self.source_field
+    if trns_field == 'source':
+      self.transform_field = self.source_field
+    elif trns_field == 'target':
+      print("Yahtzee!!!")
+      self.transform_field = self.target_field
+    else:
+      log.error("`transform_field` must be either 'source' or 'target'; you supplied {}!".format(trns_field))
+      raise ValueError("Invalid `transform_field`: {}".format(trns_field))
     
     self._iterators = {}
     self._in_sample_data = []
