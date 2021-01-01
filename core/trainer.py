@@ -9,8 +9,8 @@ from cmd import Cmd
 from torchtext.data import Batch
 
 # Library imports
-from core.models.TransductionModel import TransductionModel
-from core.dataset.TransductionDataset import TransductionDataset
+from core.models.base_model import TransductionModel
+from core.dataset.base_dataset import TransductionDataset
 from core.metrics.base_metric import TokenAccuracy, LossMetric
 from core.metrics.meter import Meter
 

@@ -12,7 +12,7 @@ from torchtext.data.batch import Batch
 # library imports
 from core.models.sequence_encoder import SequenceEncoder
 from core.models.sequence_decoder import SequenceDecoder
-from core.dataset.TransductionDataset import TransductionDataset
+from core.dataset.base_dataset import TransductionDataset
 
 log = logging.getLogger(__name__)
 
