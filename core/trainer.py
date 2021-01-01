@@ -106,6 +106,8 @@ class Trainer:
             output = self._model(batch).permute(1, 2, 0)
             target = batch.target.permute(1, 0)
 
+            meter(output, target)
+
           meter.log(stage='test', step=epoch)
           meter.reset()
 
@@ -116,6 +118,8 @@ class Trainer:
 
               output = self._model(batch).permute(1, 2, 0)
               target = batch.target.permute(1, 0)
+
+              meter(output, target)
 
             meter.log(stage='gen', step=epoch)
             meter.reset()
@@ -130,12 +134,19 @@ class Trainer:
               output = self._model(batch).permute(1, 2, 0)
               target = batch.target.permute(1, 0)
 
+              meter(output, target)
+
             meter.log(stage=itr, step=epoch)
             meter.reset()
 
       torch.save(self._model.state_dict(), 'model.pt')
 
   def eval(self, eval_cfg: DictConfig):
+
+    # Create meter
+    # Metrics
+    token_acc = TokenAccuracy(self._dataset.target_field.vocab.stoi['<pad>'])
+    meter = Meter([token_acc])
 
     # Load the pre-trained model weights
     chkpt_dir = hydra.utils.to_absolute_path(eval_cfg.checkpoint_dir)
@@ -161,6 +172,8 @@ class Trainer:
             prediction = self._model(batch).permute(1, 2, 0)
             target = batch.target.permute(1, 0)
 
+            meter(prediction, target)
+
             src_toks = self._dataset.id_to_token(source, 'source')
             pred_toks = self._dataset.id_to_token(prediction.argmax(1), 'target')
             tgt_toks = self._dataset.id_to_token(target, 'target')
@@ -171,6 +184,9 @@ class Trainer:
               pred_line = ' '.join(pred_toks[seq])
 
               f.write('{}\t{}\t{}\n'.format(src_line, tgt_line, pred_line))
+      
+        meter.log(stage=key, step=0)
+        meter.reset()
 
   def repl(self, eval_cfg: DictConfig):
 
