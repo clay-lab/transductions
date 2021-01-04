@@ -4,7 +4,9 @@ A Pytorch/Torchtext framework for building and testing Sequence-to-Sequence
 models and experiments. Transductions relies heavily on 
 [Hydra](https://github.com/facebookresearch/hydra) for configuration,
 allowing you to specify model architectures, datasets, and experiments using
-YAML files for easy modularity and reproducibility.
+YAML files for easy modularity and reproducibility. Out of the box, Transductions
+supports the [Tensorboard](https://tensorboard.dev) logging framework to make
+recording model performance easy.
 
 ## Training
 
@@ -14,39 +16,101 @@ python train.py
 ```
 The `train.py` script is configured through the `train.yaml` file in the `config`
 directory. This YAML file specifies three further configuration options: 
-`hyperparameters`, `model`, and `experiment`, each of which point to more 
-configuration files in their respective directories. If `train.py` is run without
-any further options, it will load the default values for these three config
-files.
+`experiment/hyperparameters`, `experiment/model`, and `experiment/dataset`, 
+each of which point to more configuration files in their respective directories. 
+If `train.py` is run without any further options, it will load the default values 
+for these three config files.
 
 Outputs from training runs are stored in the `outputs/` directory. If this 
-directory is not present, it will be created on first run. Each run gets its own
-folder, sorted in a two-part hierarchy of `DATE` and `TIME`. An example output
-directory will look something like this:
+directory is not present, it will be created on first run. Outputs are, by
+default, grouped by `experiment.name`, model type, date, and time.
+An example `outputs/` directory from the model sepcified in the default
+configuration would look something like this:
 ```
 outputs/
-  2021-01-01/
-    08-30-00/
-      .hydra/
-      model.pt
-      source.pt
-      target.pt
-      train.log
+  experiment-1/
+    SRN-SRN-None/
+      2021-01-01_14-30-00/
+        .hydra/
+        tensorboard/
+        model.pt
+        source.pt
+        target.pt
+        train.log
 ```
 The `model.pt` file contains the model weights. `source.pt` and `target.pt`
 contain the source and target fields needed to instantiate vocabularies.
 The `train.log` file records the output of `stdout` and `stderr` as logged
-during training.
+during training. The `.hydra/` directory contains a copy of the configuration
+specified when training began. The `tensorboard` directory contains the
+tensorboard events created during training.
 
 ### Overriding defaults
-To customize the training runs, add new YAML files in the `experiment`, 
-`hyperparameters`, and `model` directories. You can then load these at runtime
-by providing names to the training script:
+The default values for each configuration option can be overwritten, 
+either through the creation of new YAML configuration files and/or
+through values provided through the command-line interface. The 
+default `train.yaml` looks like the following:
 ```
-python main.py experiment=EXPERIMENT_NAME model=MODEL_NAME hyperparameteres=HYP_NAME
+defaults:
+  - experiment/hyperparameters: default
+  - experiment/model: default
+  - experiment/dataset: alice-herself
+
+  - hydra/output: custom
+
+experiment:
+  name: experiment-1
+
+pretty_print: True
 ```
-These would load the `experiment/EXPERIMENT_NAME.yaml`, 
-`model/MODEL_NAME.yaml`, and `hyperparameteres/HYP_NAME.yaml`, respectively.
+You can (and should) change `experiment.name` to be whatever you want.
+The three `experiment/...` parameters under the `defaults:` parameter
+are specifying config files in those directories to load. To run a
+training instance with a different configuraiton, create new 
+config files which match the schema of the provided ones and point
+`train.yaml` to look at those files instead. For example, we might
+add a new model configuration called `inattentive-gru-sequence.yaml`,
+which specifies the following model:
+```
+# @package _group_
+encoder:
+  unit: GRU
+  type: sequence
+  dropout: 0
+  num_layers: 1
+  hidden_size: 256
+  max_length: 0
+  embedding_size: 256
+  bidirectional: True
+decoder:
+  unit: GRU
+  type: sequence
+  dropout: 0
+  num_layers: 1
+  max_length: 30
+  hidden_size: 256
+  attention: None
+  embedding_size: 256
+```
+We can then train with this model by changing `- experiment/model:` to be `inattentive-gru-sequence`:
+```
+defaults:
+  - experiment/hyperparameters: default
+  - experiment/model: default
+  - experiment/dataset: alice-herself
+
+  - hydra/output: custom
+
+experiment:
+  name: experiment-1
+
+pretty_print: True
+```
+
+Alternatively, we can train with this new model directly from the command-line by overwriting the default value:
+```bash
+python train.py experiment/model=inattentive-gru-sequence
+```
 
 ## Defining an experiment
 

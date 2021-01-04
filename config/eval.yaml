@@ -1,4 +1,4 @@
-checkpoint_dir: "outputs/2021-01-04/17-12-44"
+checkpoint_dir: "outputs/alice-herself/SRN-SRN-None/2021-01-04/17-12-44"
 
 hydra:
   run:

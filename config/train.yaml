@@ -5,7 +5,7 @@ defaults:
 
   - hydra/output: custom
 
-# experiment:
-#   name: alice-herself
+experiment:
+  name: experiment-1
 
-pretty_print: True
+pretty_print: False
