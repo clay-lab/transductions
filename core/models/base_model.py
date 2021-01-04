@@ -40,12 +40,12 @@ class TransductionModel(torch.nn.Module):
     decoder_cfg = cfg.model.decoder
     decoder_vcb = dataset.target_field.vocab
 
-    if cfg.experiment.dataset.source_format == 'sequence':
+    if cfg.dataset.source_format == 'sequence':
       self._encoder = SequenceEncoder(encoder_cfg, encoder_vcb)
     else:
       raise NotImplementedError
     
-    if cfg.experiment.dataset.target_format == 'sequence':
+    if cfg.dataset.target_format == 'sequence':
       self._decoder = SequenceDecoder(decoder_cfg, decoder_vcb)
     else:
       raise NotImplementedError

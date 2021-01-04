@@ -28,6 +28,8 @@ class Trainer:
 
   def __init__(self, cfg: DictConfig):
 
+    print(cfg)
+
     self._cfg = cfg
     self._instantiate()
 
@@ -36,17 +38,18 @@ class Trainer:
     self._device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     log.info("DEVICE: {}".format(self._device))
 
-    self._dataset = TransductionDataset(self._cfg, self._device)
+    self._dataset = TransductionDataset(self._cfg.experiment, self._device)
     log.info(self._dataset)
 
-    self._model = TransductionModel(self._cfg, self._dataset, self._device)
+    self._model = TransductionModel(self._cfg.experiment, self._dataset, self._device)
     log.info(self._model)
   
   def train(self):
 
     log.info("Beginning training")
 
-    lr = self._cfg.hyperparameters.lr
+    lr = self._cfg.experiment.hyperparameters.lr
+    epochs = self._cfg.experiment.hyperparameters.epochs
     optimizer = torch.optim.SGD(self._model.parameters(), lr=lr)
     criterion = nn.CrossEntropyLoss(weight=None)
 
@@ -56,9 +59,9 @@ class Trainer:
     avg_loss = LossMetric(F.cross_entropy)
     meter = Meter([token_acc, avg_loss])
 
-    for epoch in range(self._cfg.hyperparameters.epochs):
+    for epoch in range(epochs):
 
-      log.info("EPOCH %i / %i", epoch + 1, self._cfg.hyperparameters.epochs)
+      log.info("EPOCH %i / %i", epoch + 1, epochs)
 
       log.info("Computing metrics for 'train' dataset")
       self._model.train()

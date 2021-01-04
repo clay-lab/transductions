@@ -44,8 +44,8 @@ class TransductionDataset:
     data path as .pt files.
     """
 
-    splits = cfg.experiment.dataset.splits
-    to_withhold = re.compile('|'.join(cfg.experiment.dataset.withholding))
+    splits = cfg.dataset.splits
+    to_withhold = re.compile('|'.join(cfg.dataset.withholding))
 
     s_names = list(splits.keys())
     s_paths = [os.path.join(self._processed_path, s + '.pt') for s in s_names]
@@ -76,7 +76,7 @@ class TransductionDataset:
     corresponding tracking file.
     """
 
-    tracking = cfg.experiment.dataset.tracking
+    tracking = cfg.dataset.tracking
     t_names = list(tracking.keys())
     t_paths = [os.path.join(self._processed_path, t + '.pt') for t in t_names]
     t_patterns = list(tracking.values())
@@ -98,9 +98,9 @@ class TransductionDataset:
     """
     Constructs TabularDatasets and iterators for the processed data.
     """
-    source_format = cfg.experiment.dataset.source_format.lower()
-    target_format = cfg.experiment.dataset.target_format.lower()
-    trns_field = cfg.experiment.dataset.transform_field.lower()
+    source_format = cfg.dataset.source_format.lower()
+    target_format = cfg.dataset.target_format.lower()
+    trns_field = cfg.dataset.transform_field.lower()
 
     if source_format == 'sequence' and target_format == 'sequence':
 
@@ -173,16 +173,16 @@ class TransductionDataset:
     log.info("Initializing dataset")
 
     self._processed_path = os.path.join(hydra.utils.get_original_cwd(), 
-      'data/experiments', cfg.experiment.name)
+      'data/experiments', cfg.dataset.name)
     self._raw_path = os.path.join(hydra.utils.get_original_cwd(), 'data/raw', 
-      cfg.experiment.dataset.input)
+      cfg.dataset.input)
     self._device = device
     
     if not os.path.exists(self._processed_path):
       os.mkdir(self._process_path)
       self._process_raw_data(cfg)
     else:
-      if cfg.experiment.dataset.overwrite:
+      if cfg.dataset.overwrite:
         self._process_raw_data(cfg)
     
     self._create_iterators(cfg)

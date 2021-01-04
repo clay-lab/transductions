@@ -2,9 +2,10 @@
 # 
 # Entry point for the transductions library.
 
-from typing import Dict
 import hydra
 from omegaconf import OmegaConf, DictConfig
+
+# Library imports
 from core.trainer import Trainer
 
 @hydra.main(config_path="config", config_name="train.yaml")

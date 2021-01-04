@@ -1,6 +1,9 @@
 defaults:
-  - hyperparameters: default
-  - model: default
-  - experiment: experiment-1
+  - experiment/hyperparameters: default
+  - experiment/model: default
+  - experiment/dataset: alice-herself
+
+# experiment:
+#   name: alice-herself
 
 pretty_print: True
