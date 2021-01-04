@@ -1,6 +1,6 @@
 # @package _group_
 encoder:
-  unit: GRU
+  unit: SRN
   type: sequence
   dropout: 0
   num_layers: 1
@@ -9,7 +9,7 @@ encoder:
   embedding_size: 256
   bidirectional: True
 decoder:
-  unit: GRU
+  unit: SRN
   type: sequence
   dropout: 0
   num_layers: 1
@@ -17,4 +17,3 @@ decoder:
   hidden_size: 256
   attention: None
   embedding_size: 256
-  bidirectional: True

@@ -3,6 +3,8 @@ defaults:
   - experiment/model: default
   - experiment/dataset: alice-herself
 
+  - hydra/output: custom
+
 # experiment:
 #   name: alice-herself
 

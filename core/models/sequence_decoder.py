@@ -150,8 +150,7 @@ class SequenceDecoder(torch.nn.Module):
           "h": h,
         })
 
-    output = ModelIO()
-    output.set_attributes({
+    output = ModelIO({
       "dec_outputs" : dec_outputs,
       "dec_hiddens" : dec_hiddens
     })

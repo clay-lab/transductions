@@ -1,0 +1,5 @@
+# @package _global_
+
+hydra:
+  run:
+    dir: ./outputs/${experiment.dataset.name}/${experiment.model.encoder.unit}-${experiment.model.decoder.unit}-${experiment.model.decoder.attention}/${now:%Y-%m-%d/%H-%M-%S}
