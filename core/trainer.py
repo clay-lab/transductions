@@ -53,7 +53,7 @@ class Trainer:
     # Metrics
     token_acc = TokenAccuracy(self._dataset.target_field.vocab.stoi['<pad>'])
     length_acc = LengthAccuracy(self._dataset.target_field.vocab.stoi['<pad>'])
-    avg_loss = LossMetric(F.nll_loss)
+    avg_loss = LossMetric(F.cross_entropy)
     meter = Meter([token_acc, avg_loss])
 
     for epoch in range(self._cfg.hyperparameters.epochs):
