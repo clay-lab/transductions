@@ -90,3 +90,21 @@ class LossMetric(BaseMetric):
   @property
   def name(self):
     return "Average Loss"
+
+class LengthAccuracy(BaseMetric):
+  """
+  Are the predicted sequences the same length as the target seqs?
+  """
+
+  def __init__(self, pad_token_id = None):
+    super().__init__()
+    self._pad = pad_token_id
+
+  def compute(self, prediction: Tensor, target: Tensor):
+    prediction = prediction.argmax(1)
+    pred_seq_len = (prediction != self._pad).sum(axis=0)
+    target_seq_len = (target != self._pad).sum(axis=0)
+    correct = (prediction == target)
+    total = correct.shape[0]
+
+    return correct, total

@@ -7,7 +7,6 @@ import torch.nn.functional as F
 import random
 import logging
 from omegaconf import DictConfig
-from torchtext.data import batch
 from torchtext.vocab import Vocab
 
 # Library imports

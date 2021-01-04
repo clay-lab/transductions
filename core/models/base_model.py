@@ -2,17 +2,16 @@
 # 
 # Provides the base class for transduction models.
 
-from core.models.model_io import ModelIO
+
 import torch
-import random
 import logging
 from omegaconf import DictConfig
-from torch._C import dtype
 from torchtext.data.batch import Batch
 
 # library imports
 from core.models.sequence_encoder import SequenceEncoder
 from core.models.sequence_decoder import SequenceDecoder
+from core.models.model_io import ModelIO
 from core.dataset.base_dataset import TransductionDataset
 
 log = logging.getLogger(__name__)

@@ -3,6 +3,7 @@ import torch
 import hydra
 import os
 import torch.nn as nn
+import torch.nn.functional as F
 from tqdm import tqdm
 from omegaconf import DictConfig
 from cmd import Cmd
@@ -10,8 +11,9 @@ from torchtext.data import Batch
 
 # Library imports
 from core.models.base_model import TransductionModel
+from core.models.model_io import ModelIO
 from core.dataset.base_dataset import TransductionDataset
-from core.metrics.base_metric import TokenAccuracy, LossMetric
+from core.metrics.base_metric import TokenAccuracy, LossMetric, LengthAccuracy
 from core.metrics.meter import Meter
 
 log = logging.getLogger(__name__)
@@ -50,7 +52,8 @@ class Trainer:
 
     # Metrics
     token_acc = TokenAccuracy(self._dataset.target_field.vocab.stoi['<pad>'])
-    avg_loss = LossMetric(criterion)
+    length_acc = LengthAccuracy(self._dataset.target_field.vocab.stoi['<pad>'])
+    avg_loss = LossMetric(F.nll_loss)
     meter = Meter([token_acc, avg_loss])
 
     for epoch in range(self._cfg.hyperparameters.epochs):
