@@ -15,6 +15,7 @@ from core.models.model_io import ModelIO
 from core.dataset.base_dataset import TransductionDataset
 from core.metrics.base_metric import TokenAccuracy, LossMetric, LengthAccuracy
 from core.metrics.meter import Meter
+from core.early_stopping import EarlyStopping
 
 log = logging.getLogger(__name__)
 
@@ -52,6 +53,8 @@ class Trainer:
     epochs = self._cfg.experiment.hyperparameters.epochs
     optimizer = torch.optim.SGD(self._model.parameters(), lr=lr)
     criterion = nn.CrossEntropyLoss(weight=None)
+
+    early_stoping = EarlyStopping(self._cfg.experiment.hyperparameters)
 
     # Metrics
     token_acc = TokenAccuracy(self._dataset.target_field.vocab.stoi['<pad>'])
@@ -102,6 +105,10 @@ class Trainer:
 
             meter(output, target)
 
+            # Compute validation loss
+            val_loss = F.cross_entropy(output, target)
+            T.set_postfix(val_loss='{:4.3f}'.format(val_loss.item()))
+
           meter.log(stage='val', step=epoch)
           meter.reset()
 
@@ -145,7 +152,11 @@ class Trainer:
             meter.log(stage=itr, step=epoch)
             meter.reset()
 
-      torch.save(self._model.state_dict(), 'model.pt')
+      should_stop, should_save = early_stoping(val_loss)
+      if should_save:
+        torch.save(self._model.state_dict(), 'model.pt')
+      if should_stop:
+        break
 
   def eval(self, eval_cfg: DictConfig):
 

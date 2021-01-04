@@ -71,7 +71,7 @@ config files which match the schema of the provided ones and point
 `train.yaml` to look at those files instead. For example, we might
 add a new model configuration called `inattentive-gru-sequence.yaml`,
 which specifies the following model:
-```
+```YAML
 # @package _group_
 encoder:
   unit: GRU
