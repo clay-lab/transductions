@@ -180,10 +180,10 @@ class TransductionDataset:
     
     if not os.path.exists(self._processed_path):
       os.mkdir(self._process_path)
-      splits = self._process_raw_data(cfg)
+      self._process_raw_data(cfg)
     else:
       if cfg.experiment.dataset.overwrite:
-        splits = self._process_raw_data(cfg)
+        self._process_raw_data(cfg)
     
     self._create_iterators(cfg)
 

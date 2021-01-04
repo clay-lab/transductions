@@ -6,6 +6,9 @@ import torch
 from omegaconf import DictConfig
 from torchtext.vocab import Vocab
 
+# Library imports
+from core.models.model_io import ModelIO
+
 class SequenceEncoder(torch.nn.Module):
 
   @property
@@ -39,11 +42,17 @@ class SequenceEncoder(torch.nn.Module):
     else:
       raise ValueError('Invalid recurrent unit type "{}".'.format(self._unit_type))
   
-  def forward(self, source):
+  def forward(self, enc_input: ModelIO) -> ModelIO:
     """
       Compute the forward pass.
     """
-    embedded = self._dropout(self._embedding(source))
-    outputs, hidden = self._unit(embedded)
+    embedded = self._dropout(self._embedding(enc_input.source))
+    enc_outputs, enc_hidden = self._unit(embedded)
 
-    return outputs, hidden
+    output = ModelIO()
+    output.set_attributes({
+      "enc_outputs" : enc_outputs,
+      "enc_hidden" : enc_hidden
+    })
+
+    return output

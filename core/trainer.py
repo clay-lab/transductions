@@ -68,7 +68,7 @@ class Trainer:
           # Loss expects:
           #   output:  [batch_size, classes, seq_len]
           #   target: [batch_size, seq_len]
-          output = self._model(batch).permute(1, 2, 0)
+          output = self._model(batch, tf_ratio=0.5).permute(1, 2, 0)
           target = batch.target.permute(1, 0)
 
           loss = criterion(output, target)
