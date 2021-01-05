@@ -29,8 +29,6 @@ class Trainer:
 
   def __init__(self, cfg: DictConfig):
 
-    print(cfg)
-
     self._cfg = cfg
     self._instantiate()
 

@@ -61,7 +61,7 @@ class TransductionDataset:
     with open(self._raw_path) as raw_data:
       next(raw_data)
       for line in raw_data:
-        if to_withhold.match(line):
+        if bool(to_withhold.search(line)):
           with open(g_path, 'a') as f:
             f.write(line)
         else:
@@ -90,7 +90,7 @@ class TransductionDataset:
       next(raw_data)
       for line in raw_data:
         for i, pattern in enumerate(t_patterns):
-          if pattern.match(line):
+          if bool(pattern.search(line)):
             with open(t_paths[i], 'a') as f:
               f.write(line)
 
@@ -179,7 +179,7 @@ class TransductionDataset:
     self._device = device
     
     if not os.path.exists(self._processed_path):
-      os.mkdir(self._process_path)
+      os.mkdir(self._processed_path)
       self._process_raw_data(cfg)
     else:
       if cfg.dataset.overwrite:
