@@ -33,7 +33,7 @@ class Meter:
       self._writer.add_scalar(metric_name, metric_value, step)
 
   def _display_metrics(self):
-    msg = ""
+    msg = "Meter:\n"
     for i, metric in enumerate(self._metrics):
       if i > 0:
         msg += "\n"

@@ -3,6 +3,7 @@
 # Provides SequenceDecoder module.
 
 import torch
+from torch import nn
 import torch.nn.functional as F
 import random
 import logging
@@ -20,6 +21,22 @@ else:
     avd = torch.device('cpu')
 
 class SequenceDecoder(torch.nn.Module):
+
+  @staticmethod
+  def newDecoder(cfg: DictConfig, vocab: Vocab):
+
+    unit_type = cfg.unit.upper()
+
+    if unit_type == 'SRN':
+      return SRNSequenceDecoder(cfg, vocab)
+    elif unit_type == 'GRU':
+      raise NotImplementedError
+    elif unit_type == 'LSTM':
+      return LSTMSequenceDecoder(cfg, vocab)
+    elif unit_type == 'TRANSFORMER':
+      raise NotImplementedError
+    else:
+      log.error(f"Unknown decoder type '{unit_type}'.")
 
   @property
   def vocab_size(self):
@@ -60,6 +77,7 @@ class SequenceDecoder(torch.nn.Module):
     if self._num_layers == 1:
       assert cfg.dropout == 0, "Dropout must be zero if num_layers = 1"
 
+    # TODO: THESE SHOULD BE MADE OBSELETE
     if self._unit_type == "SRN":
       self._unit = torch.nn.RNN(self._embedding_size, self._hidden_size, num_layers=self._num_layers, dropout=cfg.dropout)
     elif self._unit_type == "GRU":
@@ -88,47 +106,26 @@ class SequenceDecoder(torch.nn.Module):
     """
 
     batch_size = dec_input.source.shape[1]
+
+    teacher_forcing = random.random() < tf_ratio
+    if teacher_forcing:
+      if teacher_forcing and not hasattr(dec_input, 'target'):
+        log.error("You must provide a 'target' to use teacher forcing.")
+        raise SystemError
+      gen_len = dec_input.target.shape[0]
+    else:
+      gen_len = self._max_length
+
     if hasattr(dec_input, 'target'):
       gen_len = dec_input.target.shape[0]
     else:
       gen_len = self._max_length
-    
-    teacher_forcing = random.random() < tf_ratio
-    if teacher_forcing and not hasattr(dec_input, 'target'):
-      log.error("You must provide a 'target' to use teacher forcing.")
-      raise SystemError
-
-    """
-    Create or extract step inputs from the `dec_input` object.
-    - x0: [trans_seq_len × batch_size] 
-          The initial input to the decoder. For simple seq-2-seq tasks,
-          this is simply the `transformation` token. For more complicated
-          tasks, it may be a sequence of transformation tokens.
-    - enc_outputs: The hidden states produced at all timesteps from the encoder.
-    - h0: The final hidden state of the encoded vectors. We generate this from
-          the `enc_outputs` value.
-    """
-    x0 = dec_input.transform[1:-1] # remove the `<sos>` and `<eos>` tokens
-    enc_outputs = dec_input.enc_outputs
-    h0 = enc_outputs[-1]
-
-    x, h = x0, h0
-
-    dec_step_input = ModelIO()
-    dec_step_input.set_attributes({
-      "x": x,
-      "h": h,
-    })
-
-    # Check if we're using an LSTM
-    if self._unit_type == 'LSTM' and not hasattr(dec_step_input, 'c'):
-      c0 = torch.zeros(self._num_layers, batch_size, self._hidden_size).to(avd)
-      dec_step_input.set_attribute('c', c0)
-    elif isinstance(h0, tuple):
-      dec_step_input.set_attribute('h', h[0])
+  
+    # Get input to decoder unit
+    dec_step_input = self._get_step_inputs(dec_input)
 
     # Skeletons for the decoder outputs
-    has_finished = torch.zeros(batch_size).to(avd)
+    has_finished = torch.zeros(batch_size, dtype=torch.bool).to(avd)
     dec_outputs = torch.zeros(gen_len, batch_size, self.vocab_size).to(avd)
     dec_outputs[:,:,self.PAD_IDX] = 1.0
     dec_hiddens = torch.zeros(gen_len, batch_size, self._hidden_size).to(avd)
@@ -141,30 +138,22 @@ class SequenceDecoder(torch.nn.Module):
 
       # Update outputs
       dec_outputs[i] = step_result.y
-      if self._unit_type == 'LSTM':
-        dec_hiddens[i] = step_result.h[0][-1]
-      else:
-        dec_hiddens[i] = step_result.h[-1]
+      dec_hiddens[i] = step_result.h[-1]
 
       # Check if we're done
-      has_finished[step_prediction == self.EOS_IDX] = 1
-      if has_finished.prod() == 1: # TODO: use `bool` tensor here
+      # TODO: Does this ever go from True -> False??
+      has_finished[step_prediction == self.EOS_IDX] = True
+      if all(has_finished): 
         break
       else:
         # Otherwise, iterate x, h and repeat
         x = dec_input.target[i] if teacher_forcing else step_prediction
-        h = step_result.h
 
-        dec_step_input.set_attribute("x", x)
-
-        if isinstance(h, tuple):
-          h, c = h
-          dec_step_input.set_attributes({
-            "h": h,
-            "c": c
-          })
-        else:
-          dec_step_input.set_attribute("h", h)
+        # A little hacky, but we want to use every value from the step result
+        # For the next step EXCEPT x, which should come from either the target
+        # or the step_prediction.
+        step_result.set_attribute('x', x)
+        dec_step_input = self._get_step_inputs(step_result)
 
     output = ModelIO({
       "dec_outputs" : dec_outputs,
@@ -172,6 +161,129 @@ class SequenceDecoder(torch.nn.Module):
     })
 
     return output
+
+  def forward_step(self, step_input: ModelIO) -> ModelIO:
+    raise NotImplementedError
+
+  def _get_step_inputs(self, dec_inputs: ModelIO) -> ModelIO:
+    raise NotImplementedError
+
+class LSTMSequenceDecoder(SequenceDecoder):
+
+  def __init__(self, cfg: DictConfig, vocab: Vocab):
+    
+    super(LSTMSequenceDecoder, self).__init__(cfg, vocab)
+
+    self._unit = nn.LSTM(self._embedding_size, self._hidden_size, num_layers=self._num_layers, dropout=cfg.dropout)
+
+
+  def _get_step_inputs(self, dec_inputs: ModelIO) -> ModelIO:
+
+    # x0 = dec_inputs.transform[1:-1] # strip <sos> and <eos> tokens
+    # enc_outputs = dec_inputs.enc_outputs
+    if hasattr(dec_inputs, 'h'):
+      h = dec_inputs.h
+    elif hasattr(dec_inputs, 'enc_outputs'):
+      h = dec_inputs.enc_outputs[-1]
+    else:
+      log.error(f"I don't have any hidden state to use for the step from {dec_inputs}.")
+      raise SystemError
+
+    batch_size = h.shape[0]
+
+    if hasattr(dec_inputs, 'x'):
+      # Not the first step. Use outputs from previous step instead
+      x = dec_inputs.x
+    elif hasattr(dec_inputs, 'transform'):
+      # Use the transformation token from the input
+      x = dec_inputs.transform[1:-1] # strip <sos> and <eos> tokens
+    else:
+      log.error(f"I don't have any input to use for the step from {dec_inputs}.")
+      raise SystemError
+
+    if isinstance(h, tuple):
+      # I think this should only happen once, when we get the initial result of an LSTM encoder,
+      # at least until we fix that....
+      # log.info('An LSTM decoder was given a tuple for h')
+      h = h[0]
+      c = h[1]
+    else:
+      if hasattr(dec_inputs, 'c'):
+        # log.info('An LSTM decoder was given a distinct h and c')
+        c = dec_inputs.c
+      else:
+        # log.info('An LSTM decoder was given h but no c')
+        c = torch.zeros(self._num_layers, batch_size, self._hidden_size).to(avd)
+
+    dec_step_input = ModelIO({
+      "x": x,
+      "h": h,
+      "c": c
+    })
+
+    return dec_step_input
+
+  def forward_step(self, step_input: ModelIO) -> ModelIO:
+
+    unit_input = F.relu(self._embedding(step_input.x))
+    h, c = step_input.h, step_input.c
+
+    if len(unit_input.shape) == 2:
+      unit_input = unit_input.unsqueeze(0)
+    
+    if len(h.shape) == 2:
+      h = h.unsqueeze(0)
+    
+    hidden = (h, c)
+
+    _, state = self._unit(unit_input, hidden)
+
+    y = self._out(state[0][-1])
+
+    step_result = ModelIO({
+      "y" : y,
+      "h" : state[0],
+      "c" : state[1]
+    })
+
+    return step_result
+    
+class SRNSequenceDecoder(SequenceDecoder):
+
+  def __init__(self, cfg: DictConfig, vocab: Vocab):
+
+    super(SRNSequenceDecoder, self).__init__(cfg, vocab)
+
+    self._unit = nn.RNN(self._embedding_size, self._hidden_size, num_layers=self._num_layers, dropout=cfg.dropout)
+
+  def _get_step_inputs(self, dec_inputs: ModelIO) -> ModelIO:
+
+    if hasattr(dec_inputs, 'h'):
+      h = dec_inputs.h
+    elif hasattr(dec_inputs, 'enc_outputs'):
+      h = dec_inputs.enc_outputs[-1]
+    else:
+      log.error(f"I don't have any hidden state to use for the step from {dec_inputs}.")
+      raise SystemError
+
+    batch_size = h.shape[0]
+
+    if hasattr(dec_inputs, 'x'):
+      # Not the first step. Use outputs from previous step instead
+      x = dec_inputs.x
+    elif hasattr(dec_inputs, 'transform'):
+      # Use the transformation token from the input
+      x = dec_inputs.transform[1:-1] # strip <sos> and <eos> tokens
+    else:
+      log.error(f"I don't have any input to use for the step from {dec_inputs}.")
+      raise SystemError
+
+    dec_step_input = ModelIO({
+      "x": x,
+      "h": h
+    })
+
+    return dec_step_input
 
   def forward_step(self, step_input: ModelIO) -> ModelIO:
 
@@ -184,25 +296,72 @@ class SequenceDecoder(torch.nn.Module):
     if len(h.shape) == 2:
       h = h.unsqueeze(0)
 
-    # Check if we're dealing with an LSTM
-    if self._unit_type == 'LSTM':
-      c = step_input.c
-      hidden = (h, c)
-    else:
-      hidden = h
+    _, state = self._unit(unit_input, h)
 
-    # print("unit_input:", unit_input.shape)
-    # print("h:", h.shape)
-
-    # TODO: Figure out why the original code has unit_input.unsqueeze(0) and
-    #       why we have to unsqueeze h....probably changes with an LSTM.....
-
-    _, state = self._unit(unit_input, hidden)
-    y = self._out(state[0][-1] if self._unit_type == 'LSTM' else state[-1])
+    y = self._out(state[-1])
 
     step_result = ModelIO({
       "y" : y,
-      "h" : state
+      "h" : state[0]
+    })
+
+    return step_result
+
+class GRUSequenceDecoder(SequenceDecoder):
+
+  def __init__(self, cfg: DictConfig, vocab: Vocab):
+
+    super(SRNSequenceDecoder, self).__init__(cfg, vocab)
+
+    self._unit = nn.GRU(self._embedding_size, self._hidden_size, num_layers=self._num_layers, dropout=cfg.dropout)
+
+  def _get_step_inputs(self, dec_inputs: ModelIO) -> ModelIO:
+
+    if hasattr(dec_inputs, 'h'):
+      h = dec_inputs.h
+    elif hasattr(dec_inputs, 'enc_outputs'):
+      h = dec_inputs.enc_outputs[-1]
+    else:
+      log.error(f"I don't have any hidden state to use for the step from {dec_inputs}.")
+      raise SystemError
+
+    batch_size = h.shape[0]
+
+    if hasattr(dec_inputs, 'x'):
+      # Not the first step. Use outputs from previous step instead
+      x = dec_inputs.x
+    elif hasattr(dec_inputs, 'transform'):
+      # Use the transformation token from the input
+      x = dec_inputs.transform[1:-1] # strip <sos> and <eos> tokens
+    else:
+      log.error(f"I don't have any input to use for the step from {dec_inputs}.")
+      raise SystemError
+
+    dec_step_input = ModelIO({
+      "x": x,
+      "h": h
+    })
+
+    return dec_step_input
+
+  def forward_step(self, step_input: ModelIO) -> ModelIO:
+
+    unit_input = F.relu(self._embedding(step_input.x))
+    h = step_input.h
+
+    if len(unit_input.shape) == 2:
+      unit_input = unit_input.unsqueeze(0)
+    
+    if len(h.shape) == 2:
+      h = h.unsqueeze(0)
+
+    _, state = self._unit(unit_input, h)
+
+    y = self._out(state[-1])
+
+    step_result = ModelIO({
+      "y" : y,
+      "h" : state[0]
     })
 
     return step_result

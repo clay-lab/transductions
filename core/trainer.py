@@ -96,6 +96,7 @@ class Trainer:
 
         log.info("Computing metrics for 'val' dataset")
         with tqdm(self._dataset.iterators['val']) as V:
+          val_loss = 0.0
           for batch in V:
 
             output = self._model(batch).permute(1, 2, 0)
@@ -103,8 +104,8 @@ class Trainer:
 
             meter(output, target)
 
-            # Compute validation loss
-            val_loss = F.cross_entropy(output, target)
+            # Compute average validation loss
+            val_loss += F.cross_entropy(output, target) / len(V)
             V.set_postfix(val_loss='{:4.3f}'.format(val_loss.item()))
 
           meter.log(stage='val', step=epoch)

@@ -46,7 +46,7 @@ class TransductionModel(torch.nn.Module):
       raise NotImplementedError
     
     if cfg.dataset.target_format == 'sequence':
-      self._decoder = SequenceDecoder(decoder_cfg, decoder_vcb)
+      self._decoder = SequenceDecoder.newDecoder(decoder_cfg, decoder_vcb)
     else:
       raise NotImplementedError
     
