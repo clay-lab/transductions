@@ -103,11 +103,8 @@ class TransductionDataset:
     trns_field = cfg.dataset.transform_field.lower()
 
     if source_format == 'sequence' and target_format == 'sequence':
-
-      self.source_field = Field(lower=True, 
-                                eos_token='<eos>', init_token='<sos>') 
-      self.target_field = Field(lower=True, 
-                                eos_token='<eos>', init_token='<sos>') 
+      self.source_field = Field(lower=True, eos_token='<eos>', init_token='<sos>') 
+      self.target_field = Field(lower=True, eos_token='<eos>', init_token='<sos>') 
     else:
       raise NotImplementedError
 
@@ -195,9 +192,8 @@ class TransductionDataset:
 
   def __repr__(self):
     message = "{}(\n".format(self.__class__.__name__)
-    padding = ""
     for attr in self.__dict__:
-      padding += " "
+      padding = " "
       if '_iterators' in attr:
         message += padding + "splits: ["
         for i, s in enumerate(getattr(self, attr)):
@@ -205,5 +201,5 @@ class TransductionDataset:
             message += ', '
           message += "{} ({} sequences)".format(s, len(getattr(self, attr)[s].dataset) + 1)
         message += ']'
-    message += ")"
+    message += "\n)"
     return message

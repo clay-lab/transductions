@@ -120,6 +120,13 @@ class SequenceDecoder(torch.nn.Module):
       "h": h,
     })
 
+    # Check if we're using an LSTM
+    if self._unit_type == 'LSTM' and not hasattr(dec_step_input, 'c'):
+      c0 = torch.zeros(self._num_layers, batch_size, self._hidden_size).to(avd)
+      dec_step_input.set_attribute('c', c0)
+    elif isinstance(h0, tuple):
+      dec_step_input.set_attribute('h', h[0])
+
     # Skeletons for the decoder outputs
     has_finished = torch.zeros(batch_size).to(avd)
     dec_outputs = torch.zeros(gen_len, batch_size, self.vocab_size).to(avd)
@@ -134,7 +141,10 @@ class SequenceDecoder(torch.nn.Module):
 
       # Update outputs
       dec_outputs[i] = step_result.y
-      dec_hiddens[i] = step_result.h[-1]
+      if self._unit_type == 'LSTM':
+        dec_hiddens[i] = step_result.h[0][-1]
+      else:
+        dec_hiddens[i] = step_result.h[-1]
 
       # Check if we're done
       has_finished[step_prediction == self.EOS_IDX] = 1
@@ -145,10 +155,16 @@ class SequenceDecoder(torch.nn.Module):
         x = dec_input.target[i] if teacher_forcing else step_prediction
         h = step_result.h
 
-        dec_step_input.set_attributes({
-          "x": x,
-          "h": h,
-        })
+        dec_step_input.set_attribute("x", x)
+
+        if isinstance(h, tuple):
+          h, c = h
+          dec_step_input.set_attributes({
+            "h": h,
+            "c": c
+          })
+        else:
+          dec_step_input.set_attribute("h", h)
 
     output = ModelIO({
       "dec_outputs" : dec_outputs,
@@ -168,14 +184,21 @@ class SequenceDecoder(torch.nn.Module):
     if len(h.shape) == 2:
       h = h.unsqueeze(0)
 
+    # Check if we're dealing with an LSTM
+    if self._unit_type == 'LSTM':
+      c = step_input.c
+      hidden = (h, c)
+    else:
+      hidden = h
+
     # print("unit_input:", unit_input.shape)
     # print("h:", h.shape)
 
     # TODO: Figure out why the original code has unit_input.unsqueeze(0) and
     #       why we have to unsqueeze h....probably changes with an LSTM.....
 
-    _, state = self._unit(unit_input, h)
-    y = self._out(state[-1])
+    _, state = self._unit(unit_input, hidden)
+    y = self._out(state[0][-1] if self._unit_type == 'LSTM' else state[-1])
 
     step_result = ModelIO({
       "y" : y,
