@@ -30,7 +30,7 @@ class SequenceDecoder(torch.nn.Module):
     if unit_type == 'SRN':
       return SRNSequenceDecoder(cfg, vocab)
     elif unit_type == 'GRU':
-      raise NotImplementedError
+      return GRUSequenceDecoder(cfg, vocab)
     elif unit_type == 'LSTM':
       return LSTMSequenceDecoder(cfg, vocab)
     elif unit_type == 'TRANSFORMER':
@@ -112,11 +112,6 @@ class SequenceDecoder(torch.nn.Module):
       if teacher_forcing and not hasattr(dec_input, 'target'):
         log.error("You must provide a 'target' to use teacher forcing.")
         raise SystemError
-      gen_len = dec_input.target.shape[0]
-    else:
-      gen_len = self._max_length
-
-    if hasattr(dec_input, 'target'):
       gen_len = dec_input.target.shape[0]
     else:
       gen_len = self._max_length
@@ -311,7 +306,7 @@ class GRUSequenceDecoder(SequenceDecoder):
 
   def __init__(self, cfg: DictConfig, vocab: Vocab):
 
-    super(SRNSequenceDecoder, self).__init__(cfg, vocab)
+    super(GRUSequenceDecoder, self).__init__(cfg, vocab)
 
     self._unit = nn.GRU(self._embedding_size, self._hidden_size, num_layers=self._num_layers, dropout=cfg.dropout)
 
@@ -365,3 +360,4 @@ class GRUSequenceDecoder(SequenceDecoder):
     })
 
     return step_result
+    

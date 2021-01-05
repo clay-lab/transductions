@@ -2,7 +2,7 @@
 epochs: 100
 batch_size: 5
 lr: 0.01
-tolerance: 0.0005
+tolerance: 0.005
 patience: 7
 
 cuda: 0 # -1 means use CPU
