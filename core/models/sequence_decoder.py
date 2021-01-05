@@ -149,6 +149,7 @@ class SequenceDecoder(torch.nn.Module):
     for i in range(gen_len):
 
       # print(i)
+      # TODO: I"M NEVER UPDATING ATTENIONNNNNNN!!!
 
       # Get forward_step pass
       step_result = self.forward_step(dec_step_input, src_mask)
@@ -181,22 +182,37 @@ class SequenceDecoder(torch.nn.Module):
     return output
 
   @abstractmethod
-  def forward_step(self, step_input: ModelIO) -> ModelIO:
-    raise NotImplementedError
+  def forward_step(self, step_input: ModelIO, src_mask: Tensor = None) -> ModelIO:
+
+    unit_input = F.relu(self._embedding(step_input.x))
+    h = step_input.h
+
+    if len(unit_input.shape) == 2:
+      unit_input = unit_input.unsqueeze(0)
+    
+    if len(h.shape) == 2:
+      h = h.unsqueeze(0)
+    
+    if src_mask is not None:
+      # Attentive
+      attn = self._attention(step_input.enc_outputs, h[-1], src_mask).unsqueeze(1)
+      enc_out = step_input.enc_outputs.permute(1,0,2)
+      weighted_enc_out = torch.bmm(attn, enc_out).permute(1,0,2)
+
+      unit_input = torch.cat((unit_input, weighted_enc_out), dim=2)
+
+    _, state = self._unit(unit_input, h)
+
+    y = self._out(state[-1])
+
+    step_result = ModelIO({
+      "y" : y,
+      "h" : state[0]
+    })
+
+    return step_result
 
   @abstractmethod
-  def _get_step_inputs(self, dec_inputs: ModelIO) -> ModelIO:
-    raise NotImplementedError
-
-class LSTMSequenceDecoder(SequenceDecoder):
-
-  def __init__(self, cfg: DictConfig, vocab: Vocab):
-    
-    super(LSTMSequenceDecoder, self).__init__(cfg, vocab)
-
-    self._unit = nn.LSTM(self._embedding_size, self._hidden_size, num_layers=self._num_layers, dropout=cfg.dropout)
-
-
   def _get_step_inputs(self, dec_inputs: ModelIO) -> ModelIO:
 
     if hasattr(dec_inputs, 'h'):
@@ -219,30 +235,37 @@ class LSTMSequenceDecoder(SequenceDecoder):
       log.error(f"I don't have any input to use for the step from {dec_inputs}.")
       raise SystemError
 
-    if isinstance(h, tuple):
-      # I think this should only happen once, when we get the initial result of an LSTM encoder,
-      # at least until we fix that....
-      # log.info('An LSTM decoder was given a tuple for h')
-      h = h[0]
-      c = h[1]
-    else:
-      if hasattr(dec_inputs, 'c'):
-        # log.info('An LSTM decoder was given a distinct h and c')
-        c = dec_inputs.c
-      else:
-        # log.info('An LSTM decoder was given h but no c')
-        c = torch.zeros(self._num_layers, batch_size, self._hidden_size).to(avd)
-
     dec_step_input = ModelIO({
       "x": x,
-      "h": h,
-      "c": c
+      "h": h
     })
 
     if hasattr(dec_inputs, 'enc_outputs'):
       dec_step_input.set_attribute('enc_outputs', dec_inputs.enc_outputs)
 
     return dec_step_input
+
+class LSTMSequenceDecoder(SequenceDecoder):
+
+  def __init__(self, cfg: DictConfig, vocab: Vocab):
+    super(LSTMSequenceDecoder, self).__init__(cfg, vocab)
+    self._unit = nn.LSTM(self._embedding_size, self._hidden_size, num_layers=self._num_layers, dropout=cfg.dropout)
+
+  def _get_step_inputs(self, dec_inputs: ModelIO) -> ModelIO:
+
+    # Get default implementation
+    step_input = super()._get_step_inputs(dec_inputs)
+    batch_size = step_input.h.shape[0]
+
+    if hasattr(dec_inputs, 'c'):
+      # log.info('An LSTM decoder was given a distinct h and c')
+      step_input.set_attribute('c', dec_inputs.c)
+    else:
+      # log.info('An LSTM decoder was given h but no c')
+      c = torch.zeros(self._num_layers, batch_size, self._hidden_size).to(avd)
+      step_input.set_attribute('c', c)
+
+    return step_input
 
   def forward_step(self, step_input: ModelIO, src_mask: Tensor = None) -> ModelIO:
 
@@ -280,138 +303,11 @@ class LSTMSequenceDecoder(SequenceDecoder):
 class SRNSequenceDecoder(SequenceDecoder):
 
   def __init__(self, cfg: DictConfig, vocab: Vocab):
-
     super(SRNSequenceDecoder, self).__init__(cfg, vocab)
-
     self._unit = nn.RNN(self._embedding_size, self._hidden_size, num_layers=self._num_layers, dropout=cfg.dropout)
-
-  def _get_step_inputs(self, dec_inputs: ModelIO) -> ModelIO:
-
-    if hasattr(dec_inputs, 'h'):
-      h = dec_inputs.h
-    elif hasattr(dec_inputs, 'enc_outputs'):
-      h = dec_inputs.enc_outputs[-1]
-    else:
-      log.error(f"I don't have any hidden state to use for the step from {dec_inputs}.")
-      raise SystemError
-
-    batch_size = h.shape[0]
-
-    if hasattr(dec_inputs, 'x'):
-      # Not the first step. Use outputs from previous step instead
-      x = dec_inputs.x
-    elif hasattr(dec_inputs, 'transform'):
-      # Use the transformation token from the input
-      x = dec_inputs.transform[1:-1] # strip <sos> and <eos> tokens
-    else:
-      log.error(f"I don't have any input to use for the step from {dec_inputs}.")
-      raise SystemError
-
-    dec_step_input = ModelIO({
-      "x": x,
-      "h": h
-    })
-
-    if hasattr(dec_inputs, 'enc_outputs'):
-      dec_step_input.set_attribute('enc_outputs', dec_inputs.enc_outputs)
-
-    return dec_step_input
-
-  def forward_step(self, step_input: ModelIO, src_mask: Tensor = None) -> ModelIO:
-
-    unit_input = F.relu(self._embedding(step_input.x))
-    h = step_input.h
-
-    if len(unit_input.shape) == 2:
-      unit_input = unit_input.unsqueeze(0)
-    
-    if len(h.shape) == 2:
-      h = h.unsqueeze(0)
-    
-    if src_mask is not None:
-      # Attentive
-      attn = self._attention(step_input.enc_outputs, h[-1], src_mask).unsqueeze(1)
-      enc_out = step_input.enc_outputs.permute(1,0,2)
-      weighted_enc_out = torch.bmm(attn, enc_out).permute(1,0,2)
-
-      unit_input = torch.cat((unit_input, weighted_enc_out), dim=2)
-
-    _, state = self._unit(unit_input, h)
-
-    y = self._out(state[-1])
-
-    step_result = ModelIO({
-      "y" : y,
-      "h" : state[0]
-    })
-
-    return step_result
 
 class GRUSequenceDecoder(SequenceDecoder):
 
   def __init__(self, cfg: DictConfig, vocab: Vocab):
-
     super(GRUSequenceDecoder, self).__init__(cfg, vocab)
-
     self._unit = nn.GRU(self._embedding_size, self._hidden_size, num_layers=self._num_layers, dropout=cfg.dropout)
-
-  def _get_step_inputs(self, dec_inputs: ModelIO) -> ModelIO:
-
-    if hasattr(dec_inputs, 'h'):
-      h = dec_inputs.h
-    elif hasattr(dec_inputs, 'enc_outputs'):
-      h = dec_inputs.enc_outputs[-1]
-    else:
-      log.error(f"I don't have any hidden state to use for the step from {dec_inputs}.")
-      raise SystemError
-
-    batch_size = h.shape[0]
-
-    if hasattr(dec_inputs, 'x'):
-      # Not the first step. Use outputs from previous step instead
-      x = dec_inputs.x
-    elif hasattr(dec_inputs, 'transform'):
-      # Use the transformation token from the input
-      x = dec_inputs.transform[1:-1] # strip <sos> and <eos> tokens
-    else:
-      log.error(f"I don't have any input to use for the step from {dec_inputs}.")
-      raise SystemError
-
-    dec_step_input = ModelIO({
-      "x": x,
-      "h": h
-    })
-
-    if hasattr(dec_inputs, 'enc_outputs'):
-      dec_step_input.set_attribute('enc_outputs', dec_inputs.enc_outputs)
-
-    return dec_step_input
-
-  def forward_step(self, step_input: ModelIO, src_mask: Tensor = None) -> ModelIO:
-
-    unit_input = F.relu(self._embedding(step_input.x))
-    h = step_input.h
-
-    if len(unit_input.shape) == 2:
-      unit_input = unit_input.unsqueeze(0)
-    
-    if len(h.shape) == 2:
-      h = h.unsqueeze(0)
-
-    if src_mask is not None:
-      attn = self._attention(step_input.enc_outputs, h[-1], src_mask).unsqueeze(1)
-      enc_out = step_input.enc_outputs.permute(1,0,2)
-      weighted_enc_out = torch.bmm(attn, enc_out).permute(1,0,2)
-
-      unit_input = torch.cat((unit_input, weighted_enc_out), dim=2)
-
-    _, state = self._unit(unit_input, h)
-
-    y = self._out(state[-1])
-
-    step_result = ModelIO({
-      "y" : y,
-      "h" : state[0]
-    })
-
-    return step_result
