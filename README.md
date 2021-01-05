@@ -133,19 +133,19 @@ An experiment consists of several parts, including:
 
 A `dataset` has the following configuration schema:
 ```YAML
-  name: experiment-1 
-  input: grammar-1.tsv
-  source_format: sequence
-  target_format: sequence
-  overwrite: false
-  splits:
-    train: 80
-    test: 10
-    val: 10
-  withholding:
+name: experiment-1 
+input: grammar-1.tsv
+source_format: sequence
+target_format: sequence
+overwrite: false
+splits:
+  train: 80
+  test: 10
+  val: 10
+withholding:
   - ^Alice \w+ herself.*
-  tracking:
-    alice: ^Alice.*
+tracking:
+  alice: ^Alice.*
 ```
 
 This defines the relationship between the input data (the file specified by the 
