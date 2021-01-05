@@ -26,20 +26,24 @@ class EarlyStopping:
 
   def __call__(self, loss):
     
-    score = -loss
+    score = loss
 
     if self.best_score is None:
       self.best_score = score
-    elif score < self.best_score + self.tolerance:
-      self.counter += 1
-      log.info(f'Early stopping counter: {self.counter} / {self.patience}')
-      self.should_stop = self.counter >= self.patience
-      self.should_save = False
     else:
-      self.best_score = score
-      self.counter = 0
-      self.should_save = True
-    
+      delta = self.best_score - score
+      if delta <= self.tolerance:
+        self.counter += 1
+        log.info(f'Early stopping counter: {self.counter} / {self.patience}')
+        log.info('Pausing model saving until validation loss decreases by {}'.format(self.tolerance))
+        self.should_stop = self.counter >= self.patience
+        self.should_save = False
+      else:
+        self.best_score = score
+        self.counter = 0
+        self.should_save = True
+        self.should_stop = False
+
     return self.should_stop, self.should_save
   
 

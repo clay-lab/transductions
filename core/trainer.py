@@ -107,7 +107,7 @@ class Trainer:
 
             # Compute validation loss
             val_loss = F.cross_entropy(output, target)
-            T.set_postfix(val_loss='{:4.3f}'.format(val_loss.item()))
+            V.set_postfix(val_loss='{:4.3f}'.format(val_loss.item()))
 
           meter.log(stage='val', step=epoch)
           meter.reset()
