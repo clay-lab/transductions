@@ -202,3 +202,14 @@ a model's checkpoint directory. Just as in the training script, this value may b
 ```bash
 python eval.py checkpoint_dir=FILEPATH
 ```
+
+## Tensorboard 
+Transductions has built-in support for Tensorboard logging during training, allowing you to monitor training
+curves and custom metrics. To view a Tensorboard dashboard for a training run, use
+```bash
+tensorboard --logdir=CHECKPOINT_DIR
+```
+Tensorboard's real strength is that it *recursively* searches the `logdir` for its log files, which means you
+can point it to an arbitrarily high directory and view the logs for multiple runs at once. This is especially
+useful for viewing the training curves for an entire experiment, or the curves for a particular model
+architecture within an experiment.
