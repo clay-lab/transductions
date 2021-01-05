@@ -1,4 +1,4 @@
-# transductions
+# Transductions
 
 A Pytorch/Torchtext framework for building and testing Sequence-to-Sequence
 models and experiments. Transductions relies heavily on 
@@ -96,7 +96,7 @@ We can then train with this model by changing `- experiment/model:` to be `inatt
 ```
 defaults:
   - experiment/hyperparameters: default
-  - experiment/model: default
+  - experiment/model: inattentive-gru-sequence
   - experiment/dataset: alice-herself
 
   - hydra/output: custom
@@ -131,23 +131,21 @@ An experiment consists of several parts, including:
 
 ### Dataset Configuration
 
-An experiment has the following configuration schema:
+A `dataset` has the following configuration schema:
 ```YAML
-experiment:
   name: experiment-1 
-  dataset:
-    input: grammar-1.tsv
-    source_format: sequence
-    target_format: sequence
-    overwrite: false
-    splits:
-      train: 80
-      test: 10
-      val: 10
-    withholding:
-    - ^Alice \w+ herself.*
-    tracking:
-      alice: ^Alice.*
+  input: grammar-1.tsv
+  source_format: sequence
+  target_format: sequence
+  overwrite: false
+  splits:
+    train: 80
+    test: 10
+    val: 10
+  withholding:
+  - ^Alice \w+ herself.*
+  tracking:
+    alice: ^Alice.*
 ```
 
 This defines the relationship between the input data (the file specified by the 
@@ -170,20 +168,36 @@ are included. Importantly, this has no effect on split generation and is merely
 used to allow for the logging of model performance on different subsets of the
 data during training.
 
-## Running an experiment
+## Evaluation
 
-Running an experiment involves specifying three run-time Hydra configuration 
-parameters: `experiment`, `model`, and `training`. The `experiment` parameter
-defines the dataset, including the location of the raw data and the split 
-configuration, along with the metrics which are tracked during and after 
-training. The `model` parameter specifies the network hyperparameters, including
-things like `unit_type`, `hidden_size`, and so on. The `training` parameter 
-specifies the training hyperparameters like learning rate, batch size, and the 
-number of epochs. These parameters each correspond to to subdirectories of the
-`config/` directory where named YAML configuration files should live. These
-files can then be passed in as run-time arguments as follows:
+There are two ways to evaluate model performance. The first is using `eval.py`, which will load 
+a model from the saved weights and evaluate it on every split which was generated for it
+during training. 
+```bash
+python eval.py
 ```
-$ python main.py experiment=EXPERIMENT_NAME model=MODEL_NAME training=TRAINING_NAME
+This will generate an `eval/` directory inside the model's checkpoint directory containing the `eval.log`
+log file for the evaluation run along with tab-separate value files for each of the splits in the following
+format:
 ```
-which would load values specified in `config/experiment/EXPERIMENT_NAME.yaml` 
-and so on.
+source  target  prediction
+```
+
+There is also in interactive Read-Evaluate-Print Loop (REPL) which lets you load a model and input arbitrary
+transforms sequences to the model, which will print out its predictions. Run
+```bash
+python repl.py
+```
+and enter sequences of the form
+```
+> TRANSFORM this is a sentence
+```
+where `TRANSFORM` is the transform token. A log for each REPL run will be saved in the `repl/` directory 
+inside the model checkpoint directory.
+
+The `eval.py` and `repl.py` scripts are configured by the `eval.yaml` and `repl.yaml` configuration files in 
+the `config/` directory. Both contain a single parameter `checkpoint_dir:` which must be set to point to
+a model's checkpoint directory. Just as in the training script, this value may be overridden on the command-line:
+```bash
+python eval.py checkpoint_dir=FILEPATH
+```

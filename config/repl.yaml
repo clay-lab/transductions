@@ -2,4 +2,4 @@ checkpoint_dir: "outputs/experiment-1/SRN-SRN-None/2021-01-04_18-50-35"
 
 hydra:
   run:
-    dir: ${checkpoint_dir}/eval/${now:%Y-%m-%d_%H-%M-%S}
+    dir: ${checkpoint_dir}/repl/${now:%Y-%m-%d_%H-%M-%S}
