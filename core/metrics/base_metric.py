@@ -1,5 +1,6 @@
 from abc import abstractmethod
 from torch import Tensor
+import torch
 
 class BaseMetric:
   """
@@ -50,8 +51,16 @@ class SequenceAccuracy(BaseMetric):
 
   def compute(self, prediction: Tensor, target: Tensor):
     prediction = prediction.argmax(1)
-    correct = (prediction == target).prod(axis=0)
-    total = correct.size[0]
+    correct = (prediction == target).prod(axis=1)
+    total = correct.shape[0]
+    correct = correct.sum()
+
+    # print("prediciton", prediction.shape)
+    # print("correct", correct)
+    # print("total", total)
+
+    # raise SystemExit
+
     return correct, total
 
 class TokenAccuracy(BaseMetric):
@@ -102,9 +111,10 @@ class LengthAccuracy(BaseMetric):
 
   def compute(self, prediction: Tensor, target: Tensor):
     prediction = prediction.argmax(1)
-    pred_seq_len = (prediction != self._pad).sum(axis=0)
-    target_seq_len = (target != self._pad).sum(axis=0)
-    correct = (prediction == target)
-    total = correct.shape[0]
+    pred_seq_len = (prediction != self._pad).sum(axis=1)
+    target_seq_len = (target != self._pad).sum(axis=1)
+    matches = torch.eq(pred_seq_len, target_seq_len)
+    correct = matches.int().sum()
+    total = matches.shape[0]
 
     return correct, total

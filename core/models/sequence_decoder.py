@@ -9,6 +9,7 @@ import random
 import logging
 from omegaconf import DictConfig
 from torchtext.vocab import Vocab
+from abc import abstractmethod
 
 # Library imports
 from core.models.model_io import ModelIO
@@ -92,6 +93,9 @@ class SequenceDecoder(torch.nn.Module):
   
     self._out = torch.nn.Linear(self._hidden_size, self.vocab_size)
 
+    # Attention
+    
+
   def forward(self, dec_input: ModelIO, tf_ratio: float) -> ModelIO:
     """
     Computes the forward pass of the decoder.
@@ -108,10 +112,13 @@ class SequenceDecoder(torch.nn.Module):
     batch_size = dec_input.source.shape[1]
 
     teacher_forcing = random.random() < tf_ratio
-    if teacher_forcing:
-      if teacher_forcing and not hasattr(dec_input, 'target'):
-        log.error("You must provide a 'target' to use teacher forcing.")
-        raise SystemError
+    if teacher_forcing and not hasattr(dec_input, 'target'):
+      log.error("You must provide a 'target' to use teacher forcing.")
+      raise SystemError
+
+    # Okay so we still need this, but should we be padding
+    # the outputs or something when not using teacher forcing?
+    if hasattr(dec_input, 'target'):
       gen_len = dec_input.target.shape[0]
     else:
       gen_len = self._max_length
@@ -157,9 +164,11 @@ class SequenceDecoder(torch.nn.Module):
 
     return output
 
+  @abstractmethod
   def forward_step(self, step_input: ModelIO) -> ModelIO:
     raise NotImplementedError
 
+  @abstractmethod
   def _get_step_inputs(self, dec_inputs: ModelIO) -> ModelIO:
     raise NotImplementedError
 
@@ -174,8 +183,6 @@ class LSTMSequenceDecoder(SequenceDecoder):
 
   def _get_step_inputs(self, dec_inputs: ModelIO) -> ModelIO:
 
-    # x0 = dec_inputs.transform[1:-1] # strip <sos> and <eos> tokens
-    # enc_outputs = dec_inputs.enc_outputs
     if hasattr(dec_inputs, 'h'):
       h = dec_inputs.h
     elif hasattr(dec_inputs, 'enc_outputs'):
@@ -360,4 +367,3 @@ class GRUSequenceDecoder(SequenceDecoder):
     })
 
     return step_result
-    

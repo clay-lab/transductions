@@ -13,7 +13,7 @@ from torchtext.data import Batch
 from core.models.base_model import TransductionModel
 from core.models.model_io import ModelIO
 from core.dataset.base_dataset import TransductionDataset
-from core.metrics.base_metric import TokenAccuracy, LossMetric, LengthAccuracy
+from core.metrics.base_metric import SequenceAccuracy, TokenAccuracy, LossMetric, LengthAccuracy
 from core.metrics.meter import Meter
 from core.early_stopping import EarlyStopping
 
@@ -55,10 +55,12 @@ class Trainer:
     early_stoping = EarlyStopping(self._cfg.experiment.hyperparameters)
 
     # Metrics
-    token_acc = TokenAccuracy(self._dataset.target_field.vocab.stoi['<pad>'])
-    length_acc = LengthAccuracy(self._dataset.target_field.vocab.stoi['<pad>'])
+    seq_acc = SequenceAccuracy()
+    tok_acc = TokenAccuracy(self._dataset.target_field.vocab.stoi['<pad>'])
+    len_acc = LengthAccuracy(self._dataset.target_field.vocab.stoi['<pad>'])
     avg_loss = LossMetric(F.cross_entropy)
-    meter = Meter([token_acc, avg_loss])
+    
+    meter = Meter([seq_acc, tok_acc, len_acc, avg_loss])
 
     for epoch in range(epochs):
 
