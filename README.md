@@ -133,6 +133,7 @@ An experiment consists of several parts, including:
 
 A `dataset` has the following configuration schema:
 ```YAML
+# @package _group_
 name: experiment-1 
 input: grammar-1.tsv
 source_format: sequence
