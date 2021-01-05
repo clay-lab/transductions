@@ -1,6 +1,6 @@
 defaults:
   - experiment/hyperparameters: default
-  - experiment/model: default
+  - experiment/model: inattentive-srn-sequence
   - experiment/dataset: alice-herself
 
   - hydra/output: custom

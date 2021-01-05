@@ -5,6 +5,7 @@
 import torch
 from torch import nn
 import torch.nn.functional as F
+from torch import Tensor
 import random
 import logging
 from omegaconf import DictConfig
@@ -13,6 +14,7 @@ from abc import abstractmethod
 
 # Library imports
 from core.models.model_io import ModelIO
+from core.models.attention import create_mask, MultiplicativeAttention
 
 log = logging.getLogger(__name__)
 
@@ -64,8 +66,12 @@ class SequenceDecoder(torch.nn.Module):
     self._unit_type = cfg.unit.upper()
     self._max_length = cfg.max_length
     self._embedding_size = cfg.embedding_size
-    self._attention = cfg.attention.lower()
-    if self._attention != 'none':
+    self._attention_type = cfg.attention.lower()
+
+    if self._attention_type == 'none':
+      self._attention_type = None
+
+    if self._attention_type:
       self._embedding_size += self._hidden_size
     
     self._vocabulary = vocab
@@ -94,7 +100,8 @@ class SequenceDecoder(torch.nn.Module):
     self._out = torch.nn.Linear(self._hidden_size, self.vocab_size)
 
     # Attention
-    
+    if self._attention_type == 'multiplicative':
+      self._attention = MultiplicativeAttention(self._hidden_size)
 
   def forward(self, dec_input: ModelIO, tf_ratio: float) -> ModelIO:
     """
@@ -109,7 +116,7 @@ class SequenceDecoder(torch.nn.Module):
           be present in `dec_input`.
     """
 
-    batch_size = dec_input.source.shape[1]
+    seq_len, batch_size, _ = dec_input.enc_outputs.shape
 
     teacher_forcing = random.random() < tf_ratio
     if teacher_forcing and not hasattr(dec_input, 'target'):
@@ -131,11 +138,20 @@ class SequenceDecoder(torch.nn.Module):
     dec_outputs = torch.zeros(gen_len, batch_size, self.vocab_size).to(avd)
     dec_outputs[:,:,self.PAD_IDX] = 1.0
     dec_hiddens = torch.zeros(gen_len, batch_size, self._hidden_size).to(avd)
+    
+    # Attention
+    if self._attention_type is not None:
+      attention = torch.zeros(gen_len, batch_size, seq_len).to(avd)
+      src_mask = create_mask(dec_input.source, self._vocabulary) # THIS SHOULD BE THE ENC VOCAB
+    else:
+      src_mask = None
 
     for i in range(gen_len):
 
+      # print(i)
+
       # Get forward_step pass
-      step_result = self.forward_step(dec_step_input)
+      step_result = self.forward_step(dec_step_input, src_mask)
       step_prediction = step_result.y.argmax(dim=1)
 
       # Update outputs
@@ -143,7 +159,6 @@ class SequenceDecoder(torch.nn.Module):
       dec_hiddens[i] = step_result.h[-1]
 
       # Check if we're done
-      # TODO: Does this ever go from True -> False??
       has_finished[step_prediction == self.EOS_IDX] = True
       if all(has_finished): 
         break
@@ -155,6 +170,7 @@ class SequenceDecoder(torch.nn.Module):
         # For the next step EXCEPT x, which should come from either the target
         # or the step_prediction.
         step_result.set_attribute('x', x)
+        step_result.set_attribute('enc_outputs', dec_input.enc_outputs)
         dec_step_input = self._get_step_inputs(step_result)
 
     output = ModelIO({
@@ -223,9 +239,12 @@ class LSTMSequenceDecoder(SequenceDecoder):
       "c": c
     })
 
+    if hasattr(dec_inputs, 'enc_outputs'):
+      dec_step_input.set_attribute('enc_outputs', dec_inputs.enc_outputs)
+
     return dec_step_input
 
-  def forward_step(self, step_input: ModelIO) -> ModelIO:
+  def forward_step(self, step_input: ModelIO, src_mask: Tensor = None) -> ModelIO:
 
     unit_input = F.relu(self._embedding(step_input.x))
     h, c = step_input.h, step_input.c
@@ -237,6 +256,14 @@ class LSTMSequenceDecoder(SequenceDecoder):
       h = h.unsqueeze(0)
     
     hidden = (h, c)
+
+    if src_mask is not None:
+      # Attentive
+      attn = self._attention(step_input.enc_outputs, h[-1], src_mask).unsqueeze(1)
+      enc_out = step_input.enc_outputs.permute(1,0,2)
+      weighted_enc_out = torch.bmm(attn, enc_out).permute(1,0,2)
+
+      unit_input = torch.cat((unit_input, weighted_enc_out), dim=2)
 
     _, state = self._unit(unit_input, hidden)
 
@@ -285,9 +312,12 @@ class SRNSequenceDecoder(SequenceDecoder):
       "h": h
     })
 
+    if hasattr(dec_inputs, 'enc_outputs'):
+      dec_step_input.set_attribute('enc_outputs', dec_inputs.enc_outputs)
+
     return dec_step_input
 
-  def forward_step(self, step_input: ModelIO) -> ModelIO:
+  def forward_step(self, step_input: ModelIO, src_mask: Tensor = None) -> ModelIO:
 
     unit_input = F.relu(self._embedding(step_input.x))
     h = step_input.h
@@ -297,6 +327,14 @@ class SRNSequenceDecoder(SequenceDecoder):
     
     if len(h.shape) == 2:
       h = h.unsqueeze(0)
+    
+    if src_mask is not None:
+      # Attentive
+      attn = self._attention(step_input.enc_outputs, h[-1], src_mask).unsqueeze(1)
+      enc_out = step_input.enc_outputs.permute(1,0,2)
+      weighted_enc_out = torch.bmm(attn, enc_out).permute(1,0,2)
+
+      unit_input = torch.cat((unit_input, weighted_enc_out), dim=2)
 
     _, state = self._unit(unit_input, h)
 
@@ -344,9 +382,12 @@ class GRUSequenceDecoder(SequenceDecoder):
       "h": h
     })
 
+    if hasattr(dec_inputs, 'enc_outputs'):
+      dec_step_input.set_attribute('enc_outputs', dec_inputs.enc_outputs)
+
     return dec_step_input
 
-  def forward_step(self, step_input: ModelIO) -> ModelIO:
+  def forward_step(self, step_input: ModelIO, src_mask: Tensor = None) -> ModelIO:
 
     unit_input = F.relu(self._embedding(step_input.x))
     h = step_input.h
@@ -356,6 +397,13 @@ class GRUSequenceDecoder(SequenceDecoder):
     
     if len(h.shape) == 2:
       h = h.unsqueeze(0)
+
+    if src_mask is not None:
+      attn = self._attention(step_input.enc_outputs, h[-1], src_mask).unsqueeze(1)
+      enc_out = step_input.enc_outputs.permute(1,0,2)
+      weighted_enc_out = torch.bmm(attn, enc_out).permute(1,0,2)
+
+      unit_input = torch.cat((unit_input, weighted_enc_out), dim=2)
 
     _, state = self._unit(unit_input, h)
 
