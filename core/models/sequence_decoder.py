@@ -14,7 +14,6 @@ from abc import abstractmethod
 
 # Library imports
 from core.models.model_io import ModelIO
-from core.models.positional_encoding import PositionalEncoding
 from core.models.attention import create_mask, MultiplicativeAttention
 
 log = logging.getLogger(__name__)
@@ -38,7 +37,7 @@ class SequenceDecoder(torch.nn.Module):
     elif unit_type == 'LSTM':
       return LSTMSequenceDecoder(cfg, vocab)
     elif unit_type == 'TRANSFORMER':
-      return TransformerSequenceDecoder(cfg, vocab)
+      raise NotImplementedError
     else:
       log.error(f"Unknown decoder type '{unit_type}'.")
 
@@ -88,8 +87,11 @@ class SequenceDecoder(torch.nn.Module):
     self._out = torch.nn.Linear(self._hidden_size, self.vocab_size)
 
     # Attention
-    if self._attention_type == 'multiplicative':
-      self._attention = MultiplicativeAttention(self._hidden_size)
+    if self._attention_type is not None:
+      if self._attention_type == 'multiplicative':
+        self._attention = MultiplicativeAttention(self._hidden_size)
+      else:
+        raise NotImplementedError
 
   def forward(self, dec_input: ModelIO, tf_ratio: float) -> ModelIO:
     """
@@ -136,16 +138,17 @@ class SequenceDecoder(torch.nn.Module):
 
     for i in range(gen_len):
 
-      # print(i)
       # TODO: I"M NEVER UPDATING ATTENIONNNNNNN!!!
 
       # Get forward_step pass
       step_result = self.forward_step(dec_step_input, src_mask)
       step_prediction = step_result.y.argmax(dim=1)
 
-      # Update outputs
+      # Update results
       dec_outputs[i] = step_result.y
       dec_hiddens[i] = step_result.h[-1]
+      if self._attention_type is not None:
+        attention[i] = step_result.attn
 
       # Check if we're done
       has_finished[step_prediction == self.EOS_IDX] = True
@@ -167,13 +170,17 @@ class SequenceDecoder(torch.nn.Module):
       "dec_hiddens" : dec_hiddens
     })
 
+    if self._attention_type is not None:
+      output.set_attribute("attention", attention)
+
     return output
   
-  def compute_attention(self, enc_inputs: Tensor, h: Tensor, src_mask: Tensor) -> Tensor:
+  def compute_attention(self, unit_input: Tensor, enc_outputs: Tensor, h: Tensor, src_mask: Tensor) -> Tensor:
+
     attn = self._attention(enc_outputs, h[-1], src_mask).unsqueeze(1)
     enc_out = enc_outputs.permute(1,0,2)
     weighted_enc_out = torch.bmm(attn, enc_out).permute(1,0,2)
-    return torch.cat((unit_input, weighted_enc_out), dim=2)
+    return torch.cat((unit_input, weighted_enc_out), dim=2), attn.squeeze(1)
 
   def forward_step(self, step_input: ModelIO, src_mask: Tensor = None) -> ModelIO:
 
@@ -182,12 +189,16 @@ class SequenceDecoder(torch.nn.Module):
     unit_input = F.relu(self._embedding(step_input.x))
     unit_input = unit_input.unsqueeze(0) if len(unit_input.shape) == 2 else unit_input
     if src_mask is not None:
-      unit_input = self.compute_attention(step_input.enc_inputs, h, src_mask)
+      unit_input, attn = self.compute_attention(unit_input, step_input.enc_outputs, h, src_mask)
 
     _, state = self._unit(unit_input, h)
     y = self._out(state[-1])
 
-    return ModelIO({ "y" : y, "h" : state[0] })
+    step_result = ModelIO({ "y" : y, "h" : state[0] })
+    if src_mask is not None:
+      step_result.set_attribute("attn", attn)
+
+    return step_result
 
   def _get_step_inputs(self, dec_inputs: ModelIO) -> ModelIO:
 
@@ -275,25 +286,3 @@ class GRUSequenceDecoder(SequenceDecoder):
   def __init__(self, cfg: DictConfig, vocab: Vocab):
     super(GRUSequenceDecoder, self).__init__(cfg, vocab)
     self._unit = nn.GRU(self._embedding_size, self._hidden_size, num_layers=self._num_layers, dropout=cfg.dropout)
-
-class TransformerSequenceDecoder(torch.nn.Module):
-
-  def __init__(self, cfg: DictConfig, vocab: Vocab):
-
-    self._hidden_size = cfg.hidden_size
-    self._num_layers = cfg.num_layers
-    self._max_length = self._max_length
-    self._num_heads = cfg.num_heads
-    self._dropout_p = cfg.dropout
-
-    decoder_layer = nn.TransformerDecoderLayer(d_model=self._hidden_size, nhead=self._num_heads, dropout=self._dropout_p)
-    self._unit = nn.TransformerDecoder(decoder_layer, num_layers=self._num_layers)
-    self._pos_encoder = PositionalEncoding(self._hidden_size, self._dropout_p, self._max_length)
-  
-  def subsequent_mask(size):
-    attn_shape = (1, size, size)
-    subsequent_mask = np.triu(np.ones(attn_shape), k=1).astype('uint8')
-    return torch.from_numpy(subsequent_mask) == 0
-  
-  def forward(self, dec_inputs: ModelIO, tf_ratio: float) -> ModelIO:
-    pass

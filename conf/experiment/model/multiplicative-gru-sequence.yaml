@@ -1,15 +1,15 @@
 # @package _group_
 encoder:
-  unit: LSTM
+  unit: GRU
   type: sequence
   dropout: 0
   num_layers: 1
   hidden_size: 256
   max_length: 0
   embedding_size: 256
-  bidirectional: True
+  bidirectional: False
 decoder:
-  unit: LSTM
+  unit: GRU
   type: sequence
   dropout: 0
   num_layers: 1

@@ -7,7 +7,7 @@ encoder:
   hidden_size: 256
   max_length: 0
   embedding_size: 256
-  bidirectional: True
+  bidirectional: False
 decoder:
   unit: LSTM
   type: sequence
@@ -15,5 +15,5 @@ decoder:
   num_layers: 1
   max_length: 30
   hidden_size: 256
-  attention: None
+  attention: Multiplicative
   embedding_size: 256

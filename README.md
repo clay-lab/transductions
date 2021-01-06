@@ -14,7 +14,7 @@ To train a new model, run the following script:
 ```bash
 python train.py
 ```
-The `train.py` script is configured through the `train.yaml` file in the `config`
+The `train.py` script is configured through the `train.yaml` file in the `conf`
 directory. This YAML file specifies three further configuration options: 
 `experiment/hyperparameters`, `experiment/model`, and `experiment/dataset`, 
 each of which point to more configuration files in their respective directories. 
@@ -34,12 +34,9 @@ outputs/
         .hydra/
         tensorboard/
         model.pt
-        source.pt
-        target.pt
         train.log
 ```
-The `model.pt` file contains the model weights. `source.pt` and `target.pt`
-contain the source and target fields needed to instantiate vocabularies.
+The `model.pt` file contains the model weights.
 The `train.log` file records the output of `stdout` and `stderr` as logged
 during training. The `.hydra/` directory contains a copy of the configuration
 specified when training began. The `tensorboard` directory contains the
@@ -81,7 +78,7 @@ encoder:
   hidden_size: 256
   max_length: 0
   embedding_size: 256
-  bidirectional: True
+  bidirectional: False
 decoder:
   unit: GRU
   type: sequence
@@ -117,17 +114,18 @@ python train.py experiment/model=inattentive-gru-sequence
 An experiment consists of several parts, including:
 - **Dataset:** The dataset is the training, testing, and evaluation data given 
     to the model and used to evaluate its performance. The dataset for a given
-    experiment consists of a raw input data source, which lives as a TSV file in
+    experiment is defined as an entry in `conf/experiment/dataset/`, and consists
+    of a raw input data source, which lives as a TSV file in
     the `data/raw/` directory and a configuration file which specifies how the
     raw data is turned into splits for training, testing, and evaluation, as well
     as any withholding done to create a generalization set or separate tracking
     splits to evaluate performance on a specific subset of the full data.
 - **Models:** Models for an experiment are defined by configuration files in the
-    `config/model` directory. These configuration files specify the hyperparameters
+    `conf/experiment/model/` directory. These configuration files specify the hyperparameters
     of the model, and allow an experiment to quickly and briefly specify the
     types of models to be used.
-- **Training Parameters:** Things like batch size, early stopping, learning rate,
-    and so on are defined by config files in the `config/training/` directory.
+- **Hyperparameters:** Things like batch size, early stopping, learning rate,
+    and so on are defined by config files in the `conf/experiment/hyperparameters/` directory.
 
 ### Dataset Configuration
 
@@ -197,7 +195,7 @@ where `TRANSFORM` is the transform token. A log for each REPL run will be saved 
 inside the model checkpoint directory.
 
 The `eval.py` and `repl.py` scripts are configured by the `eval.yaml` and `repl.yaml` configuration files in 
-the `config/` directory. Both contain a single parameter `checkpoint_dir:` which must be set to point to
+the `conf/` directory. Both contain a single parameter `checkpoint_dir:` which must be set to point to
 a model's checkpoint directory. Just as in the training script, this value may be overridden on the command-line:
 ```bash
 python eval.py checkpoint_dir=FILEPATH

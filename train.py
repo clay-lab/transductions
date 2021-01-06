@@ -8,7 +8,7 @@ from omegaconf import OmegaConf, DictConfig
 # Library imports
 from core.trainer import Trainer
 
-@hydra.main(config_path="config", config_name="train.yaml")
+@hydra.main(config_path="conf", config_name="train.yaml")
 def main(cfg: DictConfig) -> None:
   if cfg.pretty_print:
     print(OmegaConf.to_yaml(cfg))

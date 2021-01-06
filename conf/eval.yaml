@@ -1,0 +1,5 @@
+checkpoint_dir: ???
+
+hydra:
+  run:
+    dir: ${checkpoint_dir}/eval
