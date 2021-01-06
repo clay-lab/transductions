@@ -189,9 +189,6 @@ class TransductionDataset:
     self.source_field.build_vocab(*self._in_sample_data)
     self.target_field.build_vocab(*self._in_sample_data)
 
-    pickle.dump(self.source_field, open('source.pt', 'wb'))
-    pickle.dump(self.target_field, open('target.pt', 'wb'))
-
   def __repr__(self):
     message = "{}(\n".format(self.__class__.__name__)
     for attr in self.__dict__:

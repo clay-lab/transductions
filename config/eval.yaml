@@ -1,4 +1,4 @@
-checkpoint_dir: "outputs/experiment-1/SRN-SRN-None/2021-01-05_19-37-57"
+checkpoint_dir: ???
 
 hydra:
   run:
