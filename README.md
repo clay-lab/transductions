@@ -34,12 +34,9 @@ outputs/
         .hydra/
         tensorboard/
         model.pt
-        source.pt
-        target.pt
         train.log
 ```
-The `model.pt` file contains the model weights. `source.pt` and `target.pt`
-contain the source and target fields needed to instantiate vocabularies.
+The `model.pt` file contains the model weights.
 The `train.log` file records the output of `stdout` and `stderr` as logged
 during training. The `.hydra/` directory contains a copy of the configuration
 specified when training began. The `tensorboard` directory contains the
