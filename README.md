@@ -1,262 +1,215 @@
-# transductions
-A Pytorch/Torchtext implementation of seq2seq transductions
+# Transductions
 
+A Pytorch/Torchtext framework for building and testing Sequence-to-Sequence
+models and experiments. Transductions relies heavily on 
+[Hydra](https://github.com/facebookresearch/hydra) for configuration,
+allowing you to specify model architectures, datasets, and experiments using
+YAML files for easy modularity and reproducibility. Out of the box, Transductions
+supports the [Tensorboard](https://tensorboard.dev) logging framework to make
+recording model performance easy.
 
-## Running `transductions`
+## Training
 
-The basic interface for `transductions` is the following:
+To train a new model, run the following script:
 ```bash
-$ python main.py {train, test, log}
+python train.py
+```
+The `train.py` script is configured through the `train.yaml` file in the `config`
+directory. This YAML file specifies three further configuration options: 
+`experiment/hyperparameters`, `experiment/model`, and `experiment/dataset`, 
+each of which point to more configuration files in their respective directories. 
+If `train.py` is run without any further options, it will load the default values 
+for these three config files.
+
+Outputs from training runs are stored in the `outputs/` directory. If this 
+directory is not present, it will be created on first run. Outputs are, by
+default, grouped by `experiment.name`, model type, date, and time.
+An example `outputs/` directory from the model sepcified in the default
+configuration would look something like this:
+```
+outputs/
+  experiment-1/
+    SRN-SRN-None/
+      2021-01-01_14-30-00/
+        .hydra/
+        tensorboard/
+        model.pt
+        source.pt
+        target.pt
+        train.log
+```
+The `model.pt` file contains the model weights. `source.pt` and `target.pt`
+contain the source and target fields needed to instantiate vocabularies.
+The `train.log` file records the output of `stdout` and `stderr` as logged
+during training. The `.hydra/` directory contains a copy of the configuration
+specified when training began. The `tensorboard` directory contains the
+tensorboard events created during training.
+
+### Overriding defaults
+The default values for each configuration option can be overwritten, 
+either through the creation of new YAML configuration files and/or
+through values provided through the command-line interface. The 
+default `train.yaml` looks like the following:
+```
+defaults:
+  - experiment/hyperparameters: default
+  - experiment/model: default
+  - experiment/dataset: alice-herself
+
+  - hydra/output: custom
+
+experiment:
+  name: experiment-1
+
+pretty_print: True
+```
+You can (and should) change `experiment.name` to be whatever you want.
+The three `experiment/...` parameters under the `defaults:` parameter
+are specifying config files in those directories to load. To run a
+training instance with a different configuraiton, create new 
+config files which match the schema of the provided ones and point
+`train.yaml` to look at those files instead. For example, we might
+add a new model configuration called `inattentive-gru-sequence.yaml`,
+which specifies the following model:
+```YAML
+# @package _group_
+encoder:
+  unit: GRU
+  type: sequence
+  dropout: 0
+  num_layers: 1
+  hidden_size: 256
+  max_length: 0
+  embedding_size: 256
+  bidirectional: True
+decoder:
+  unit: GRU
+  type: sequence
+  dropout: 0
+  num_layers: 1
+  max_length: 30
+  hidden_size: 256
+  attention: None
+  embedding_size: 256
+```
+We can then train with this model by changing `- experiment/model:` to be `inattentive-gru-sequence`:
+```
+defaults:
+  - experiment/hyperparameters: default
+  - experiment/model: inattentive-gru-sequence
+  - experiment/dataset: alice-herself
+
+  - hydra/output: custom
+
+experiment:
+  name: experiment-1
+
+pretty_print: True
 ```
 
-Passing the `train` argument will allow you to train a new model, while 
-issuing the `test` argument will allow you to load a model and test it. 
-Both training and testing produce log files, which can be desplayed with the
-`log` argument.Note that Python 3 is required; Python 2.7 is not supported.
-
-### Directory structure and shared arguments
-
-A single dataset defines an experiment, a collection of training, testing,
-and validation data. In a single experiment, one may test different model
-structures, and in turn one can create multiple instances of a particular
-structure. This hierarchy defines the directory structure which `transductions`
-expects.
-
-The root folder for a collection of experiments is the `experiments` directory,
-which may be located anywhere on disk. Preferably, this directory should itself
-be a separate git repository. The location of this directory is passed with the
-`-E, --expdir` flag on the command line. The structure of the `experiments`
-directory is as follows:
-
-```
-tree experiments -L 5
-.
-└── task-name
-    ├── SRN-SRN-None
-    │   ├── model-1
-    │   │   ├── SRC.vocab
-    │   │   ├── TRG.vocab
-    │   │   ├── checkpoint.pt
-    │   │   ├── logs
-    │   │   │   └── training
-    │   │   ├── model.pt
-    │   │   └── results
-    │   │       └── task-name.tsv
-    │   ├── model-2
-    │   │   ├── SRC.vocab
-    │   │   ├── TRG.vocab
-    │   │   ├── checkpoint.pt
-    │   │   ├── logs
-    │   │   │   └── training
-    │   │   ├── model.pt
-    │   │   └── results
-    │   │       └── task-name.tsv
-    │   ├── model-3
-    │   │   ├── SRC.vocab
-    │   │   ├── TRG.vocab
-    │   │   ├── checkpoint.pt
-    │   │   ├── logs
-    │   │   │   └── training
-    │   │   ├── model.pt
-    │   │   └── results
-    │   │       └── task-name.tsv
-    │   └── model-4
-    │       ├── SRC.vocab
-    │       ├── TRG.vocab
-    │       ├── checkpoint.pt
-    │       ├── logs
-    │       │   └── training
-    │       ├── model.pt
-    │       └── results
-    │           └── task-name.tsv
-    ├── SRN-SRN-multiplicative
-    │   ├── model-1
-    │   │   ├── SRC.vocab
-    │   │   ├── TRG.vocab
-    │   │   ├── checkpoint.pt
-    │   │   ├── logs
-    │   │   │   ├── training
-    │   │   │   └── task-name
-    │   │   ├── model.pt
-    │   │   └── results
-    │   │       └── task-name.tsv
-    │   ├── model-2
-    │   │   ├── SRC.vocab
-    │   │   ├── TRG.vocab
-    │   │   ├── checkpoint.pt
-    │   │   ├── logs
-    │   │   │   └── training
-    │   │   ├── model.pt
-    │   │   └── results
-    │   │       └── task-name.tsv
-    │   ├── model-3
-    │   │   ├── SRC.vocab
-    │   │   ├── TRG.vocab
-    │   │   ├── checkpoint.pt
-    │   │   ├── logs
-    │   │   │   └── training
-    │   │   ├── model.pt
-    │   │   └── results
-    │   │       └── task-name.tsv
-    │   ├── model-4
-    │   │   ├── SRC.vocab
-    │   │   ├── TRG.vocab
-    │   │   ├── checkpoint.pt
-    │   │   ├── logs
-    │   │   │   └── training
-    │   │   ├── model.pt
-    │   │   └── results
-    │   │       └── task-name.tsv
-    │   ├── model-5
-    │   │   ├── SRC.vocab
-    │   │   ├── TRG.vocab
-    │   │   ├── checkpoint.pt
-    │   │   ├── logs
-    │   │   │   └── training
-    │   │   ├── model.pt
-    │   │   └── results
-    │   │       └── task-name.tsv
-    │   └── model-6
-    │       ├── SRC.vocab
-    │       ├── TRG.vocab
-    │       ├── checkpoint.pt
-    │       ├── logs
-    │       │   └── training
-    │       ├── model.pt
-    │       └── results
-    │           └── task-name.tsv
-    └── data
-        ├── task-name.forms
-        ├── task-name.test
-        ├── task-name.train
-        └── task-name.val
+Alternatively, we can train with this new model directly from the command-line by overwriting the default value:
+```bash
+python train.py experiment/model=inattentive-gru-sequence
 ```
 
-`task-name` is the name of the single experiment currently inside this 
-experiments directory. Within `task-name` directory are two `structure`
-directories, `SRN-SRN-None` and `SRN-SRN-multiplicative`, which in turn
-contain `model` directories.
+## Defining an experiment
 
-In order to train a model, you will first need a dataset consiting of three
-files: `task.train`, `task.test`, and `task.val`. These files should each be
-tab-separated values (TSV) of the following form:
+An experiment consists of several parts, including:
+- **Dataset:** The dataset is the training, testing, and evaluation data given 
+    to the model and used to evaluate its performance. The dataset for a given
+    experiment consists of a raw input data source, which lives as a TSV file in
+    the `data/raw/` directory and a configuration file which specifies how the
+    raw data is turned into splits for training, testing, and evaluation, as well
+    as any withholding done to create a generalization set or separate tracking
+    splits to evaluate performance on a specific subset of the full data.
+- **Models:** Models for an experiment are defined by configuration files in the
+    `config/model` directory. These configuration files specify the hyperparameters
+    of the model, and allow an experiment to quickly and briefly specify the
+    types of models to be used.
+- **Training Parameters:** Things like batch size, early stopping, learning rate,
+    and so on are defined by config files in the `config/training/` directory.
 
-```
-source	transformation	target
-..... 	............. 	....
-```
-Note that the header (`source	transformation	target`) must be present. The
-`source` and `target` columns consist of the input and output data you want to
-train the model on, respectively, while the `transformation` column consists of
-a transformation token describing what transformation you want the learn to 
-perform for that `source`-`target` pair.
+### Dataset Configuration
 
-No other directories (`structure`, or `model`) need be created as 
-`transductions` will automatically create them if necessary.
-
-### Training a model
-
-Models are trained with the following command:
-
-``` bash
-python main.py train -E EXP_DIR -t TASK_NAME -e ENCODER -d DECODER 
-```
-
-Optionally, you may specify other parts of the model using the following
-additional flags:
-
-* `-a, --attention`: type of attention used; one of `none`, `additive`, `multiplicative`, `location`. Defaults to `none`.
-* `-lr, --learning-rate`: learning rate of the model. Defaults to `0.01`.
-* `-l, --layers`: number of layers in the encoder and decoder. Defaults to `1`.
-* `-p, --patience`: number of changes model has to improve loss by `DELTA` to avoid early stopping. Defaults to `3`.
-* `-dt, --delta`: amount model needs to improve by to avoid early stopping. Defaults to `0.005`.
-* `-v, --vocab`: which vocabulary contains the transformation annotation; one of `SRC` or `TRG`. Defaults to `TRG`.
-* `-do, --dropout`: how much dropout to use. Defaults to `0.0`.
-* `-ep, --epochs`: number of epochs to train for. Defaults to `40`.
-* `-b, --batch-size`: batch size. Defaults to `5`.
-* `-sa, --sentacc`: whether or not to log sentence accuracy on validation data. Defaults to `True`.
-* `-la, --lengacc`: whether or not to log length accuracy on validation data. Defaults to `True`.
-* `-ta, --tokenacc`: whether or not to log token accuracy on validation data. Defaults to `True`.
-* `-to, --tokens`: tokens to track the accuracy of on validation data. Defaults to `None`.
-
-During training, loss statistics are calculated for the validation dataset
-and stored inside the `logs/training` directory, in the form of a `cox` store.
-These logs, and others, can be loaded later.
-
-#### A note on `--tokens`:
-
-Input type is string separated by `-` and `_`. The dashes separate individual 
-words and accuracy measurements, respectively. This argument will include 
-accuracy measures for any token in the vocabulary for a given dataset. If no 
-argument is included, only the loss, the token-level accuracy, and the 
-length-level accuracy will be calculated.
-
-### Testing a model
-
-Once you've trained a model, you can load it for testing. There are two main
-ways to test a model: file mode and REPL mode.
-
-In REPL mode, you load the model for testing and pass in sequences on the 
-command line. The sequences are evaluated and printed back out. This is useful
-for one-off testing. To test a model in REPL mode, issue the following command:
-
-```
-python main.py test -E EXP_DIR -t TASK_NAME -S ENC-DEC-ATTN -m MODEL-#
+A `dataset` has the following configuration schema:
+```YAML
+# @package _group_
+name: experiment-1 
+input: grammar-1.tsv
+source_format: sequence
+target_format: sequence
+overwrite: false
+splits:
+  train: 80
+  test: 10
+  val: 10
+withholding:
+  - ^Alice \w+ herself.*
+tracking:
+  alice: ^Alice.*
 ```
 
-This will load the following prompt on screen:
+This defines the relationship between the input data (the file specified by the 
+`input` parameter) and the generated output data. Multiple experiments can use
+the same `input` file but may generate distinct outputs due to differences in 
+how the splits are generated, different withholding patterns, or different 
+tracking patterns. The `splits` parameter defines a dictionary of percentages
+which must add up to 100. The percentages specify how the *in-sample* data
+is broken into splits. You must provide values for `train`, `test`, and `val`.
+The `withholding` parameter specifies a list of regular expressions which
+define a generalization set. Input sequences which match any of these regexes
+are withheld from the in-sample data and are instead put into a separate split.
+In total, the generated `train.pt`, `test.pt`, `val.pt`, and `gen.pt` files
+are mutually disjoint and their union is simply the original `input` file.
 
+The `tracking` parameter also specifies various `.pt` files, but in a different
+way. This is a dictionary of the form `{name : regex}`, where `name` is the name
+of the generated file and `regex` is a regex which determines which sequences
+are included. Importantly, this has no effect on split generation and is merely
+used to allow for the logging of model performance on different subsets of the
+data during training.
+
+## Evaluation
+
+There are two ways to evaluate model performance. The first is using `eval.py`, which will load 
+a model from the saved weights and evaluate it on every split which was generated for it
+during training. 
+```bash
+python eval.py
 ```
-Enter sequences into the MODEL-# model for evalutaion.
-> 
+This will generate an `eval/` directory inside the model's checkpoint directory containing the `eval.log`
+log file for the evaluation run along with tab-separate value files for each of the splits in the following
+format:
 ```
-
-Enter sequences in the following format:
-
-```
-> TRANSFORMATION This is the sequence here
-```
-
-where `TRANSFORMATION` is the transformation token found in the splits file.
-
-To exit the REPL, enter `quit`.
-
-
-In file mode, you generate a set of testing files to be placed inside the
-`data/` directory of the experiment. You then test the model's performance
-on any of these testing files. To test a model in file mode, issue the 
-following command:
-
-```
-python main.py test -E EXP_DIR -t TASK_NAME -S ENC-DEC-ATTN -m MODEL-# -f FILE-1 FILE-2 ...
-```
-
-where `FILE-N` corresponds to `data/FILE-N.test`. Accuracy statistics will be
-printed out to the screen for each file, and logs for each will be created
-inside new `MODEL-#/logs/FILE-N/...` directories.
-
-### Viewing a model's logs
-
-In order to view logs from a previous training or testing run, issue the 
-following command:
-
-```
-python main.py log -E EXP_DIR -t TASK_NAME -S ENC-DEC-ATTN -m MODEL-# -l LOG
+source  target  prediction
 ```
 
-This will print out the contents of `MODEL-#/logs/LOG` to the screen. The `-l, 
---log` argument will default to `training` if no log is specified, since this 
-log always exists.
-
-
-## Submitting files on GRACE
-
-`transductions` comes with a bash script to automate the deployment of a testing run to the GRACE cluster at Yale. Once logged into your GRACE account,
-issue the following command.
-
+There is also in interactive Read-Evaluate-Print Loop (REPL) which lets you load a model and input arbitrary
+transforms sequences to the model, which will print out its predictions. Run
+```bash
+python repl.py
 ```
-./batcher.sh EXPDIR TASK ENC DEC ATTN
+and enter sequences of the form
+```
+> TRANSFORM this is a sentence
+```
+where `TRANSFORM` is the transform token. A log for each REPL run will be saved in the `repl/` directory 
+inside the model checkpoint directory.
+
+The `eval.py` and `repl.py` scripts are configured by the `eval.yaml` and `repl.yaml` configuration files in 
+the `config/` directory. Both contain a single parameter `checkpoint_dir:` which must be set to point to
+a model's checkpoint directory. Just as in the training script, this value may be overridden on the command-line:
+```bash
+python eval.py checkpoint_dir=FILEPATH
 ```
 
-This will generate the SBATCH script `TASK-ENC-DEC-ATTN.sh` and then run `sbatch TASK-ENC-DEC-ATTN.sh`, submitting the job. You can (and should) configure this script before using it to suit your needs. In particular, please change the email address.
-
+## Tensorboard 
+Transductions has built-in support for Tensorboard logging during training, allowing you to monitor training
+curves and custom metrics. To view a Tensorboard dashboard for a training run, use
+```bash
+tensorboard --logdir=CHECKPOINT_DIR
+```
+Tensorboard's real strength is that it *recursively* searches the `logdir` for its log files, which means you
+can point it to an arbitrarily high directory and view the logs for multiple runs at once. This is especially
+useful for viewing the training curves for an entire experiment, or the curves for a particular model
+architecture within an experiment.

@@ -1,5 +1,6 @@
 # Output data
-models/
+/models/
+outputs/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -148,5 +149,6 @@ logs/
 results/
 demo_savefile.txt
 sandbox.ipynb
+data/experiments
 
 
