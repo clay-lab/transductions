@@ -14,7 +14,6 @@ from abc import abstractmethod
 
 # Library imports
 from core.models.model_io import ModelIO
-from core.models.positional_encoding import PositionalEncoding
 from core.models.attention import create_mask, MultiplicativeAttention
 
 log = logging.getLogger(__name__)
@@ -38,7 +37,7 @@ class SequenceDecoder(torch.nn.Module):
     elif unit_type == 'LSTM':
       return LSTMSequenceDecoder(cfg, vocab)
     elif unit_type == 'TRANSFORMER':
-      return TransformerSequenceDecoder(cfg, vocab)
+      raise NotImplementedError
     else:
       log.error(f"Unknown decoder type '{unit_type}'.")
 
@@ -88,8 +87,11 @@ class SequenceDecoder(torch.nn.Module):
     self._out = torch.nn.Linear(self._hidden_size, self.vocab_size)
 
     # Attention
-    if self._attention_type == 'multiplicative':
-      self._attention = MultiplicativeAttention(self._hidden_size)
+    if self._attention_type is not None:
+      if self._attention_type == 'multiplicative':
+        self._attention = MultiplicativeAttention(self._hidden_size)
+      else:
+        raise NotImplementedError
 
   def forward(self, dec_input: ModelIO, tf_ratio: float) -> ModelIO:
     """
@@ -275,25 +277,3 @@ class GRUSequenceDecoder(SequenceDecoder):
   def __init__(self, cfg: DictConfig, vocab: Vocab):
     super(GRUSequenceDecoder, self).__init__(cfg, vocab)
     self._unit = nn.GRU(self._embedding_size, self._hidden_size, num_layers=self._num_layers, dropout=cfg.dropout)
-
-class TransformerSequenceDecoder(torch.nn.Module):
-
-  def __init__(self, cfg: DictConfig, vocab: Vocab):
-
-    self._hidden_size = cfg.hidden_size
-    self._num_layers = cfg.num_layers
-    self._max_length = self._max_length
-    self._num_heads = cfg.num_heads
-    self._dropout_p = cfg.dropout
-
-    decoder_layer = nn.TransformerDecoderLayer(d_model=self._hidden_size, nhead=self._num_heads, dropout=self._dropout_p)
-    self._unit = nn.TransformerDecoder(decoder_layer, num_layers=self._num_layers)
-    self._pos_encoder = PositionalEncoding(self._hidden_size, self._dropout_p, self._max_length)
-  
-  def subsequent_mask(size):
-    attn_shape = (1, size, size)
-    subsequent_mask = np.triu(np.ones(attn_shape), k=1).astype('uint8')
-    return torch.from_numpy(subsequent_mask) == 0
-  
-  def forward(self, dec_inputs: ModelIO, tf_ratio: float) -> ModelIO:
-    pass
