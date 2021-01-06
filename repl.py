@@ -7,7 +7,7 @@ import hydra
 from omegaconf import OmegaConf, DictConfig
 from core.trainer import Trainer
 
-@hydra.main(config_path="config", config_name="repl.yaml")
+@hydra.main(config_path="conf", config_name="repl.yaml")
 def main(cfg: DictConfig) -> None:
 
   # Load checkpoint configuration
