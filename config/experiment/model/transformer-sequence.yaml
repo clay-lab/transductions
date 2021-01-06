@@ -1,0 +1,19 @@
+# @package _group_
+encoder:
+  unit: SRN
+  type: sequence
+  dropout: 0
+  num_layers: 1
+  hidden_size: 256
+  embedding_size: 256
+  bidirectional: True
+decoder:
+  unit: Transformer
+  type: sequence
+  dropout: 0
+  num_layers: 6
+  max_length: 30
+  hidden_size: 256
+  attention: None
+  embedding_size: 256
+  num_heads: 8
