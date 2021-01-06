@@ -171,7 +171,8 @@ class SequenceDecoder(torch.nn.Module):
 
     return output
   
-  def compute_attention(self, enc_inputs: Tensor, h: Tensor, src_mask: Tensor) -> Tensor:
+  def compute_attention(self, unit_input: Tensor, enc_outputs: Tensor, h: Tensor, src_mask: Tensor) -> Tensor:
+
     attn = self._attention(enc_outputs, h[-1], src_mask).unsqueeze(1)
     enc_out = enc_outputs.permute(1,0,2)
     weighted_enc_out = torch.bmm(attn, enc_out).permute(1,0,2)
@@ -184,7 +185,7 @@ class SequenceDecoder(torch.nn.Module):
     unit_input = F.relu(self._embedding(step_input.x))
     unit_input = unit_input.unsqueeze(0) if len(unit_input.shape) == 2 else unit_input
     if src_mask is not None:
-      unit_input = self.compute_attention(step_input.enc_inputs, h, src_mask)
+      unit_input = self.compute_attention(unit_input, step_input.enc_outputs, h, src_mask)
 
     _, state = self._unit(unit_input, h)
     y = self._out(state[-1])
