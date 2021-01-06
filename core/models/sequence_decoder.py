@@ -14,6 +14,7 @@ from abc import abstractmethod
 
 # Library imports
 from core.models.model_io import ModelIO
+from core.models.positional_encoding import PositionalEncoding
 from core.models.attention import create_mask, MultiplicativeAttention
 
 log = logging.getLogger(__name__)
@@ -37,7 +38,7 @@ class SequenceDecoder(torch.nn.Module):
     elif unit_type == 'LSTM':
       return LSTMSequenceDecoder(cfg, vocab)
     elif unit_type == 'TRANSFORMER':
-      raise NotImplementedError
+      return TransformerSequenceDecoder(cfg, vocab)
     else:
       log.error(f"Unknown decoder type '{unit_type}'.")
 
@@ -83,19 +84,6 @@ class SequenceDecoder(torch.nn.Module):
 
     if self._num_layers == 1:
       assert cfg.dropout == 0, "Dropout must be zero if num_layers = 1"
-
-    # TODO: THESE SHOULD BE MADE OBSELETE
-    if self._unit_type == "SRN":
-      self._unit = torch.nn.RNN(self._embedding_size, self._hidden_size, num_layers=self._num_layers, dropout=cfg.dropout)
-    elif self._unit_type == "GRU":
-      self._unit = torch.nn.GRU(self._embedding_size, self._hidden_size, num_layers=self._num_layers, dropout=cfg.dropout)
-    elif self._unit_type == "LSTM":
-      self._unit = torch.nn.LSTM(self._embedding_size, self._hidden_size, num_layers=self._num_layers, dropout=cfg.dropout)
-    elif self._unit_type == "TRANSFORMER":
-      raise NotImplementedError
-    else:
-      log.error("Invalid unit type '{}''.".format(self._unit_type))
-      raise ValueError("Invalid unit type '{}''.".format(self._unit_type))
   
     self._out = torch.nn.Linear(self._hidden_size, self.vocab_size)
 
@@ -180,39 +168,27 @@ class SequenceDecoder(torch.nn.Module):
     })
 
     return output
+  
+  def compute_attention(self, enc_inputs: Tensor, h: Tensor, src_mask: Tensor) -> Tensor:
+    attn = self._attention(enc_outputs, h[-1], src_mask).unsqueeze(1)
+    enc_out = enc_outputs.permute(1,0,2)
+    weighted_enc_out = torch.bmm(attn, enc_out).permute(1,0,2)
+    return torch.cat((unit_input, weighted_enc_out), dim=2)
 
-  @abstractmethod
   def forward_step(self, step_input: ModelIO, src_mask: Tensor = None) -> ModelIO:
 
-    unit_input = F.relu(self._embedding(step_input.x))
     h = step_input.h
-
-    if len(unit_input.shape) == 2:
-      unit_input = unit_input.unsqueeze(0)
-    
-    if len(h.shape) == 2:
-      h = h.unsqueeze(0)
-    
+    h = h.unsqueeze(0) if len(h.shape) == 2 else h
+    unit_input = F.relu(self._embedding(step_input.x))
+    unit_input = unit_input.unsqueeze(0) if len(unit_input.shape) == 2 else unit_input
     if src_mask is not None:
-      # Attentive
-      attn = self._attention(step_input.enc_outputs, h[-1], src_mask).unsqueeze(1)
-      enc_out = step_input.enc_outputs.permute(1,0,2)
-      weighted_enc_out = torch.bmm(attn, enc_out).permute(1,0,2)
-
-      unit_input = torch.cat((unit_input, weighted_enc_out), dim=2)
+      unit_input = self.compute_attention(step_input.enc_inputs, h, src_mask)
 
     _, state = self._unit(unit_input, h)
-
     y = self._out(state[-1])
 
-    step_result = ModelIO({
-      "y" : y,
-      "h" : state[0]
-    })
+    return ModelIO({ "y" : y, "h" : state[0] })
 
-    return step_result
-
-  @abstractmethod
   def _get_step_inputs(self, dec_inputs: ModelIO) -> ModelIO:
 
     if hasattr(dec_inputs, 'h'):
@@ -281,24 +257,12 @@ class LSTMSequenceDecoder(SequenceDecoder):
     hidden = (h, c)
 
     if src_mask is not None:
-      # Attentive
-      attn = self._attention(step_input.enc_outputs, h[-1], src_mask).unsqueeze(1)
-      enc_out = step_input.enc_outputs.permute(1,0,2)
-      weighted_enc_out = torch.bmm(attn, enc_out).permute(1,0,2)
-
-      unit_input = torch.cat((unit_input, weighted_enc_out), dim=2)
+      unit_input = self.compute_attention(step_input.enc_inputs, h, src_mask)
 
     _, state = self._unit(unit_input, hidden)
-
     y = self._out(state[0][-1])
 
-    step_result = ModelIO({
-      "y" : y,
-      "h" : state[0],
-      "c" : state[1]
-    })
-
-    return step_result
+    return ModelIO({ "y" : y, "h" : state[0], "c" : state[1] })
     
 class SRNSequenceDecoder(SequenceDecoder):
 
@@ -311,3 +275,25 @@ class GRUSequenceDecoder(SequenceDecoder):
   def __init__(self, cfg: DictConfig, vocab: Vocab):
     super(GRUSequenceDecoder, self).__init__(cfg, vocab)
     self._unit = nn.GRU(self._embedding_size, self._hidden_size, num_layers=self._num_layers, dropout=cfg.dropout)
+
+class TransformerSequenceDecoder(torch.nn.Module):
+
+  def __init__(self, cfg: DictConfig, vocab: Vocab):
+
+    self._hidden_size = cfg.hidden_size
+    self._num_layers = cfg.num_layers
+    self._max_length = self._max_length
+    self._num_heads = cfg.num_heads
+    self._dropout_p = cfg.dropout
+
+    decoder_layer = nn.TransformerDecoderLayer(d_model=self._hidden_size, nhead=self._num_heads, dropout=self._dropout_p)
+    self._unit = nn.TransformerDecoder(decoder_layer, num_layers=self._num_layers)
+    self._pos_encoder = PositionalEncoding(self._hidden_size, self._dropout_p, self._max_length)
+  
+  def subsequent_mask(size):
+    attn_shape = (1, size, size)
+    subsequent_mask = np.triu(np.ones(attn_shape), k=1).astype('uint8')
+    return torch.from_numpy(subsequent_mask) == 0
+  
+  def forward(self, dec_inputs: ModelIO, tf_ratio: float) -> ModelIO:
+    pass

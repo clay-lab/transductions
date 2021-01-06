@@ -3,7 +3,7 @@ import os
 import hydra
 import re
 import numpy as np
-from omegaconf import DictConfig
+from omegaconf import DictConfig, OmegaConf
 import pickle
 from torchtext.data import Field, TabularDataset, BucketIterator
 
@@ -45,23 +45,24 @@ class TransductionDataset:
     """
 
     splits = cfg.dataset.splits
-    to_withhold = re.compile('|'.join(cfg.dataset.withholding))
+    if 'withholding' in cfg.dataset.keys():
+      to_withhold = re.compile('|'.join(cfg.dataset.withholding))
+      g_path = os.path.join(self._processed_path, 'gen.pt')
+      if os.path.isfile(g_path):
+        os.remove(g_path)
 
     s_names = list(splits.keys())
     s_paths = [os.path.join(self._processed_path, s + '.pt') for s in s_names]
     s_probs = [float(p) / 100.0 for p in list(splits.values())]
-    g_path = os.path.join(self._processed_path, 'gen.pt')
 
     for split in s_paths:
       if os.path.isfile(split):
         os.remove(split)
-    if os.path.isfile(g_path):
-      os.remove(g_path)
 
     with open(self._raw_path) as raw_data:
       next(raw_data)
       for line in raw_data:
-        if bool(to_withhold.search(line)):
+        if 'withholding' in cfg.dataset.keys() and bool(to_withhold.search(line)):
           with open(g_path, 'a') as f:
             f.write(line)
         else:
@@ -76,23 +77,24 @@ class TransductionDataset:
     corresponding tracking file.
     """
 
-    tracking = cfg.dataset.tracking
-    t_names = list(tracking.keys())
-    t_paths = [os.path.join(self._processed_path, t + '.pt') for t in t_names]
-    t_patterns = list(tracking.values())
-    t_patterns = [re.compile(t) for t in t_patterns]
+    if 'tracking' in cfg.dataset.keys():
+      tracking = cfg.dataset.tracking
+      t_names = list(tracking.keys())
+      t_paths = [os.path.join(self._processed_path, t + '.pt') for t in t_names]
+      t_patterns = list(tracking.values())
+      t_patterns = [re.compile(t) for t in t_patterns]
 
-    for path in t_paths:
-      if os.path.exists(path):
-        os.remove(path)
-    
-    with open(self._raw_path) as raw_data:
-      next(raw_data)
-      for line in raw_data:
-        for i, pattern in enumerate(t_patterns):
-          if bool(pattern.search(line)):
-            with open(t_paths[i], 'a') as f:
-              f.write(line)
+      for path in t_paths:
+        if os.path.exists(path):
+          os.remove(path)
+      
+      with open(self._raw_path) as raw_data:
+        next(raw_data)
+        for line in raw_data:
+          for i, pattern in enumerate(t_patterns):
+            if bool(pattern.search(line)):
+              with open(t_paths[i], 'a') as f:
+                f.write(line)
 
   def _create_iterators(self, cfg: DictConfig):
     """

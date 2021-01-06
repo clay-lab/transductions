@@ -22,7 +22,6 @@ class SequenceEncoder(torch.nn.Module):
     self._num_layers = cfg.num_layers
     self._hidden_size = cfg.hidden_size
     self._unit_type = cfg.unit.upper()
-    self._max_length = cfg.max_length
     
     self._vocabulary = vocab
     self._pad_index = self._vocabulary.stoi['pad']
