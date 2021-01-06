@@ -78,7 +78,7 @@ encoder:
   hidden_size: 256
   max_length: 0
   embedding_size: 256
-  bidirectional: True
+  bidirectional: False
 decoder:
   unit: GRU
   type: sequence
