@@ -3,11 +3,13 @@
 # Provides SequenceEncoder module.
 
 import torch
+from torch import nn
 from omegaconf import DictConfig
 from torchtext.vocab import Vocab
 
 # Library imports
 from core.models.model_io import ModelIO
+from core.models.positional_encoding import PositionalEncoding
 
 class SequenceEncoder(torch.nn.Module):
 
@@ -31,13 +33,16 @@ class SequenceEncoder(torch.nn.Module):
     self._dropout = torch.nn.Dropout(p=cfg.dropout)
 
     if self._unit_type == 'SRN':
-      self._unit = torch.nn.RNN(self._hidden_size, self._hidden_size, num_layers = self._num_layers, dropout = cfg.dropout)
+      self._unit = nn.RNN(self._hidden_size, self._hidden_size, num_layers = self._num_layers, dropout = cfg.dropout)
     elif self._unit_type == 'GRU':
-      self._unit = torch.nn.GRU(self._hidden_size, self._hidden_size, num_layers = self._num_layers, dropout = cfg.dropout)
+      self._unit = nn.GRU(self._hidden_size, self._hidden_size, num_layers = self._num_layers, dropout = cfg.dropout)
     elif self._unit_type == 'LSTM':
-      self._unit = torch.nn.LSTM(self._hidden_size, self._hidden_size, num_layers = self._num_layers, dropout = cfg.dropout)
+      self._unit = nn.LSTM(self._hidden_size, self._hidden_size, num_layers = self._num_layers, dropout = cfg.dropout)
     elif self._unit_type == 'TRANSFORMER':
-      pass
+      layer = nn.TransformerEncoderLayer(self._hidden_size, cfg.num_heads)
+      self._unit = nn.TransformerEncoder(layer, num_layers=self._num_layers)
+      self._pos_enc = PositionalEncoding(self._hidden_size, cfg.dropout)
+      self._embedding = nn.Sequential(self._embedding, self._pos_enc)
     else:
       raise ValueError('Invalid recurrent unit type "{}".'.format(self._unit_type))
   
@@ -46,12 +51,19 @@ class SequenceEncoder(torch.nn.Module):
       Compute the forward pass.
     """
     embedded = self._dropout(self._embedding(enc_input.source))
-    enc_outputs, enc_hidden = self._unit(embedded)
+    enc = self._unit(embedded)
 
     output = ModelIO()
-    output.set_attributes({
-      "enc_outputs" : enc_outputs,
-      "enc_hidden" : enc_hidden
-    })
+    if isinstance(enc, tuple):
+      enc_outputs, enc_hidden = enc
+      output.set_attributes({
+        "enc_outputs" : enc_outputs,
+        "enc_hidden" : enc_hidden
+      })
+    else:
+      enc_outputs = enc
+      output.set_attributes({
+        "enc_outputs" : enc_outputs
+      })
 
     return output

@@ -1,0 +1,21 @@
+# @package _group_
+encoder:
+  unit: Transformer
+  type: sequence
+  dropout: 0
+  num_layers: 1
+  hidden_size: 256
+  embedding_size: 256
+  bidirectional: False
+  num_heads: 8
+decoder:
+  unit: Transformer
+  type: sequence
+  dropout: 0
+  num_layers: 1
+  max_length: 30
+  hidden_size: 256
+  embedding_size: 256
+  num_heads: 8
+  attention: null
+  

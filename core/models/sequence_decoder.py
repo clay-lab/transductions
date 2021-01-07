@@ -14,6 +14,7 @@ from abc import abstractmethod
 
 # Library imports
 from core.models.model_io import ModelIO
+from core.models.positional_encoding import PositionalEncoding
 from core.models.attention import create_mask, MultiplicativeAttention
 
 log = logging.getLogger(__name__)
@@ -37,7 +38,7 @@ class SequenceDecoder(torch.nn.Module):
     elif unit_type == 'LSTM':
       return LSTMSequenceDecoder(cfg, vocab)
     elif unit_type == 'TRANSFORMER':
-      raise NotImplementedError
+      return TransformerSequenceDecoder(cfg, vocab)
     else:
       log.error(f"Unknown decoder type '{unit_type}'.")
 
@@ -67,6 +68,7 @@ class SequenceDecoder(torch.nn.Module):
     self._max_length = cfg.max_length
     self._embedding_size = cfg.embedding_size
     self._attention_type = cfg.attention.lower()
+    self._dropout_p = cfg.dropout
 
     if self._attention_type == 'none':
       self._attention_type = None
@@ -79,10 +81,10 @@ class SequenceDecoder(torch.nn.Module):
     self._cls_index = self._vocabulary.stoi['cls']
 
     self._embedding = torch.nn.Embedding(self.vocab_size, self._hidden_size)
-    self._dropout = torch.nn.Dropout(p=cfg.dropout)
+    self._dropout = torch.nn.Dropout(p=self._dropout_p)
 
     if self._num_layers == 1:
-      assert cfg.dropout == 0, "Dropout must be zero if num_layers = 1"
+      assert self._dropout_p == 0, "Dropout must be zero if num_layers = 1"
   
     self._out = torch.nn.Linear(self._hidden_size, self.vocab_size)
 
@@ -286,3 +288,94 @@ class GRUSequenceDecoder(SequenceDecoder):
   def __init__(self, cfg: DictConfig, vocab: Vocab):
     super(GRUSequenceDecoder, self).__init__(cfg, vocab)
     self._unit = nn.GRU(self._embedding_size, self._hidden_size, num_layers=self._num_layers, dropout=cfg.dropout)
+
+class TransformerSequenceDecoder(nn.Module):
+
+  @property
+  def vocab_size(self):
+    return len(self._vocabulary)
+  
+  @property
+  def EOS_IDX(self):
+    return self._vocabulary.stoi['<eos>']
+
+  def __init__(self, cfg: DictConfig, vocab: Vocab):
+    
+    super().__init__()
+    
+    # Parameters
+    self._num_layers = cfg.num_layers
+    self._hidden_size = cfg.hidden_size
+    self._unit_type = cfg.unit.upper()
+    self._max_length = cfg.max_length
+    self._embedding_size = cfg.embedding_size
+    self._dropout_p = cfg.dropout
+    self._num_heads = cfg.num_heads
+    self._vocabulary = vocab
+
+    # Model layers
+    self._embedding = nn.Sequential(
+      torch.nn.Embedding(self.vocab_size, self._hidden_size),
+      PositionalEncoding(self._hidden_size, self._dropout_p, self._max_length)
+    )
+    layer = nn.TransformerDecoderLayer(d_model=self._hidden_size, nhead=self._num_heads, dropout=self._dropout_p)
+    self._unit = nn.TransformerDecoder(layer, num_layers=self._num_layers)
+    self._out = torch.nn.Linear(self._hidden_size, self.vocab_size)
+    
+  def _generate_square_subsequent_mask(self, sz: int) -> Tensor:
+    """
+    Taken from PyTorch's implementation:
+    https://pytorch.org/docs/stable/_modules/torch/nn/modules/transformer.html#Transformer.generate_square_subsequent_mask
+    """
+    mask = (torch.triu(torch.ones(sz, sz)) == 1).transpose(0, 1)
+    mask = mask.float().masked_fill(mask == 0, float('-inf')).masked_fill(mask == 1, float(0.0))
+    return mask
+  
+  def forward(self, dec_input: ModelIO, tf_ratio: float) -> ModelIO:
+    """
+    Try and keep the same signature as SequenceDecoder.
+    """
+
+    seq_len, batch_size, _ = dec_input.enc_outputs.shape
+
+    teacher_forcing = random.random() < tf_ratio
+    if teacher_forcing and not hasattr(dec_input, 'target'):
+      log.error("You must provide a 'target' to use teacher forcing.")
+      raise SystemError
+
+    if hasattr(dec_input, 'target'):
+      gen_len = dec_input.target.shape[0]
+    else:
+      gen_len = self._max_length
+
+    # tgt = inputs to the decoder, starting with TRANS token and appending
+    #       dec_input.target[i] or predicted token
+    # mem = encoder outputs, used for multi-headed attention
+    tgt = dec_input.transform[1:-1] # strip <sos> and <eos> tokens
+    mem = dec_input.enc_outputs
+
+    has_finished = torch.zeros(batch_size, dtype=torch.bool).to(avd)
+
+    for i in range(gen_len):
+
+      # Re-embed every time since we need positional encoding to take into
+      # account the new tokens in context of the old ones.
+      tgt_emb = self._embedding(tgt)
+
+      # Ensures that once a model outputs token <t> @ position i, it will
+      # always output <t> @ i even for further timesteps
+      tgt_mask = self._generate_square_subsequent_mask(tgt.shape[0])
+      
+      # Calculate the next predicted token from output
+      out = self._out(self._unit(tgt=tgt_emb, memory=mem, tgt_mask=tgt_mask))
+      predicted = out[-1].argmax(dim=1)
+      
+      has_finished[predicted == self.EOS_IDX] = True
+      if all(has_finished): 
+        break
+      else:
+        new_tgt = dec_input.target[i] if teacher_forcing else predicted
+        tgt = torch.cat((tgt, new_tgt.unsqueeze(0)), dim=0)
+
+    return ModelIO({"dec_outputs": out})
+  

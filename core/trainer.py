@@ -4,6 +4,7 @@ import hydra
 import os
 import torch.nn as nn
 import torch.nn.functional as F
+from torch import Tensor
 from tqdm import tqdm
 from omegaconf import DictConfig
 from cmd import Cmd
@@ -43,6 +44,29 @@ class Trainer:
     self._model = TransductionModel(self._cfg.experiment, self._dataset, self._device)
     log.info(self._model)
   
+  def _normalize_lengths(self, output: Tensor, target: Tensor) -> (Tensor, Tensor):
+    """
+    Pad the output or target with decoder's <pad> so that loss can be computed.
+    """
+
+    diff = int(output.shape[-1] - target.shape[-1])
+    pad_idx = self._model._decoder._vocabulary.stoi['<pad>']
+
+    if diff == 0:
+      pass
+    elif diff > 0:
+      # output is longer than target. Add <pad> index to end 
+      # of target until length is equal
+      target = F.pad(input=target, pad=(0, diff), value=pad_tok)
+    else:
+      # target is longer than output. Add one-hot tensor hot in
+      # index == pad_idx to end until length is equal
+      padding = torch.zeros(output.shape[0], output.shape[1], -diff)
+      padding[:, pad_idx] = 1.0
+      output = torch.cat((output, padding), dim=2)
+
+    return output, target
+  
   def train(self):
 
     log.info("Beginning training")
@@ -79,7 +103,9 @@ class Trainer:
           #   target: [batch_size, seq_len]
           output = self._model(batch, tf_ratio=0.5).permute(1, 2, 0)
           target = batch.target.permute(1, 0)
+          output, target = self._normalize_lengths(output, target)
 
+          # TODO: Loss should ignore <pad>, ...maybe others?
           loss = criterion(output, target)
 
           loss.backward()
@@ -103,6 +129,7 @@ class Trainer:
 
             output = self._model(batch).permute(1, 2, 0)
             target = batch.target.permute(1, 0)
+            output, target = self._normalize_lengths(output, target)
 
             meter(output, target)
 
@@ -119,6 +146,7 @@ class Trainer:
             
             output = self._model(batch).permute(1, 2, 0)
             target = batch.target.permute(1, 0)
+            output, target = self._normalize_lengths(output, target)
 
             meter(output, target)
 
@@ -132,6 +160,7 @@ class Trainer:
 
               output = self._model(batch).permute(1, 2, 0)
               target = batch.target.permute(1, 0)
+              output, target = self._normalize_lengths(output, target)
 
               meter(output, target)
 
@@ -147,6 +176,7 @@ class Trainer:
 
               output = self._model(batch).permute(1, 2, 0)
               target = batch.target.permute(1, 0)
+              output, target = self._normalize_lengths(output, target)
 
               meter(output, target)
 
@@ -189,6 +219,7 @@ class Trainer:
             source = batch.source.permute(1, 0)
             prediction = self._model(batch).permute(1, 2, 0)
             target = batch.target.permute(1, 0)
+            output, target = self._normalize_lengths(prediction, target)
 
             meter(prediction, target)
 
