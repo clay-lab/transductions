@@ -11,7 +11,6 @@ import logging
 from omegaconf import DictConfig
 from torchtext.vocab import Vocab
 from abc import abstractmethod
-import numpy as np
 
 # Library imports
 from core.models.model_io import ModelIO
