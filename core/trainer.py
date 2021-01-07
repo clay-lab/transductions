@@ -80,6 +80,8 @@ class Trainer:
           output = self._model(batch, tf_ratio=0.5).permute(1, 2, 0)
           target = batch.target.permute(1, 0)
 
+          # TODO: Handle the case when output or target need to be padded because the 
+          # predicted lengths are different.
           loss = criterion(output, target)
 
           loss.backward()

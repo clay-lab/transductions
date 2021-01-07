@@ -316,6 +316,7 @@ class TransformerSequenceDecoder(nn.Module):
     self._pos_enc = PositionalEncoding(self._hidden_size, self._dropout_p, self._max_length)
     layer = nn.TransformerDecoderLayer(d_model=self._hidden_size, nhead=self._num_heads, dropout=self._dropout_p)
     self._unit = nn.TransformerDecoder(layer, num_layers=self._num_layers)
+    self._out = torch.nn.Linear(self._hidden_size, self.vocab_size)
     
   def _generate_square_subsequent_mask(self, sz: int) -> Tensor:
     """
@@ -339,21 +340,35 @@ class TransformerSequenceDecoder(nn.Module):
 
     # tgt = inputs to the decoder = starts with the TRANS token, becomes the next input
     tgt = dec_input.transform[1:-1] # strip <sos> and <eos> tokens
+
     tgt = self._embedding(tgt)
     tgt = self._pos_enc(tgt)
 
-    tgt_mask = self._generate_square_subsequent_mask(tgt.shape[0])
+    
 
     # mem = encoder outputs
     mem = dec_input.enc_outputs
+    # mem_mask = torch.ones(tgt.shape[0], mem.shape[0])
+    # print("max len", self._max_length)
 
-    print("tgt:", tgt.shape)
-    print("tgt_mask:", tgt_mask.shape)
+    batch_size = tgt.shape[1]
+    target_len = dec_input.target.shape[0]
 
-    for i in range(self._max_length):
-      out = self._unit(tgt, mem, tgt_mask)
-      print(type(out))
+    for i in range(target_len):
 
-    output = ModelIO({"enc_outputs", out})
+      tgt_mask = self._generate_square_subsequent_mask(tgt.shape[0])
+
+      # print("tgt", tgt.shape)
+      
+      out = self._out(self._unit(tgt=tgt, memory=mem, tgt_mask=tgt_mask))
+
+      # Calculate the next predicted token
+      predicted = out[-1].unsqueeze(0).argmax(dim=2)
+      predicted = self._embedding(predicted)
+      predicted = self._pos_enc(predicted)
+
+      tgt = torch.cat((tgt, predicted), dim=0)
+
+    output = ModelIO({"dec_outputs": out})
     return output
   
