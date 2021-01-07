@@ -353,7 +353,6 @@ class TransformerSequenceDecoder(nn.Module):
 
     # tgt = inputs to the decoder = starts with the TRANS token(s), becomes the next input
     tgt = dec_input.transform[1:-1] # strip <sos> and <eos> tokens
-    tgt = self._embedding(tgt)
 
     # mem = encoder outputs
     mem = dec_input.enc_outputs
@@ -362,9 +361,13 @@ class TransformerSequenceDecoder(nn.Module):
 
     for i in range(gen_len):
 
+      tgt_emb = self._embedding(tgt)
       tgt_mask = self._generate_square_subsequent_mask(tgt.shape[0])
+
+      # print("target:", tgt.shape)
+      # print("target_emb:", tgt_emb.shape)
       
-      out = self._out(self._unit(tgt=tgt, memory=mem, tgt_mask=tgt_mask))
+      out = self._out(self._unit(tgt=tgt_emb, memory=mem, tgt_mask=tgt_mask))
 
       # Calculate the next predicted token
       predicted = out[-1].unsqueeze(0).argmax(dim=2)
@@ -374,9 +377,8 @@ class TransformerSequenceDecoder(nn.Module):
         break
       else:
         # Otherwise, iterate x, h and repeat
-        predicted = self._embedding(predicted)
-        x = dec_input.target[i] if teacher_forcing else predicted
-        tgt = torch.cat((tgt, predicted), dim=0)
+        x = dec_input.target[i].unsqueeze(0) if teacher_forcing else predicted
+        tgt = torch.cat((tgt, x), dim=0)
 
     output = ModelIO({"dec_outputs": out})
     return output
