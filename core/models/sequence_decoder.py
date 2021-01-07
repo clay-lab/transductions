@@ -295,6 +295,10 @@ class TransformerSequenceDecoder(nn.Module):
   @property
   def vocab_size(self):
     return len(self._vocabulary)
+  
+  @property
+  def EOS_IDX(self):
+    return self._vocabulary.stoi['<eos>']
 
   def __init__(self, cfg: DictConfig, vocab: Vocab):
     
@@ -306,14 +310,15 @@ class TransformerSequenceDecoder(nn.Module):
     self._unit_type = cfg.unit.upper()
     self._max_length = cfg.max_length
     self._embedding_size = cfg.embedding_size
-    self._attention_type = cfg.attention.lower()
     self._dropout_p = cfg.dropout
     self._num_heads = cfg.num_heads
     self._vocabulary = vocab
 
     # Model layers
-    self._embedding = torch.nn.Embedding(self.vocab_size, self._hidden_size)
-    self._pos_enc = PositionalEncoding(self._hidden_size, self._dropout_p, self._max_length)
+    self._embedding = nn.Sequential(
+      torch.nn.Embedding(self.vocab_size, self._hidden_size),
+      PositionalEncoding(self._hidden_size, self._dropout_p, self._max_length)
+    )
     layer = nn.TransformerDecoderLayer(d_model=self._hidden_size, nhead=self._num_heads, dropout=self._dropout_p)
     self._unit = nn.TransformerDecoder(layer, num_layers=self._num_layers)
     self._out = torch.nn.Linear(self._hidden_size, self.vocab_size)
@@ -327,47 +332,51 @@ class TransformerSequenceDecoder(nn.Module):
     mask = mask.float().masked_fill(mask == 0, float('-inf')).masked_fill(mask == 1, float(0.0))
     return mask
   
-  def _subsequent_mask(self, size):
-    "Mask out subsequent positions."
-    attn_shape = (1, size, size)
-    subsequent_mask = np.triu(np.ones(attn_shape), k=1).astype('uint8')
-    return torch.from_numpy(subsequent_mask) == 0
-  
   def forward(self, dec_input: ModelIO, tf_ratio: float) -> ModelIO:
     """
     Try and keep the same signature as SequenceDecoder.
     """
 
-    # tgt = inputs to the decoder = starts with the TRANS token, becomes the next input
+    seq_len, batch_size, _ = dec_input.enc_outputs.shape
+
+    teacher_forcing = random.random() < tf_ratio
+    if teacher_forcing and not hasattr(dec_input, 'target'):
+      log.error("You must provide a 'target' to use teacher forcing.")
+      raise SystemError
+
+    # Okay so we still need this, but should we be padding
+    # the outputs or something when not using teacher forcing?
+    if hasattr(dec_input, 'target'):
+      gen_len = dec_input.target.shape[0]
+    else:
+      gen_len = self._max_length
+
+    # tgt = inputs to the decoder = starts with the TRANS token(s), becomes the next input
     tgt = dec_input.transform[1:-1] # strip <sos> and <eos> tokens
-
     tgt = self._embedding(tgt)
-    tgt = self._pos_enc(tgt)
-
-    
 
     # mem = encoder outputs
     mem = dec_input.enc_outputs
-    # mem_mask = torch.ones(tgt.shape[0], mem.shape[0])
-    # print("max len", self._max_length)
 
-    batch_size = tgt.shape[1]
-    target_len = dec_input.target.shape[0]
+    has_finished = torch.zeros(batch_size, dtype=torch.bool).to(avd)
 
-    for i in range(target_len):
+    for i in range(gen_len):
 
       tgt_mask = self._generate_square_subsequent_mask(tgt.shape[0])
-
-      # print("tgt", tgt.shape)
       
       out = self._out(self._unit(tgt=tgt, memory=mem, tgt_mask=tgt_mask))
 
       # Calculate the next predicted token
       predicted = out[-1].unsqueeze(0).argmax(dim=2)
-      predicted = self._embedding(predicted)
-      predicted = self._pos_enc(predicted)
-
-      tgt = torch.cat((tgt, predicted), dim=0)
+      
+      has_finished[predicted.squeeze(0) == self.EOS_IDX] = True
+      if all(has_finished): 
+        break
+      else:
+        # Otherwise, iterate x, h and repeat
+        predicted = self._embedding(predicted)
+        x = dec_input.target[i] if teacher_forcing else predicted
+        tgt = torch.cat((tgt, predicted), dim=0)
 
     output = ModelIO({"dec_outputs": out})
     return output
