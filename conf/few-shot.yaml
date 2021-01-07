@@ -1,0 +1,11 @@
+# @package _group_
+defaults:
+  - experiment/dataset: fs-morphology
+  - experiment/model: fs-gpt2
+
+  - hydra/output: custom
+
+experiment:
+  name: few-shot-morphology
+
+pretty_print: True
