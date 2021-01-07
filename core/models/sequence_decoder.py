@@ -11,9 +11,11 @@ import logging
 from omegaconf import DictConfig
 from torchtext.vocab import Vocab
 from abc import abstractmethod
+import numpy as np
 
 # Library imports
 from core.models.model_io import ModelIO
+from core.models.positional_encoding import PositionalEncoding
 from core.models.attention import create_mask, MultiplicativeAttention
 
 log = logging.getLogger(__name__)
@@ -37,7 +39,7 @@ class SequenceDecoder(torch.nn.Module):
     elif unit_type == 'LSTM':
       return LSTMSequenceDecoder(cfg, vocab)
     elif unit_type == 'TRANSFORMER':
-      raise NotImplementedError
+      return TransformerSequenceDecoder(cfg, vocab)
     else:
       log.error(f"Unknown decoder type '{unit_type}'.")
 
@@ -67,6 +69,7 @@ class SequenceDecoder(torch.nn.Module):
     self._max_length = cfg.max_length
     self._embedding_size = cfg.embedding_size
     self._attention_type = cfg.attention.lower()
+    self._dropout_p = cfg.dropout
 
     if self._attention_type == 'none':
       self._attention_type = None
@@ -79,10 +82,10 @@ class SequenceDecoder(torch.nn.Module):
     self._cls_index = self._vocabulary.stoi['cls']
 
     self._embedding = torch.nn.Embedding(self.vocab_size, self._hidden_size)
-    self._dropout = torch.nn.Dropout(p=cfg.dropout)
+    self._dropout = torch.nn.Dropout(p=self._dropout_p)
 
     if self._num_layers == 1:
-      assert cfg.dropout == 0, "Dropout must be zero if num_layers = 1"
+      assert self._dropout_p == 0, "Dropout must be zero if num_layers = 1"
   
     self._out = torch.nn.Linear(self._hidden_size, self.vocab_size)
 
@@ -286,3 +289,71 @@ class GRUSequenceDecoder(SequenceDecoder):
   def __init__(self, cfg: DictConfig, vocab: Vocab):
     super(GRUSequenceDecoder, self).__init__(cfg, vocab)
     self._unit = nn.GRU(self._embedding_size, self._hidden_size, num_layers=self._num_layers, dropout=cfg.dropout)
+
+class TransformerSequenceDecoder(nn.Module):
+
+  @property
+  def vocab_size(self):
+    return len(self._vocabulary)
+
+  def __init__(self, cfg: DictConfig, vocab: Vocab):
+    
+    super().__init__()
+    
+    # Parameters
+    self._num_layers = cfg.num_layers
+    self._hidden_size = cfg.hidden_size
+    self._unit_type = cfg.unit.upper()
+    self._max_length = cfg.max_length
+    self._embedding_size = cfg.embedding_size
+    self._attention_type = cfg.attention.lower()
+    self._dropout_p = cfg.dropout
+    self._num_heads = cfg.num_heads
+    self._vocabulary = vocab
+
+    # Model layers
+    self._embedding = torch.nn.Embedding(self.vocab_size, self._hidden_size)
+    self._pos_enc = PositionalEncoding(self._hidden_size, self._dropout_p, self._max_length)
+    layer = nn.TransformerDecoderLayer(d_model=self._hidden_size, nhead=self._num_heads, dropout=self._dropout_p)
+    self._unit = nn.TransformerDecoder(layer, num_layers=self._num_layers)
+    
+  def _generate_square_subsequent_mask(self, sz: int) -> Tensor:
+    """
+    Taken from PyTorch's implementation:
+    https://pytorch.org/docs/stable/_modules/torch/nn/modules/transformer.html#Transformer.generate_square_subsequent_mask
+    """
+    mask = (torch.triu(torch.ones(sz, sz)) == 1).transpose(0, 1)
+    mask = mask.float().masked_fill(mask == 0, float('-inf')).masked_fill(mask == 1, float(0.0))
+    return mask
+  
+  def _subsequent_mask(self, size):
+    "Mask out subsequent positions."
+    attn_shape = (1, size, size)
+    subsequent_mask = np.triu(np.ones(attn_shape), k=1).astype('uint8')
+    return torch.from_numpy(subsequent_mask) == 0
+  
+  def forward(self, dec_input: ModelIO, tf_ratio: float) -> ModelIO:
+    """
+    Try and keep the same signature as SequenceDecoder.
+    """
+
+    # tgt = inputs to the decoder = starts with the TRANS token, becomes the next input
+    tgt = dec_input.transform[1:-1] # strip <sos> and <eos> tokens
+    tgt = self._embedding(tgt)
+    tgt = self._pos_enc(tgt)
+
+    tgt_mask = self._generate_square_subsequent_mask(tgt.shape[0])
+
+    # mem = encoder outputs
+    mem = dec_input.enc_outputs
+
+    print("tgt:", tgt.shape)
+    print("tgt_mask:", tgt_mask.shape)
+
+    for i in range(self._max_length):
+      out = self._unit(tgt, mem, tgt_mask)
+      print(type(out))
+
+    output = ModelIO({"enc_outputs", out})
+    return output
+  

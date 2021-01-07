@@ -1,12 +1,13 @@
 # @package _group_
 encoder:
-  unit: SRN
+  unit: Transformer
   type: sequence
   dropout: 0
-  num_layers: 1
+  num_layers: 6
   hidden_size: 256
   embedding_size: 256
   bidirectional: False
+  num_heads: 8
 decoder:
   unit: Transformer
   type: sequence
