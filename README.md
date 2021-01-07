@@ -8,6 +8,20 @@ YAML files for easy modularity and reproducibility. Out of the box, Transduction
 supports the [Tensorboard](https://tensorboard.dev) logging framework to make
 recording model performance easy.
 
+Transductions currently supports the following model architectures:
+- **Encoders**
+  * SRN
+  * GRU
+  * LSTM
+  * Transformer
+- **Decoders**
+  * SRN
+  * GRU
+  * LSTM
+  * Transformer
+
+Recurrent currently support no attention or multiplicative attention, while Transformers of course implement multi-head attention.
+
 ## Training
 
 To train a new model, run the following script:
