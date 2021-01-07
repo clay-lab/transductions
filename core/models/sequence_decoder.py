@@ -344,39 +344,39 @@ class TransformerSequenceDecoder(nn.Module):
       log.error("You must provide a 'target' to use teacher forcing.")
       raise SystemError
 
-    # Okay so we still need this, but should we be padding
-    # the outputs or something when not using teacher forcing?
     if hasattr(dec_input, 'target'):
       gen_len = dec_input.target.shape[0]
     else:
       gen_len = self._max_length
 
-    # tgt = inputs to the decoder = starts with the TRANS token(s), becomes the next input
+    # tgt = inputs to the decoder, starting with TRANS token and appending
+    #       dec_input.target[i] or predicted token
+    # mem = encoder outputs, used for multi-headed attention
     tgt = dec_input.transform[1:-1] # strip <sos> and <eos> tokens
-
-    # mem = encoder outputs
     mem = dec_input.enc_outputs
 
     has_finished = torch.zeros(batch_size, dtype=torch.bool).to(avd)
 
     for i in range(gen_len):
 
+      # Re-embed every time since we need positional encoding to take into
+      # account the new tokens in context of the old ones.
       tgt_emb = self._embedding(tgt)
+
+      # Ensures that once a model outputs token <t> @ position i, it will
+      # always output <t> @ i even for further timesteps
       tgt_mask = self._generate_square_subsequent_mask(tgt.shape[0])
       
+      # Calculate the next predicted token from output
       out = self._out(self._unit(tgt=tgt_emb, memory=mem, tgt_mask=tgt_mask))
-
-      # Calculate the next predicted token
       predicted = out[-1].argmax(dim=1)
       
       has_finished[predicted == self.EOS_IDX] = True
       if all(has_finished): 
         break
       else:
-        # Otherwise, iterate x, h and repeat
-        x = dec_input.target[i] if teacher_forcing else predicted
-        tgt = torch.cat((tgt, x.unsqueeze(0)), dim=0)
+        new_tgt = dec_input.target[i] if teacher_forcing else predicted
+        tgt = torch.cat((tgt, new_tgt.unsqueeze(0)), dim=0)
 
-    output = ModelIO({"dec_outputs": out})
-    return output
+    return ModelIO({"dec_outputs": out})
   

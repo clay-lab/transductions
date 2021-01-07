@@ -18,3 +18,4 @@ decoder:
   embedding_size: 256
   num_heads: 8
   attention: null
+  
