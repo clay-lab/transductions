@@ -1,6 +1,6 @@
-# few-shot.py
+# main.py
 # 
-# Entry point for running few-shot experiments.
+# Entry point for the transductions library.
 
 import hydra
 from omegaconf import OmegaConf, DictConfig
@@ -13,8 +13,8 @@ def main(cfg: DictConfig) -> None:
   if cfg.pretty_print:
     print(OmegaConf.to_yaml(cfg))
   
-  trainer = FewShotTrainer(cfg)
-  trainer.train()
+  # trainer = Trainer(cfg)
+  # trainer.train()
 
 if __name__ == "__main__":
   main()

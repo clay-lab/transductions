@@ -1,11 +1,11 @@
-# @package _group_
 defaults:
-  - experiment/dataset: fs-morphology
+  - experiment/hyperparameters: default
   - experiment/model: fs-gpt2
+  - experiment/dataset: alice-herself
 
   - hydra/output: custom
 
 experiment:
-  name: few-shot-morphology
+  name: experiment-1
 
-pretty_print: True
+pretty_print: False
