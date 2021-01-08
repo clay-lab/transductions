@@ -1,11 +1,11 @@
 defaults:
   - experiment/hyperparameters: default
-  - experiment/model: inattentive-srn-sequence
-  - experiment/dataset: alice-alice-herself
+  - experiment/model: sequence-srn-inattentive
+  - experiment/dataset: alice-herself
 
   - hydra/output: custom
 
 experiment:
-  name: experiment-2
+  name: experiment-1
 
 pretty_print: False

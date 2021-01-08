@@ -64,7 +64,7 @@ default `train.yaml` looks like the following:
 ```
 defaults:
   - experiment/hyperparameters: default
-  - experiment/model: default
+  - experiment/model: sequence-srn-inattentive
   - experiment/dataset: alice-herself
 
   - hydra/output: custom
@@ -80,7 +80,7 @@ are specifying config files in those directories to load. To run a
 training instance with a different configuraiton, create new 
 config files which match the schema of the provided ones and point
 `train.yaml` to look at those files instead. For example, we might
-add a new model configuration called `inattentive-gru-sequence.yaml`,
+add a new model configuration called `sequence-gru-inattentive.yaml`,
 which specifies the following model:
 ```YAML
 # @package _group_
