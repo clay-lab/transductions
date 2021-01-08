@@ -57,6 +57,13 @@ class SequenceDecoder(torch.nn.Module):
   @property
   def EOS_IDX(self):
     return self._vocabulary.stoi['<eos>']
+  
+  @property
+  def attention_type(self):
+    if self._attention_type is not None:
+      return self._attention_type.upper()
+    else:
+      return self._attention_type
 
   def __init__(self, cfg: DictConfig, vocab: Vocab):
     
@@ -67,13 +74,10 @@ class SequenceDecoder(torch.nn.Module):
     self._unit_type = cfg.unit.upper()
     self._max_length = cfg.max_length
     self._embedding_size = cfg.embedding_size
-    self._attention_type = cfg.attention.lower()
     self._dropout_p = cfg.dropout
+    self._attention_type = cfg.attention
 
-    if self._attention_type == 'none':
-      self._attention_type = None
-
-    if self._attention_type:
+    if self.attention_type:
       self._embedding_size += self._hidden_size
     
     self._vocabulary = vocab
@@ -89,8 +93,8 @@ class SequenceDecoder(torch.nn.Module):
     self._out = torch.nn.Linear(self._hidden_size, self.vocab_size)
 
     # Attention
-    if self._attention_type is not None:
-      if self._attention_type == 'multiplicative':
+    if self.attention_type is not None:
+      if self.attention_type == 'MULTIPLICATIVE':
         self._attention = MultiplicativeAttention(self._hidden_size)
       else:
         raise NotImplementedError
@@ -132,7 +136,7 @@ class SequenceDecoder(torch.nn.Module):
     dec_hiddens = torch.zeros(gen_len, batch_size, self._hidden_size).to(avd)
     
     # Attention
-    if self._attention_type is not None:
+    if self.attention_type is not None:
       attention = torch.zeros(gen_len, batch_size, seq_len).to(avd)
       src_mask = create_mask(dec_input.source, self._vocabulary) # THIS SHOULD BE THE ENC VOCAB
     else:
@@ -149,7 +153,7 @@ class SequenceDecoder(torch.nn.Module):
       # Update results
       dec_outputs[i] = step_result.y
       dec_hiddens[i] = step_result.h[-1]
-      if self._attention_type is not None:
+      if self.attention_type is not None:
         attention[i] = step_result.attn
 
       # Check if we're done
@@ -172,7 +176,7 @@ class SequenceDecoder(torch.nn.Module):
       "dec_hiddens" : dec_hiddens
     })
 
-    if self._attention_type is not None:
+    if self.attention_type is not None:
       output.set_attribute("attention", attention)
 
     return output

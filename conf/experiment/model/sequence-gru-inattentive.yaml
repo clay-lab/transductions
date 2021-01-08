@@ -15,5 +15,5 @@ decoder:
   num_layers: 1
   max_length: 30
   hidden_size: 256
-  attention: None
+  attention: null
   embedding_size: 256
