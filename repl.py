@@ -16,7 +16,7 @@ def main(cfg: DictConfig) -> None:
   chkpt_cfg = OmegaConf.load(chkpt_cfg_path)
   
   trainer = Trainer(chkpt_cfg)
-  trainer.repl(eval_cfg = cfg)
+  trainer.repl(repl_cfg = cfg)
 
 if __name__ == "__main__":
   main()

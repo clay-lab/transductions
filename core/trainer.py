@@ -7,9 +7,11 @@ import torch.nn.functional as F
 from torch import Tensor
 from tqdm import tqdm
 from omegaconf import DictConfig
+from typing import Dict
 from cmd import Cmd
 import pickle
 from torchtext.data import Batch
+from torchtext.vocab import Vocab
 
 # Library imports
 from core.models.base_model import TransductionModel
@@ -62,15 +64,56 @@ class Trainer:
 
     return output, target
   
+  def _load_model(self, cfg: DictConfig, src_vocab: Vocab, tgt_vocab: Vocab, from_path: str = None):
+
+    model = TransductionModel(cfg, src_vocab, tgt_vocab, self._device)
+    log.info(model)
+
+    if from_path is not None:
+      log.info("Loading model weights from {}".format(from_path))
+      model.load_state_dict(torch.load(from_path))
+    
+    return model
+
+  def _load_dataset(self, cfg: DictConfig, from_paths: Dict = None):
+
+    if from_paths is not None:
+      src_field = pickle.load(open(from_paths['source'], 'rb'))
+      tgt_field = pickle.load(open(from_paths['target'], 'rb'))
+      dataset = TransductionDataset(cfg, self._device, {'source': src_field, 'target': tgt_field})
+    else:
+      dataset = TransductionDataset(cfg, self._device)
+    
+    log.info(dataset)
+    return dataset
+  
+  def _load_checkpoint(self, from_path: str = None):
+    """
+    Sets up self._model and self._dataset. If given a path, it will attempt to load
+    these from disk; otherwise, it will create them from scratch.
+    """
+
+    if from_path is not None:
+      chkpt_dir = hydra.utils.to_absolute_path(from_path)
+      field_paths = {
+        'source' : os.path.join(chkpt_dir, 'source.pt'),
+        'target' : os.path.join(chkpt_dir, 'target.pt')
+      }
+      model_path = os.path.join(chkpt_dir, 'model.pt')
+      self._dataset = self._load_dataset(self._cfg.experiment, field_paths)
+    else:
+      model_path = None
+      self._dataset = self._load_dataset(self._cfg.experiment)
+
+    src_field = self._dataset.source_field
+    tgt_field = self._dataset.target_field
+    self._model = self._load_model(self._cfg.experiment, src_field.vocab, tgt_field.vocab, model_path)
+
+
   def train(self):
-
-    self._dataset = TransductionDataset(self._cfg.experiment, self._device)
-    log.info(self._dataset)
-
-    source_vocab = self._dataset.source_field.vocab
-    target_vocab = self._dataset.target_field.vocab
-    self._model = TransductionModel(self._cfg.experiment, source_vocab, target_vocab, self._device)
-    log.info(self._model)
+    
+    # Load checkpoint
+    self._load_checkpoint()
 
     log.info("Beginning training")
 
@@ -195,25 +238,9 @@ class Trainer:
   def eval(self, eval_cfg: DictConfig):
 
     # Load checkpoint data
-    chkpt_dir = hydra.utils.to_absolute_path(eval_cfg.checkpoint_dir)
-    
-    src_field_path = model_path = os.path.join(chkpt_dir, 'source.pt')
-    tgt_field_path = model_path = os.path.join(chkpt_dir, 'target.pt')
-    model_path = os.path.join(chkpt_dir, 'model.pt')
-
-    src_field = pickle.load(open(src_field_path, 'rb'))
-    tgt_field = pickle.load(open(tgt_field_path, 'rb'))
-
-    self._dataset = TransductionDataset(self._cfg.experiment, self._device, {'source': src_field, 'target': tgt_field})
-    log.info(self._dataset)
-
-    self._model = TransductionModel(self._cfg.experiment, src_field.vocab, tgt_field.vocab, self._device)
-    log.info(self._model)
-    log.info("Loading model weights from {}".format(model_path))
-    self._model.load_state_dict(torch.load(model_path))
+    self._load_checkpoint(eval_cfg.checkpoint_dir)
 
     # Create meter
-    # Metrics
     token_acc = TokenAccuracy(self._dataset.target_field.vocab.stoi['<pad>'])
     meter = Meter([token_acc])
 
@@ -251,25 +278,10 @@ class Trainer:
         meter.log(stage=key, step=0)
         meter.reset()
 
-  def repl(self, eval_cfg: DictConfig):
+  def repl(self, repl_cfg: DictConfig):
 
     # Load checkpoint data
-    chkpt_dir = hydra.utils.to_absolute_path(eval_cfg.checkpoint_dir)
-    
-    src_field_path = model_path = os.path.join(chkpt_dir, 'source.pt')
-    tgt_field_path = model_path = os.path.join(chkpt_dir, 'target.pt')
-    model_path = os.path.join(chkpt_dir, 'model.pt')
-
-    src_field = pickle.load(open(src_field_path, 'rb'))
-    tgt_field = pickle.load(open(tgt_field_path, 'rb'))
-
-    self._dataset = TransductionDataset(self._cfg.experiment, self._device, {'source': src_field, 'target': tgt_field})
-    log.info(self._dataset)
-
-    self._model = TransductionModel(self._cfg.experiment, src_field.vocab, tgt_field.vocab, self._device)
-    log.info(self._model)
-    log.info("Loading model weights from {}".format(model_path))
-    self._model.load_state_dict(torch.load(model_path))
+    self._load_checkpoint(repl_cfg.checkpoint_dir)
 
     log.info("Beginning REPL")
 
@@ -323,7 +335,10 @@ class ModelREPL(Cmd):
     source = self._dataset.id_to_token(batch.source.permute(1, 0), 'source')[0]
     source = ' '.join(source)
 
-    result = "{} → {}".format(source, prediction)
+    transformation = self._dataset.id_to_token(batch.annotation.permute(1, 0), 'source')[0]
+    transformation = ' '.join(transformation)
+
+    result = "{} → {} → {}".format(source, transformation, prediction)
     log.info(result)
   
   def do_quit(self, args):
