@@ -5,7 +5,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from abc import abstractmethod
+from abc import abstractmethod, ABC
 
 from torch import Tensor
 from torchtext.vocab import Vocab
@@ -19,11 +19,11 @@ def create_mask(source: Tensor, vocab: Vocab) -> Tensor:
   mask = source.mul(source.ne(pad_index)).type(torch.bool)
   return mask
 
-class Attention(nn.Module):
+class Attention(nn.Module, ABC):
 
   @abstractmethod
   def forward(self, enc_outputs: Tensor, dec_hiddens: Tensor, src_mask: Tensor) -> Tensor:
-    raise NotImplementedError
+    pass
 
 class MultiplicativeAttention(Attention):
 
@@ -72,4 +72,18 @@ class AdditiveAttention(Attention):
     weights = (mapped_enc + mapped_dec).tanh()
     weights = torch.matmul(weights, self.v)
     weights[~src_mask] = -float("Inf")      
+    return F.softmax(weights, dim=1)
+
+class DotProductAttention(Attention):
+
+  def __init__(self):
+    super().__init__()
+  
+  def forward(self, enc_outputs: Tensor, dec_hiddens: Tensor, src_mask: Tensor) -> Tensor:
+    value = enc_outputs.permute(1,0,2)
+    key = dec_hiddens.unsqueeze(2)
+    weights = torch.bmm(value, key)
+    weights = weights.squeeze(2)
+    weights[~src_mask] = -float("Inf")
+    # result is of shape (batch, seq_len)
     return F.softmax(weights, dim=1)

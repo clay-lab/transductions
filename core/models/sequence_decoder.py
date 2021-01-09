@@ -15,7 +15,7 @@ from abc import abstractmethod
 # Library imports
 from core.models.model_io import ModelIO
 from core.models.positional_encoding import PositionalEncoding
-from core.models.attention import create_mask, MultiplicativeAttention, AdditiveAttention
+from core.models.attention import create_mask, MultiplicativeAttention, AdditiveAttention, DotProductAttention
 
 log = logging.getLogger(__name__)
 
@@ -96,6 +96,8 @@ class SequenceDecoder(torch.nn.Module):
         self._attention = MultiplicativeAttention(self._hidden_size)
       elif self.attention_type == 'ADDITIVE':
         self._attention = AdditiveAttention(self._hidden_size)
+      elif self.attention_type == 'DOTPRODUCT':
+        self._attention = DotProductAttention()
       else:
         raise NotImplementedError
 
