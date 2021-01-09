@@ -56,9 +56,6 @@ class TestModels(unittest.TestCase):
     # won't complain
     test_field = Field() 
     test_field.build_vocab()
-    test_field.vocab.stoi = {}
-    test_field.vocab.stoi['pad'] = 0
-    test_field.vocab.stoi['cls'] = 1
 
     src_vocab = tgt_vocab = test_field.vocab
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')

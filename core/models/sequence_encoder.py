@@ -26,8 +26,6 @@ class SequenceEncoder(torch.nn.Module):
     self._unit_type = cfg.unit.upper()
     
     self._vocabulary = vocab
-    self._pad_index = self._vocabulary.stoi['pad']
-    self._cls_index = self._vocabulary.stoi['cls']
 
     self._embedding = torch.nn.Embedding(self.vocab_size, self._hidden_size)
     self._dropout = torch.nn.Dropout(p=cfg.dropout)

@@ -81,8 +81,6 @@ class SequenceDecoder(torch.nn.Module):
       self._embedding_size += self._hidden_size
     
     self._vocabulary = vocab
-    self._pad_index = self._vocabulary.stoi['pad']
-    self._cls_index = self._vocabulary.stoi['cls']
 
     self._embedding = torch.nn.Embedding(self.vocab_size, self._hidden_size)
     self._dropout = torch.nn.Dropout(p=self._dropout_p)
