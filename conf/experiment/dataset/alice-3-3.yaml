@@ -1,5 +1,10 @@
 # @package _group_
-name: alice-alice-herself
+
+# Withholds syntacically ("P verbs herself") and semantically ("P verbs P")
+# sentences involving 2 antecedents from training. Extension of alice-2 dataset
+# to withhold "Alice", "Claire", "Eliza" reflexives.
+
+name: alice-3-3
 input: grammar-1.tsv # where is the full dataset
 source_format: sequence # 'sequence' or 'tree'
 target_format: sequence # 'sequence' or 'tree'
@@ -14,17 +19,22 @@ splits:
 # Defines the generalization set. All inputs which match the provided
 # regex will be withheld from the train/test/val splits.
 withholding: 
-  - '^Alice \w+ herself.*'
-  - '^Alice \w+ Alice.*'
+  - 'Alice \w+ herself'
+  - 'Alice \w+ Alice'
+  - 'Claire \w+ herself'
+  - 'Claire \w+ Claire'
+  - 'Eliza \w+ herself'
+  - 'Eliza \w+ Eliza'
 
 # Defines named test sets. For each entry, a .pt file will be created 
 # containing all inputs which match the given regex.
 tracking:
-  alice_subject: '^Alice.*'
-  alice_object: '^\w+ \w+ Alice.*'
-  alice_reflexive: '^Alice \w+ herself.*'
-  alice_subject_transitive: '^Alice \w+ \w+'
-  alice_subject_intransitive: '^Alice \w+\t'
+  alice_reflexive: 'Alice \w+ herself'
+  alice_alice: 'Alice \w+ Alice'
+  claire_reflexive: 'Claire \w+ herself'
+  claire_claire: 'Claire \w+ Claire'
+  eliza_reflexive: 'Eliza \w+ herself'
+  eliza_eliza: 'Eliza \w+ Eliza'
 
   herself: 'herself'
   himself: 'himself'

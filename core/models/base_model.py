@@ -6,6 +6,7 @@
 import torch
 import logging
 from omegaconf import DictConfig
+from torchtext.vocab import Vocab
 from torchtext.data.batch import Batch
 
 # library imports
@@ -27,7 +28,7 @@ class TransductionModel(torch.nn.Module):
   which contain attributes like `source`, `target`, `enc_hidden`, and so on.
   """
 
-  def __init__(self, cfg: DictConfig, dataset: TransductionDataset, device):
+  def __init__(self, cfg: DictConfig, src_vocab: Vocab, tgt_vocab: Vocab, device):
     
     log.info("Initializing model")
     super(TransductionModel, self).__init__()
@@ -35,18 +36,15 @@ class TransductionModel(torch.nn.Module):
     self.device = device
     
     encoder_cfg = cfg.model.encoder
-    encoder_vcb = dataset.source_field.vocab
-
     decoder_cfg = cfg.model.decoder
-    decoder_vcb = dataset.target_field.vocab
 
     if cfg.dataset.source_format == 'sequence':
-      self._encoder = SequenceEncoder(encoder_cfg, encoder_vcb)
+      self._encoder = SequenceEncoder(encoder_cfg, src_vocab)
     else:
       raise NotImplementedError
     
     if cfg.dataset.target_format == 'sequence':
-      self._decoder = SequenceDecoder.newDecoder(decoder_cfg, decoder_vcb)
+      self._decoder = SequenceDecoder.newDecoder(decoder_cfg, tgt_vocab)
     else:
       raise NotImplementedError
     

@@ -4,6 +4,7 @@ import hydra
 import re
 import numpy as np
 from omegaconf import DictConfig, OmegaConf
+from typing import Dict
 import pickle
 from torchtext.data import Field, TabularDataset, BucketIterator
 
@@ -20,6 +21,17 @@ class TransductionDataset:
     return [("source", self.source_field), 
             ("annotation", self.transform_field), 
             ("target", self.target_field)]
+  
+  @property
+  def transform_field(self):
+    if self._trns_field == 'source':
+      return self.source_field
+    elif self._trns_field == 'target':
+      return self.target_field
+    else:
+      log.error("`transform_field` must be either 'source' or 'target'; you supplied {}!".format(trns_field))
+      raise ValueError("Invalid `transform_field`: {}".format(trns_field))
+
   
   def _process_raw_data(self, cfg: DictConfig):
     """
@@ -100,23 +112,6 @@ class TransductionDataset:
     """
     Constructs TabularDatasets and iterators for the processed data.
     """
-    source_format = cfg.dataset.source_format.lower()
-    target_format = cfg.dataset.target_format.lower()
-    trns_field = cfg.dataset.transform_field.lower()
-
-    if source_format == 'sequence' and target_format == 'sequence':
-      self.source_field = Field(lower=True, eos_token='<eos>', init_token='<sos>') 
-      self.target_field = Field(lower=True, eos_token='<eos>', init_token='<sos>') 
-    else:
-      raise NotImplementedError
-
-    if trns_field == 'source':
-      self.transform_field = self.source_field
-    elif trns_field == 'target':
-      self.transform_field = self.target_field
-    else:
-      log.error("`transform_field` must be either 'source' or 'target'; you supplied {}!".format(trns_field))
-      raise ValueError("Invalid `transform_field`: {}".format(trns_field))
     
     self._iterators = {}
     self._in_sample_data = []
@@ -167,7 +162,7 @@ class TransductionDataset:
 
     return batch_strings
 
-  def __init__(self, cfg: DictConfig, device):
+  def __init__(self, cfg: DictConfig, device, fields: Dict = None):
 
     log.info("Initializing dataset")
 
@@ -176,18 +171,48 @@ class TransductionDataset:
     self._raw_path = os.path.join(hydra.utils.get_original_cwd(), 'data/raw', 
       cfg.dataset.input)
     self._device = device
+
+    self._trns_field = cfg.dataset.transform_field.lower()
+
+    # TODO: make experiments directory if it's not present....cause it didn't last time?
     
     if not os.path.exists(self._processed_path):
       os.mkdir(self._processed_path)
       self._process_raw_data(cfg)
     else:
+      # Bruh, is this even checking????
+      print(type(cfg.dataset.overwrite))
       if cfg.dataset.overwrite:
         self._process_raw_data(cfg)
+
+
+    # Construct fields
+    source_format = cfg.dataset.source_format.lower()
+    target_format = cfg.dataset.target_format.lower()
+
+    if fields is not None:
+      log.info("Using provided fields: {}".format(list(fields.keys())))
+      if source_format == 'sequence' and target_format == 'sequence':
+        self.source_field = fields['source']
+        self.target_field = fields['target']
+      else:
+        raise NotImplementedError
+    else:
+      log.info("Constructing fields from dataset.")
+      if source_format == 'sequence' and target_format == 'sequence':
+        self.source_field = Field(lower=True, eos_token='<eos>', init_token='<sos>') 
+        self.target_field = Field(lower=True, eos_token='<eos>', init_token='<sos>') 
+      else:
+        raise NotImplementedError
     
+    # Construct iterators
     self._create_iterators(cfg)
 
-    self.source_field.build_vocab(*self._in_sample_data)
-    self.target_field.build_vocab(*self._in_sample_data)
+    if fields is None:
+      self.source_field.build_vocab(*self._in_sample_data)
+      self.target_field.build_vocab(*self._in_sample_data)
+      pickle.dump(self.source_field, open('source.pt', 'wb'))		
+      pickle.dump(self.target_field, open('target.pt', 'wb'))
 
   def __repr__(self):
     message = "{}(\n".format(self.__class__.__name__)
