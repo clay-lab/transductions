@@ -27,18 +27,18 @@ else:
 class SequenceDecoder(torch.nn.Module):
 
   @staticmethod
-  def newDecoder(cfg: DictConfig, vocab: Vocab):
+  def newDecoder(vocab: Vocab, dec_cfg: DictConfig, enc_cfg: DictConfig = None):
 
-    unit_type = cfg.unit.upper()
+    unit_type = dec_cfg.unit.upper()
 
     if unit_type == 'SRN':
-      return SRNSequenceDecoder(cfg, vocab)
+      return SRNSequenceDecoder(vocab, dec_cfg, enc_cfg)
     elif unit_type == 'GRU':
-      return GRUSequenceDecoder(cfg, vocab)
+      return GRUSequenceDecoder(vocab, dec_cfg, enc_cfg)
     elif unit_type == 'LSTM':
-      return LSTMSequenceDecoder(cfg, vocab)
+      return LSTMSequenceDecoder(vocab, dec_cfg, enc_cfg)
     elif unit_type == 'TRANSFORMER':
-      return TransformerSequenceDecoder(cfg, vocab)
+      return TransformerSequenceDecoder(vocab, dec_cfg)
     else:
       log.error(f"Unknown decoder type '{unit_type}'.")
 
@@ -65,37 +65,38 @@ class SequenceDecoder(torch.nn.Module):
     else:
       return self._attention_type
 
-  def __init__(self, cfg: DictConfig, vocab: Vocab):
+  def __init__(self, vocab: Vocab, dec_cfg: DictConfig, enc_cfg: DictConfig):
     
     super(SequenceDecoder, self).__init__()
 
-    self._num_layers = cfg.num_layers
-    self._hidden_size = cfg.hidden_size
-    self._unit_type = cfg.unit.upper()
-    self._max_length = cfg.max_length
-    self._embedding_size = cfg.embedding_size
-    self._dropout_p = cfg.dropout
-    self._attention_type = cfg.attention
+    self._num_layers = dec_cfg.num_layers
+    self._hidden_size = dec_cfg.hidden_size
+    self._unit_type = dec_cfg.unit.upper()
+    self._max_length = dec_cfg.max_length
+    self._embedding_size = dec_cfg.embedding_size
+    self._dropout_p = dec_cfg.dropout
+    self._attention_type = dec_cfg.attention
 
     if self.attention_type:
       self._embedding_size += self._hidden_size
     
     self._vocabulary = vocab
 
-    self._embedding = torch.nn.Embedding(self.vocab_size, self._hidden_size)
-    self._dropout = torch.nn.Dropout(p=self._dropout_p)
+    self._embedding = torch.nn.Embedding(self.vocab_size, self._embedding_size)
 
     if self._num_layers == 1:
       assert self._dropout_p == 0, "Dropout must be zero if num_layers = 1"
+    
+    self._unit = nn.Module()
   
     self._out = torch.nn.Linear(self._hidden_size, self.vocab_size)
 
     # Attention
     if self.attention_type is not None:
       if self.attention_type == 'MULTIPLICATIVE':
-        self._attention = MultiplicativeAttention(self._hidden_size)
+        self._attention = MultiplicativeAttention(self._hidden_size, enc_cfg.hidden_size)
       elif self.attention_type == 'ADDITIVE':
-        self._attention = AdditiveAttention(self._hidden_size)
+        self._attention = AdditiveAttention(self._hidden_size, enc_cfg.hidden_size)
       elif self.attention_type == 'DOTPRODUCT':
         self._attention = DotProductAttention()
       else:
@@ -240,9 +241,9 @@ class SequenceDecoder(torch.nn.Module):
 
 class LSTMSequenceDecoder(SequenceDecoder):
 
-  def __init__(self, cfg: DictConfig, vocab: Vocab):
-    super(LSTMSequenceDecoder, self).__init__(cfg, vocab)
-    self._unit = nn.LSTM(self._embedding_size, self._hidden_size, num_layers=self._num_layers, dropout=cfg.dropout)
+  def __init__(self, vocab: Vocab, dec_cfg: DictConfig, enc_cfg: DictConfig):
+    super(LSTMSequenceDecoder, self).__init__(vocab, dec_cfg, enc_cfg)
+    self._unit = nn.LSTM(self._embedding_size, self._hidden_size, num_layers=self._num_layers, dropout=dec_cfg.dropout)
 
   def _get_step_inputs(self, dec_inputs: ModelIO) -> ModelIO:
 
@@ -287,15 +288,15 @@ class LSTMSequenceDecoder(SequenceDecoder):
     
 class SRNSequenceDecoder(SequenceDecoder):
 
-  def __init__(self, cfg: DictConfig, vocab: Vocab):
-    super(SRNSequenceDecoder, self).__init__(cfg, vocab)
-    self._unit = nn.RNN(self._embedding_size, self._hidden_size, num_layers=self._num_layers, dropout=cfg.dropout)
+  def __init__(self, vocab: Vocab, dec_cfg: DictConfig, enc_cfg: DictConfig):
+    super(SRNSequenceDecoder, self).__init__(vocab, dec_cfg, enc_cfg)
+    self._unit = nn.RNN(self._embedding_size, self._hidden_size, num_layers=self._num_layers, dropout=dec_cfg.dropout)
 
 class GRUSequenceDecoder(SequenceDecoder):
 
-  def __init__(self, cfg: DictConfig, vocab: Vocab):
-    super(GRUSequenceDecoder, self).__init__(cfg, vocab)
-    self._unit = nn.GRU(self._embedding_size, self._hidden_size, num_layers=self._num_layers, dropout=cfg.dropout)
+  def __init__(self, vocab: Vocab, dec_cfg: DictConfig, enc_cfg: DictConfig):
+    super(GRUSequenceDecoder, self).__init__(vocab, dec_cfg, enc_cfg)
+    self._unit = nn.GRU(self._embedding_size, self._hidden_size, num_layers=self._num_layers, dropout=dec_cfg.dropout)
 
 class TransformerSequenceDecoder(nn.Module):
 
@@ -311,7 +312,7 @@ class TransformerSequenceDecoder(nn.Module):
   def PAD_IDX(self):
     return self._vocabulary.stoi['<pad>']
 
-  def __init__(self, cfg: DictConfig, vocab: Vocab):
+  def __init__(self, vocab: Vocab, cfg: DictConfig):
     
     super().__init__()
     

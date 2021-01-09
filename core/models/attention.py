@@ -59,7 +59,7 @@ class AdditiveAttention(Attention):
 
     # BUG: This should be reversed, right? why would the enc_map take dec_size as the
     # first parameter???
-    self.enc_map = nn.Linear(self.dec_size, self.attn_size)
+    self.enc_map = nn.Linear(self.enc_size, self.attn_size)
     self.dec_map = nn.Linear(self.dec_size, self.attn_size) 
     self.v = nn.Parameter(torch.FloatTensor(self.attn_size), requires_grad=True)
 

@@ -23,33 +23,38 @@ class SequenceEncoder(torch.nn.Module):
 
     self._num_layers = cfg.num_layers
     self._hidden_size = cfg.hidden_size
+    self._embedding_size = cfg.embedding_size
     self._unit_type = cfg.unit.upper()
+    self._dropout_p = cfg.dropout
     
     self._vocabulary = vocab
 
-    self._embedding = torch.nn.Embedding(self.vocab_size, self._hidden_size)
-    self._dropout = torch.nn.Dropout(p=cfg.dropout)
+    embedding = torch.nn.Embedding(self.vocab_size, self._embedding_size)
 
     if self._unit_type == 'SRN':
-      self._unit = nn.RNN(self._hidden_size, self._hidden_size, num_layers = self._num_layers, dropout = cfg.dropout)
+      unit = nn.RNN(self._embedding_size, self._hidden_size, num_layers = self._num_layers, dropout = cfg.dropout)
     elif self._unit_type == 'GRU':
-      self._unit = nn.GRU(self._hidden_size, self._hidden_size, num_layers = self._num_layers, dropout = cfg.dropout)
+      unit = nn.GRU(self._embedding_size, self._hidden_size, num_layers = self._num_layers, dropout = cfg.dropout)
     elif self._unit_type == 'LSTM':
-      self._unit = nn.LSTM(self._hidden_size, self._hidden_size, num_layers = self._num_layers, dropout = cfg.dropout)
+      unit = nn.LSTM(self._embedding_size, self._hidden_size, num_layers = self._num_layers, dropout = cfg.dropout)
     elif self._unit_type == 'TRANSFORMER':
       layer = nn.TransformerEncoderLayer(self._hidden_size, cfg.num_heads)
-      self._unit = nn.TransformerEncoder(layer, num_layers=self._num_layers)
-      self._pos_enc = PositionalEncoding(self._hidden_size, cfg.dropout)
-      self._embedding = nn.Sequential(self._embedding, self._pos_enc)
+      unit = nn.TransformerEncoder(layer, num_layers=self._num_layers)
+      pos_enc = PositionalEncoding(self._hidden_size, cfg.dropout)
+      embedding = nn.Sequential(embedding, pos_enc)
     else:
       raise ValueError('Invalid recurrent unit type "{}".'.format(self._unit_type))
+
+    self.module = nn.Sequential(
+      embedding,
+      unit
+    )
   
   def forward(self, enc_input: ModelIO) -> ModelIO:
     """
       Compute the forward pass.
     """
-    embedded = self._dropout(self._embedding(enc_input.source))
-    enc = self._unit(embedded)
+    enc = self.module(enc_input.source)
 
     output = ModelIO()
     if isinstance(enc, tuple):
