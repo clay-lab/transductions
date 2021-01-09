@@ -249,10 +249,10 @@ class LSTMSequenceDecoder(SequenceDecoder):
     batch_size = step_input.h.shape[0]
 
     if hasattr(dec_inputs, 'c'):
-      # log.info('An LSTM decoder was given a distinct h and c')
+      # We're @ timestep t>0, and the decoder has already produced a 'c'
       step_input.set_attribute('c', dec_inputs.c)
     else:
-      # log.info('An LSTM decoder was given h but no c')
+      # We're @ timestep t=0, so create an initial 'c' of all zeros.
       c = torch.zeros(self._num_layers, batch_size, self._hidden_size).to(avd)
       step_input.set_attribute('c', c)
 
@@ -272,12 +272,16 @@ class LSTMSequenceDecoder(SequenceDecoder):
     hidden = (h, c)
 
     if src_mask is not None:
-      unit_input = self.compute_attention(step_input.enc_inputs, h, src_mask)
+      unit_input, attn = self.compute_attention(unit_input, step_input.enc_outputs, h, src_mask)
 
     _, state = self._unit(unit_input, hidden)
     y = self._out(state[0][-1])
 
-    return ModelIO({ "y" : y, "h" : state[0], "c" : state[1] })
+    step_result = ModelIO({ "y" : y, "h" : state[0], "c" : state[1] })
+    if src_mask is not None:
+      step_result.set_attribute("attn", attn)
+
+    return step_result
     
 class SRNSequenceDecoder(SequenceDecoder):
 
