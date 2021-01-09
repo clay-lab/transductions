@@ -19,7 +19,6 @@ def create_mask(source: Tensor, vocab: Vocab) -> Tensor:
   mask = source.mul(source.ne(pad_index)).type(torch.bool)
   return mask
 
-
 class Attention(nn.Module):
 
   @abstractmethod
@@ -28,7 +27,7 @@ class Attention(nn.Module):
 
 class MultiplicativeAttention(Attention):
 
-  def __init__(self, dec_size, enc_size=None, attn_size=None):
+  def __init__(self, dec_size: int, enc_size: int = None, attn_size: int = None):
     super().__init__()
 
     self.dec_size = dec_size
@@ -47,4 +46,30 @@ class MultiplicativeAttention(Attention):
     weights = torch.bmm(value, key).squeeze(2)
     weights[~src_mask] = -float("Inf")
 
+    return F.softmax(weights, dim=1)
+
+class AdditiveAttention(Attention):
+
+  def __init__(self, dec_size: int, enc_size: int = None, attn_size: int = None):
+    super().__init__()
+
+    self.dec_size = dec_size
+    self.enc_size = dec_size if enc_size is None else enc_size
+    self.attn_size = dec_size if attn_size is None else attn_size
+
+    # BUG: This should be reversed, right? why would the enc_map take dec_size as the
+    # first parameter???
+    self.enc_map = nn.Linear(self.dec_size, self.attn_size)
+    self.dec_map = nn.Linear(self.dec_size, self.attn_size) 
+    self.v = nn.Parameter(torch.FloatTensor(self.attn_size), requires_grad=True)
+
+  def forward(self, enc_outputs: Tensor, dec_hiddens: Tensor, src_mask: Tensor) -> Tensor:
+    # want dims of [batch_size, seq_len, hidden_size]
+    enc_outputs = enc_outputs.permute(1,0,2)
+    dec_hiddens = dec_hiddens.unsqueeze(1)
+    mapped_enc = self.enc_map(enc_outputs)
+    mapped_dec = self.dec_map(dec_hiddens)
+    weights = (mapped_enc + mapped_dec).tanh()
+    weights = torch.matmul(weights, self.v)
+    weights[~src_mask] = -float("Inf")      
     return F.softmax(weights, dim=1)

@@ -15,7 +15,7 @@ from abc import abstractmethod
 # Library imports
 from core.models.model_io import ModelIO
 from core.models.positional_encoding import PositionalEncoding
-from core.models.attention import create_mask, MultiplicativeAttention
+from core.models.attention import create_mask, MultiplicativeAttention, AdditiveAttention
 
 log = logging.getLogger(__name__)
 
@@ -94,6 +94,8 @@ class SequenceDecoder(torch.nn.Module):
     if self.attention_type is not None:
       if self.attention_type == 'MULTIPLICATIVE':
         self._attention = MultiplicativeAttention(self._hidden_size)
+      elif self.attention_type == 'ADDITIVE':
+        self._attention = AdditiveAttention(self._hidden_size)
       else:
         raise NotImplementedError
 
@@ -136,13 +138,11 @@ class SequenceDecoder(torch.nn.Module):
     # Attention
     if self.attention_type is not None:
       attention = torch.zeros(gen_len, batch_size, seq_len).to(avd)
-      src_mask = create_mask(dec_input.source, self._vocabulary) # THIS SHOULD BE THE ENC VOCAB
+      src_mask = create_mask(dec_input.source, self._vocabulary) # BUG: THIS SHOULD BE THE ENC VOCAB
     else:
       src_mask = None
 
     for i in range(gen_len):
-
-      # TODO: I"M NEVER UPDATING ATTENIONNNNNNN!!!
 
       # Get forward_step pass
       step_result = self.forward_step(dec_step_input, src_mask)
