@@ -20,7 +20,8 @@ Transductions currently supports the following model architectures:
   * LSTM
   * Transformer
 
-Recurrent currently support no attention or multiplicative attention, while Transformers of course implement multi-head attention.
+Recurrent currently support `null`, `Additive`, `Multiplicative`, and `DotProduct` attention;
+Transformers of course implement multi-head attention.
 
 ## Training
 
