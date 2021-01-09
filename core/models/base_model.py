@@ -2,7 +2,6 @@
 # 
 # Provides the base class for transduction models.
 
-
 import torch
 import logging
 from omegaconf import DictConfig
