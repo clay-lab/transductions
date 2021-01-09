@@ -304,6 +304,10 @@ class TransformerSequenceDecoder(nn.Module):
   @property
   def EOS_IDX(self):
     return self._vocabulary.stoi['<eos>']
+  
+  @property
+  def PAD_IDX(self):
+    return self._vocabulary.stoi['<pad>']
 
   def __init__(self, cfg: DictConfig, vocab: Vocab):
     
