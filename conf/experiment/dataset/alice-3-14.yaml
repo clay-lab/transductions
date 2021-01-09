@@ -4,7 +4,7 @@
 # sentences involving 2 antecedents from training. Extension of alice-2 dataset
 # to withhold "Alice", "Claire", "Eliza" reflexives.
 
-name: alice-3-3
+name: alice-3-14
 input: grammar-1.tsv # where is the full dataset
 source_format: sequence # 'sequence' or 'tree'
 target_format: sequence # 'sequence' or 'tree'
@@ -19,12 +19,20 @@ splits:
 # Defines the generalization set. All inputs which match the provided
 # regex will be withheld from the train/test/val splits.
 withholding: 
-  - 'Alice \w+ herself'
-  - 'Alice \w+ Alice'
-  - 'Claire \w+ herself'
-  - 'Claire \w+ Claire'
-  - 'Eliza \w+ herself'
-  - 'Eliza \w+ Eliza'
+  - 'Alice \w+ (herself|Alice)'
+  - 'Claire \w+ (herself|Claire)'
+  - 'Eliza \w+ (herself|Eliza)'
+  - 'Grace \w+ (herself|Grace)'
+  - 'Isla \w+ (herself|Isla)'
+  - 'Katherine \w+ (herself|Katherine)'
+  - 'Margaret \w+ (herself|Margaret)'
+  - 'Neha \w+ (herself|Neha)'
+  - 'Patricia \w+ (herself|Patricia)'
+  - 'Rachael \w+ (herself|Rachael)'
+  - 'Tracy \w+ (herself|Tracy)'
+  - 'Ursula \w+ (herself|Ursula)'
+  - 'Winnifred \w+ (herself|Winnifred)'
+  - 'Yvette \w+ (herself|Yvette)'
 
 # Defines named test sets. For each entry, a .pt file will be created 
 # containing all inputs which match the given regex.
