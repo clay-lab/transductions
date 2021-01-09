@@ -28,6 +28,7 @@ class Trainer:
   Handles interface between:
     - TransductionModel
     - TransductionDataset
+    - Checkpoint
     - Meter
   """
 
@@ -109,7 +110,6 @@ class Trainer:
     tgt_field = self._dataset.target_field
     self._model = self._load_model(self._cfg.experiment, src_field.vocab, tgt_field.vocab, model_path)
 
-
   def train(self):
     
     # Load checkpoint
@@ -120,7 +120,7 @@ class Trainer:
     lr = self._cfg.experiment.hyperparameters.lr
     epochs = self._cfg.experiment.hyperparameters.epochs
     optimizer = torch.optim.SGD(self._model.parameters(), lr=lr)
-    criterion = nn.CrossEntropyLoss(weight=None)
+    criterion = nn.CrossEntropyLoss(weight=None, ignore_index=self._model._decoder.PAD_IDX)
 
     early_stoping = EarlyStopping(self._cfg.experiment.hyperparameters)
 
