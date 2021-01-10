@@ -185,7 +185,6 @@ class TransductionDataset:
       if cfg.dataset.overwrite:
         self._process_raw_data(cfg)
 
-
     # Construct fields
     source_format = cfg.dataset.source_format.lower()
     target_format = cfg.dataset.target_format.lower()

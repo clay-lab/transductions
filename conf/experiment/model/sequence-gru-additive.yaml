@@ -2,18 +2,19 @@
 encoder:
   unit: GRU
   type: sequence
-  num_layers: 1
+  num_layers: 2
   dropout: 0
-  embedding_size: 256
-  hidden_size: 256
+  embedding_size: 200
+  hidden_size: 100
   bidirectional: False
+
 decoder:
   unit: GRU
   type: sequence
   attention: Additive
   max_length: 30
-  num_layers: 1
-  dropout: 0
+  num_layers: 2
+  dropout: 0.7
   embedding_size: 256
-  hidden_size: 256
+  hidden_size: 100
   
