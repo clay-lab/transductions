@@ -7,6 +7,7 @@ encoder:
   embedding_size: 256
   bidirectional: False
   num_heads: 8
+  
 decoder:
   unit: Transformer
   type: sequence

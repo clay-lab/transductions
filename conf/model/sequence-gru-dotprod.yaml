@@ -1,4 +1,4 @@
-# @package _group_
+
 encoder:
   unit: GRU
   type: sequence
@@ -8,6 +8,7 @@ encoder:
   max_length: 0
   embedding_size: 256
   bidirectional: False
+  
 decoder:
   unit: GRU
   type: sequence
