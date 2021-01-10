@@ -1,5 +1,3 @@
-# @package _group_
-
 # Withholds reflexive sentences containing "Alice" (e.g., "Alice sees herself")
 # during training to explore lexical generalization.
 

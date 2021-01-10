@@ -1,0 +1,5 @@
+defaults:
+  - /dataset: alice-1
+  - /hyperparameters: default
+  - /model: sequence-transformer
+  

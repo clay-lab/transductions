@@ -10,6 +10,7 @@ from core.trainer import Trainer
 
 @hydra.main(config_path="conf", config_name="train.yaml")
 def main(cfg: DictConfig) -> None:
+
   if cfg.pretty_print:
     print(OmegaConf.to_yaml(cfg))
   
