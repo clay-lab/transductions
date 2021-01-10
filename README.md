@@ -23,6 +23,14 @@ Transductions currently supports the following model architectures:
 Recurrent currently support `null`, `Additive`, `Multiplicative`, and `DotProduct` attention;
 Transformers of course implement multi-head attention.
 
+## Installation
+
+Transductions uses `conda` to manage dependencies, making installation easy. Once you have cloned the repository,
+create the conda virtual environment by running
+```
+conda env create --file=.devcontainer/environment.yaml && conda activate transd
+```
+
 ## Training
 
 To train a new model, run the following script:
