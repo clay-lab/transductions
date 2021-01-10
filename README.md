@@ -25,11 +25,8 @@ Transformers of course implement multi-head attention.
 
 ## Installation
 
-Transductions uses `conda` to manage dependencies, making installation easy. Once you have cloned the repository,
-create the conda virtual environment by running
-```
-conda env create --file=.devcontainer/environment.yaml && conda activate transd
-```
+Transductions uses `poetry` to manage dependencies, making installation easy. Once you have cloned the repository,
+run `poetry shell && poetry install` to activate a virtual environment and install all necessary dependencies.
 
 ## Training
 
