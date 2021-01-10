@@ -118,6 +118,10 @@ class Trainer:
     log.info("Beginning training")
 
     lr = self._cfg.experiment.hyperparameters.lr
+    tf_ratio = self._cfg.experiment.hyperparameters.tf_ratio
+    if not tf_ratio:
+      # TODO: Should probably come up with better logic to handle the 'null' case
+      tf_ratio = 0.0
     epochs = self._cfg.experiment.hyperparameters.epochs
     optimizer = torch.optim.SGD(self._model.parameters(), lr=lr)
     criterion = nn.CrossEntropyLoss(weight=None, ignore_index=self._model._decoder.PAD_IDX)
@@ -147,7 +151,7 @@ class Trainer:
           # Loss expects:
           #   output:  [batch_size, classes, seq_len]
           #   target: [batch_size, seq_len]
-          output = self._model(batch, tf_ratio=0.5).permute(1, 2, 0)
+          output = self._model(batch, tf_ratio=tf_ratio).permute(1, 2, 0)
           target = batch.target.permute(1, 0)
           output, target = self._normalize_lengths(output, target)
 

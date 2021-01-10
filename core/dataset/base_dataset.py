@@ -180,8 +180,8 @@ class TransductionDataset:
       os.mkdir(self._processed_path)
       self._process_raw_data(cfg)
     else:
-      # Bruh, is this even checking????
-      print(type(cfg.dataset.overwrite))
+      # BUG: I think this isn't working right...it seems like it takes forever on
+      # the big dataset, even when we aren't supposed to be overwriting it
       if cfg.dataset.overwrite:
         self._process_raw_data(cfg)
 

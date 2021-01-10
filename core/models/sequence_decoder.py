@@ -256,6 +256,7 @@ class LSTMSequenceDecoder(SequenceDecoder):
 
   def _get_step_inputs(self, dec_inputs: ModelIO) -> ModelIO:
 
+    # TODO: This is hacky....make the logic nicer here.
     if hasattr(dec_inputs, 'enc_hidden') and isinstance(dec_inputs.enc_hidden, tuple):
       dec_inputs.c = dec_inputs.enc_hidden[1]
       dec_inputs.enc_hidden = dec_inputs.enc_hidden[0]
