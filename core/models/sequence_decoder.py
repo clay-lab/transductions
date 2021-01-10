@@ -198,10 +198,13 @@ class SequenceDecoder(torch.nn.Module):
     if src_mask is not None:
       unit_input, attn = self.compute_attention(unit_input, step_input.enc_outputs, h, src_mask)
 
+
+    # print("unit_input:", unit_input.shape)
+
     _, state = self._unit(unit_input, h)
     y = self._out(state[-1])
 
-    step_result = ModelIO({ "y" : y, "h" : state[0] })
+    step_result = ModelIO({ "y" : y, "h" : state })
     if src_mask is not None:
       step_result.set_attribute("attn", attn)
 
@@ -209,10 +212,14 @@ class SequenceDecoder(torch.nn.Module):
 
   def _get_step_inputs(self, dec_inputs: ModelIO) -> ModelIO:
 
+    # print("dec_inputs", dec_inputs)
+
     if hasattr(dec_inputs, 'h'):
+      # print("setting from h")
       h = dec_inputs.h
-    elif hasattr(dec_inputs, 'enc_outputs'):
-      h = dec_inputs.enc_outputs[-1]
+    elif hasattr(dec_inputs, 'enc_hidden'):
+      # print("setting from enc_hidden")
+      h = dec_inputs.enc_hidden
     else:
       log.error(f"I don't have any hidden state to use for the step from {dec_inputs}.")
       raise SystemError
@@ -236,6 +243,8 @@ class SequenceDecoder(torch.nn.Module):
 
     if hasattr(dec_inputs, 'enc_outputs'):
       dec_step_input.set_attribute('enc_outputs', dec_inputs.enc_outputs)
+    
+    # print("dec_step_input", dec_step_input)
 
     return dec_step_input
 
@@ -246,6 +255,10 @@ class LSTMSequenceDecoder(SequenceDecoder):
     self._unit = nn.LSTM(self._embedding_size, self._hidden_size, num_layers=self._num_layers, dropout=dec_cfg.dropout)
 
   def _get_step_inputs(self, dec_inputs: ModelIO) -> ModelIO:
+
+    if hasattr(dec_inputs, 'enc_hidden') and isinstance(dec_inputs.enc_hidden, tuple):
+      dec_inputs.c = dec_inputs.enc_hidden[1]
+      dec_inputs.enc_hidden = dec_inputs.enc_hidden[0]
 
     # Get default implementation
     step_input = super()._get_step_inputs(dec_inputs)
@@ -290,6 +303,7 @@ class SRNSequenceDecoder(SequenceDecoder):
 
   def __init__(self, vocab: Vocab, dec_cfg: DictConfig, enc_cfg: DictConfig):
     super(SRNSequenceDecoder, self).__init__(vocab, dec_cfg, enc_cfg)
+    print(self._num_layers)
     self._unit = nn.RNN(self._embedding_size, self._hidden_size, num_layers=self._num_layers, dropout=dec_cfg.dropout)
 
 class GRUSequenceDecoder(SequenceDecoder):
