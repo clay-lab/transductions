@@ -1,4 +1,3 @@
-# @package _group_
 name: shaynas-negation
 input: negation.tsv # where is the full dataset
 source_format: sequence # 'sequence' or 'tree'
