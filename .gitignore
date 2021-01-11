@@ -1,6 +1,6 @@
 # Output data
-/models/
 outputs/
+data/processed
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -143,12 +143,5 @@ cython_debug/
 
 .DS_Store
 .vscode/
-
-# Project specific
-logs/
-results/
-demo_savefile.txt
-sandbox.ipynb
-data/experiments
 
 

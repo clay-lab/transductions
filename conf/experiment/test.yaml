@@ -3,5 +3,5 @@ defaults:
   - /hyperparameters: default
   - /model: sequence-transformer
 
-name: experiment-1
+name: test-exp
   

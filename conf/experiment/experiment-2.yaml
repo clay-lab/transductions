@@ -1,7 +1,7 @@
 defaults:
-  - /dataset: alice-1
+  - /dataset: alice-2
   - /hyperparameters: default
   - /model: sequence-transformer
 
-name: experiment-1
+name: experiment-2
   

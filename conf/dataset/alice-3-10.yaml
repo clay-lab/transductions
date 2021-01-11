@@ -1,8 +1,10 @@
-# @package _group_
-
 # Withholds syntacically ("P verbs herself") and semantically ("P verbs P")
-# sentences involving 2 antecedents from training. Extension of alice-2 dataset
-# to withhold "Alice", "Claire", "Eliza" reflexives.
+# sentences involving 10 antecedents from training. Extension of alice-2 dataset
+# to withhold "Alice", "Claire", "Eliza", "Grace", "Isla", "Katherine",
+# "Margaret", "Neha", "Patricia", "Rachael" reflexives.
+
+defaults:
+  - tracking: all-feminine-reflexive
 
 name: alice-3-10
 input: grammar-1.tsv # where is the full dataset

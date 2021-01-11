@@ -166,15 +166,21 @@ class TransductionDataset:
 
     log.info("Initializing dataset")
 
-    self._processed_path = os.path.join(hydra.utils.get_original_cwd(), 
-      'data/experiments', cfg.dataset.name)
-    self._raw_path = os.path.join(hydra.utils.get_original_cwd(), 'data/raw', 
-      cfg.dataset.input)
+    data_path = os.path.join(hydra.utils.get_original_cwd(), 'data')
+    process_root_path = os.path.join(data_path, 'processed')
+    self._processed_path = os.path.join(process_root_path, cfg.dataset.name)
+    self._raw_path = os.path.join(data_path, 'raw', cfg.dataset.input)
     self._device = device
 
     self._trns_field = cfg.dataset.transform_field.lower()
 
     # TODO: make experiments directory if it's not present....cause it didn't last time?
+
+    if not os.path.exists(data_path):
+      os.mkdir(data_path)
+    
+    if not os.path.exists(process_root_path):
+      os.mkdir(process_root_path)
     
     if not os.path.exists(self._processed_path):
       os.mkdir(self._processed_path)

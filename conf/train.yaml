@@ -1,4 +1,5 @@
 defaults:
-  - experiment: null
+  - experiment: ???
+  - hydra/output: custom
 
 pretty_print: true
