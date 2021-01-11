@@ -57,8 +57,6 @@ class AdditiveAttention(Attention):
     self.enc_size = dec_size if enc_size is None else enc_size
     self.attn_size = dec_size if attn_size is None else attn_size
 
-    # BUG: This should be reversed, right? why would the enc_map take dec_size as the
-    # first parameter???
     self.enc_map = nn.Linear(self.enc_size, self.attn_size)
     self.dec_map = nn.Linear(self.dec_size, self.attn_size) 
     self.v = nn.Parameter(torch.FloatTensor(self.attn_size), requires_grad=True)
