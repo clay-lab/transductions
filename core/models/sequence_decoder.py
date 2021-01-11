@@ -27,18 +27,18 @@ else:
 class SequenceDecoder(torch.nn.Module):
 
   @staticmethod
-  def newDecoder(vocab: Vocab, dec_cfg: DictConfig, enc_cfg: DictConfig = None):
+  def newDecoder(src_vocab: Vocab, tgt_vocab: Vocab, dec_cfg: DictConfig, enc_cfg: DictConfig = None):
 
     unit_type = dec_cfg.unit.upper()
 
     if unit_type == 'SRN':
-      return SRNSequenceDecoder(vocab, dec_cfg, enc_cfg)
+      return SRNSequenceDecoder(src_vocab, tgt_vocab, dec_cfg, enc_cfg)
     elif unit_type == 'GRU':
-      return GRUSequenceDecoder(vocab, dec_cfg, enc_cfg)
+      return GRUSequenceDecoder(src_vocab, tgt_vocab, dec_cfg, enc_cfg)
     elif unit_type == 'LSTM':
-      return LSTMSequenceDecoder(vocab, dec_cfg, enc_cfg)
+      return LSTMSequenceDecoder(src_vocab, tgt_vocab, dec_cfg, enc_cfg)
     elif unit_type == 'TRANSFORMER':
-      return TransformerSequenceDecoder(vocab, dec_cfg)
+      return TransformerSequenceDecoder(tgt_vocab, dec_cfg)
     else:
       log.error(f"Unknown decoder type '{unit_type}'.")
 
@@ -65,7 +65,7 @@ class SequenceDecoder(torch.nn.Module):
     else:
       return self._attention_type
 
-  def __init__(self, vocab: Vocab, dec_cfg: DictConfig, enc_cfg: DictConfig):
+  def __init__(self, src_vocab: Vocab, tgt_vocab: Vocab, dec_cfg: DictConfig, enc_cfg: DictConfig):
     
     super(SequenceDecoder, self).__init__()
 
@@ -82,7 +82,8 @@ class SequenceDecoder(torch.nn.Module):
     else:
       self.unit_input_size = self._embedding_size
     
-    self._vocabulary = vocab
+    self._vocabulary = tgt_vocab
+    self._src_vocab = src_vocab
 
     self._embedding = torch.nn.Embedding(self.vocab_size, self._embedding_size)
 
@@ -143,7 +144,7 @@ class SequenceDecoder(torch.nn.Module):
     # Attention
     if self.attention_type is not None:
       attention = torch.zeros(gen_len, batch_size, seq_len).to(avd)
-      src_mask = create_mask(dec_input.source, self._vocabulary) # BUG: THIS SHOULD BE THE ENC VOCAB
+      src_mask = create_mask(dec_input.source, self._src_vocab) # BUG: THIS SHOULD BE THE ENC VOCAB
     else:
       src_mask = None
 
@@ -246,8 +247,8 @@ class SequenceDecoder(torch.nn.Module):
 
 class LSTMSequenceDecoder(SequenceDecoder):
 
-  def __init__(self, vocab: Vocab, dec_cfg: DictConfig, enc_cfg: DictConfig):
-    super(LSTMSequenceDecoder, self).__init__(vocab, dec_cfg, enc_cfg)
+  def __init__(self, src_vocab: Vocab, tgt_vocab: Vocab, dec_cfg: DictConfig, enc_cfg: DictConfig):
+    super(LSTMSequenceDecoder, self).__init__(src_vocab, tgt_vocab, dec_cfg, enc_cfg)
     self._unit = nn.LSTM(self.unit_input_size, self._hidden_size, num_layers=self._num_layers, dropout=dec_cfg.dropout)
 
   def _get_step_inputs(self, dec_inputs: ModelIO) -> ModelIO:
@@ -298,15 +299,15 @@ class LSTMSequenceDecoder(SequenceDecoder):
     
 class SRNSequenceDecoder(SequenceDecoder):
 
-  def __init__(self, vocab: Vocab, dec_cfg: DictConfig, enc_cfg: DictConfig):
-    super(SRNSequenceDecoder, self).__init__(vocab, dec_cfg, enc_cfg)
+  def __init__(self, src_vocab: Vocab, tgt_vocab: Vocab, dec_cfg: DictConfig, enc_cfg: DictConfig):
+    super(SRNSequenceDecoder, self).__init__(src_vocab, tgt_vocab, dec_cfg, enc_cfg)
     print(self._num_layers)
     self._unit = nn.RNN(self.unit_input_size, self._hidden_size, num_layers=self._num_layers, dropout=dec_cfg.dropout)
 
 class GRUSequenceDecoder(SequenceDecoder):
 
-  def __init__(self, vocab: Vocab, dec_cfg: DictConfig, enc_cfg: DictConfig):
-    super(GRUSequenceDecoder, self).__init__(vocab, dec_cfg, enc_cfg)
+  def __init__(self, src_vocab: Vocab, tgt_vocab: Vocab, dec_cfg: DictConfig, enc_cfg: DictConfig):
+    super(GRUSequenceDecoder, self).__init__(src_vocab, tgt_vocab, dec_cfg, enc_cfg)
     self._unit = nn.GRU(self.unit_input_size, self._hidden_size, num_layers=self._num_layers, dropout=dec_cfg.dropout)
 
 class TransformerSequenceDecoder(nn.Module):
