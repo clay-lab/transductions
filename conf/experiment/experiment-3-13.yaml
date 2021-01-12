@@ -1,0 +1,7 @@
+defaults:
+  - /dataset: alice-3-13
+  - /hyperparameters: default
+  - /model: sequence-transformer
+
+name: experiment-3-13
+  

@@ -5,7 +5,6 @@ encoder:
   num_layers: 1
   hidden_size: 256
   embedding_size: 256
-  bidirectional: False
   num_heads: 8
   
 decoder:
