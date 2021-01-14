@@ -1,0 +1,7 @@
+defaults:
+  - /dataset: lights
+  - /hyperparameters: default
+  - /model: sequence-transformer
+
+name: lights-1
+  

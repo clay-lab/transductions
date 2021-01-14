@@ -1,0 +1,30 @@
+# Produce sequences of "on" and "off" lights, paired with a quantified expression
+# describing how many lights are on.
+# 
+#   💡 💡 💡 ⚫️   ->    most lights are on
+#   💡 💡 💡 💡   ->    all lights are on
+#   💡 💡 ⚫️ ⚫️   ->    some lights are on
+#   ⚫️ ⚫️ ⚫️ ⚫️   ->    no lights are on
+#   💡 ⚫️ ⚫️ ⚫️   ->    few lights are on
+# 
+# From this we can test generalization to longer (or shorter) lengths, out-of-order 
+# sequences (i.e., train on having all the "on" lights be first and then test what 
+# happens when the lights are out of order)
+
+name: lights
+input: lights.tsv
+source_format: sequence
+target_format: sequence
+overwrite: true
+transform_field: source
+
+splits:
+  train: 80
+  test: 10
+  val: 10
+
+withholding:
+  - '((💡|⚫️)( |\t)){7,}' # 7 or more lights
+
+tracking:
+  long: '((💡|⚫️)( |\t)){7,}' # 7 or more lights
