@@ -63,7 +63,7 @@ class Trainer:
       padding[:, pad_idx] = 1.0
       output = torch.cat((output, padding), dim=2)
 
-    return output, target
+    return output.to(self._device), target.to(self._device)
   
   def _load_model(self, cfg: DictConfig, src_vocab: Vocab, tgt_vocab: Vocab, from_path: str = None):
 
