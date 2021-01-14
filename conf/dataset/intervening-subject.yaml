@@ -33,6 +33,8 @@ tracking:
   alice_subject_transitive: '^Alice \w+ \w+'
   alice_subject_intransitive: '^Alice \w+\t'
   alice_alice: 'Alice .* Alice\t'
-
+  alice_intervening: 'Alice .* (near|by|behind|beside)'
+  alice_alice_intervening: 'Alice (by|near|beside|behind) .* Alice'
+  alice_herself_intervening: 'Alice (by|near|beside|behind) .* herself'
   herself: 'herself'
   himself: 'himself'

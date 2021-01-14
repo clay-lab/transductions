@@ -1,7 +1,7 @@
 defaults:
   - /dataset: intervening-subject
   - /hyperparameters: default
-  - /model: sequence-srn-multiplicative
+  - /model: sequence-transformer
 
 name: intervening-1
   
