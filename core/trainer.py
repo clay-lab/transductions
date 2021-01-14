@@ -59,7 +59,7 @@ class Trainer:
     else:
       # target is longer than output. Add one-hot tensor hot in
       # index == pad_idx to end until length is equal
-      padding = torch.zeros(output.shape[0], output.shape[1], -diff)
+      padding = torch.zeros(output.shape[0], output.shape[1], -diff).to(self._device)
       padding[:, pad_idx] = 1.0
       output = torch.cat((output, padding), dim=2)
 
