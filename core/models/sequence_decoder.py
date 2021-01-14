@@ -389,7 +389,7 @@ class TransformerSequenceDecoder(nn.Module):
 
       # Ensures that once a model outputs token <t> @ position i, it will
       # always output <t> @ i even for further timesteps
-      tgt_mask = self._generate_square_subsequent_mask(tgt.shape[0])
+      tgt_mask = self._generate_square_subsequent_mask(tgt.shape[0]).to(avd)
       
       # Calculate the next predicted token from output
       out = self._out(self._unit(tgt=tgt_emb, memory=mem, tgt_mask=tgt_mask))
@@ -400,7 +400,7 @@ class TransformerSequenceDecoder(nn.Module):
         break
       else:
         new_tgt = dec_input.target[i] if teacher_forcing else predicted
-        tgt = torch.cat((tgt, new_tgt.unsqueeze(0)), dim=0)
+        tgt = torch.cat((tgt, new_tgt.unsqueeze(0)), dim=0).to(avd)
 
     return ModelIO({"dec_outputs": out})
   
