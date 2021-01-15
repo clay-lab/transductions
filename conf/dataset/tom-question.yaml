@@ -1,0 +1,20 @@
+# Corresponds to the 'question' dataset from McCoy, Frank, and Linzen (2020).
+# There are two transformation tokens, 'DECL' and 'QUEST'. Source sentences
+# are declarative sentences with (1) no relative clauses, (2) relative clauses
+# on the object, and (3) relative clauses on the subject. The generalization
+# set is all sentences in (3) which are paired with the 'QUEST' token.
+# 
+# NOTE: The .pt files have been created manually and SHOULD NOT BE OVERWRITTEN
+#       or generated automatically. DO NOT CHANGE THE 'overwrite' parameter.
+
+name: tom-question
+input: tom-question.tsv
+source_format: sequence
+target_format: sequence
+overwrite: False 
+transform_field: source
+
+splits:
+  train: 80
+  test: 10
+  val: 10

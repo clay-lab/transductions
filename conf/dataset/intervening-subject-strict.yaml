@@ -1,0 +1,36 @@
+# Examines the effect of intervening PP phrases in parsing reflexive expressions.
+# Sentences include intransitives, like
+#   (1) Alice runs
+# simple transitives, like
+#   (2) Alice sees Bob
+# and simple reflexives, like
+#   (3) Alice sees herself
+# Additionally, any of (1)--(3) may have an intervening PP between the
+# subject and the verb, as in
+#   (4) Alice near Grace sees John
+# Names are coded for gender, with 13 masculine and 13 feminine names.
+# 
+# This is the 'strict' dataset; it explores the task of structural generalization
+# of reflexives to the intervening cases. All reflexive sentences with an intervening
+# PP are withheld from training.
+
+name: intervening-subject-strict
+input: intervening_subject.tsv
+source_format: sequence
+target_format: sequence
+overwrite: true
+transform_field: source
+
+splits:
+  train: 80
+  test: 10
+  val: 10
+
+withholding:
+  - '(near|by|behind|beside) .* (herself|himself)'
+
+tracking:
+  herself: 'herself'
+  himself: 'himself'
+  herself_intervening: '(near|by|behind|beside) .* herself'
+  himself_intervening: '(near|by|behind|beside) .* himself'

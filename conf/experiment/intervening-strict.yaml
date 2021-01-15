@@ -1,0 +1,7 @@
+defaults:
+  - /dataset: intervening-subject-strict
+  - /hyperparameters: default
+  - /model: sequence-transformer
+
+name: intervening-strict
+  

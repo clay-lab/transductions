@@ -1,0 +1,20 @@
+# Corresponds to the 'tense' dataset from McCoy, Frank, and Linzen (2020).
+# There are two transformation tokens, 'PAST' and 'PRESENT'. Source sentences
+# are past-tense declarative sentences. Target sentences are either identical
+# to the source if 'PAST', or inflected in simple present tense (no auxiliaries)
+# if 'PRESENT'. The generalization set consists of .......?
+# 
+# NOTE: The .pt files have been created manually and SHOULD NOT BE OVERWRITTEN
+#       or generated automatically. DO NOT CHANGE THE 'overwrite' parameter.
+
+name: tom-tense
+input: tom-tense.tsv
+source_format: sequence
+target_format: sequence
+overwrite: False 
+transform_field: source
+
+splits:
+  train: 80
+  test: 10
+  val: 10

@@ -1,7 +1,7 @@
 defaults:
   - /dataset: alice-4a
   - /hyperparameters: default
-  - /model: sequence-transformer
+  - /model: sequence-srn-multiplicative
 
 name: experiment-4a
   

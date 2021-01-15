@@ -1,0 +1,7 @@
+defaults:
+  - /dataset: tom-tense
+  - /hyperparameters: default
+  - /model: sequence-transformer
+
+name: tom-tense
+  

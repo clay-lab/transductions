@@ -1,0 +1,7 @@
+defaults:
+  - /dataset: tom-question
+  - /hyperparameters: default
+  - /model: sequence-transformer
+
+name: tom-question
+  
