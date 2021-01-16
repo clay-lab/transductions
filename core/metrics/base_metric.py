@@ -55,11 +55,22 @@ class SequenceAccuracy(BaseMetric):
     total = correct.shape[0]
     correct = correct.sum()
 
-    # print("prediciton", prediction.shape)
-    # print("correct", correct)
-    # print("total", total)
+    return correct, total
 
-    # raise SystemExit
+class NthTokenAccuracy(BaseMetric):
+  """
+  Computes the accuracy at the specified token.
+  """
+
+  def __init__(self, n: int = 0):
+    super().__init__()
+    self.n = n
+  
+  def compute(self, prediction: Tensor, target: Tensor):
+    prediction = prediction.argmax(1)
+    correct = (prediction[self.n] == target[self.n])
+    total = correct.shape[0]
+    correct = correct.sum()
 
     return correct, total
 

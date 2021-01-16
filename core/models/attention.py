@@ -50,16 +50,15 @@ class MultiplicativeAttention(Attention):
 
 class AdditiveAttention(Attention):
 
-  def __init__(self, dec_size: int, enc_size: int = None, attn_size: int = None):
+  def __init__(self, dec_size: int, enc_size: int = None):
     super().__init__()
 
     self.dec_size = dec_size
     self.enc_size = dec_size if enc_size is None else enc_size
-    self.attn_size = dec_size if attn_size is None else attn_size
 
-    self.enc_map = nn.Linear(self.enc_size, self.attn_size)
-    self.dec_map = nn.Linear(self.dec_size, self.attn_size) 
-    self.v = nn.Parameter(torch.FloatTensor(self.attn_size), requires_grad=True)
+    self.enc_map = nn.Linear(self.enc_size, self.dec_size)
+    self.dec_map = nn.Linear(self.dec_size, self.dec_size) 
+    self.v = nn.Parameter(torch.rand(self.dec_size), requires_grad=True)
 
   def forward(self, enc_outputs: Tensor, dec_hiddens: Tensor, src_mask: Tensor) -> Tensor:
     # want dims of [batch_size, seq_len, hidden_size]
@@ -67,8 +66,8 @@ class AdditiveAttention(Attention):
     dec_hiddens = dec_hiddens.unsqueeze(1)
     mapped_enc = self.enc_map(enc_outputs)
     mapped_dec = self.dec_map(dec_hiddens)
-    weights = (mapped_enc + mapped_dec).tanh()
-    weights = torch.matmul(weights, self.v)
+    weights = mapped_enc + mapped_dec
+    weights = torch.tanh(weights) @ self.v
     weights[~src_mask] = -float("Inf")      
     return F.softmax(weights, dim=1)
 
