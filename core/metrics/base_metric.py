@@ -62,13 +62,24 @@ class NthTokenAccuracy(BaseMetric):
   Computes the accuracy at the specified token.
   """
 
+  @property
+  def name(self):
+    if self.n == 1:
+      return "1st Token Accuracy"
+    elif self.n == 2:
+      return "2nd Token Accuracy"
+    elif self.n == 3:
+      return "3rd Token Accuray"
+    else:
+      return f"{self.n}th Token Accuracy"
+
   def __init__(self, n: int = 0):
     super().__init__()
     self.n = n
   
   def compute(self, prediction: Tensor, target: Tensor):
     prediction = prediction.argmax(1)
-    correct = (prediction[self.n] == target[self.n])
+    correct = (prediction[:,self.n] == target[:,self.n])
     total = correct.shape[0]
     correct = correct.sum()
 

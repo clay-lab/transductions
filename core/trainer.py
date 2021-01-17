@@ -7,7 +7,7 @@ import torch.nn.functional as F
 from torch import Tensor
 from tqdm import tqdm
 from omegaconf import DictConfig
-from typing import Dict
+from typing import Dict, Tuple
 from cmd import Cmd
 import pickle
 from torchtext.data import Batch
@@ -17,7 +17,7 @@ from torchtext.vocab import Vocab
 from core.models.base_model import TransductionModel
 from core.models.model_io import ModelIO
 from core.dataset.base_dataset import TransductionDataset
-from core.metrics.base_metric import SequenceAccuracy, TokenAccuracy, LossMetric, LengthAccuracy
+from core.metrics.base_metric import SequenceAccuracy, TokenAccuracy, LossMetric, LengthAccuracy, NthTokenAccuracy
 from core.metrics.meter import Meter
 from core.early_stopping import EarlyStopping
 
@@ -42,7 +42,7 @@ class Trainer:
     self._device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     log.info("DEVICE: {}".format(self._device))
 
-  def _normalize_lengths(self, output: Tensor, target: Tensor) -> (Tensor, Tensor):
+  def _normalize_lengths(self, output: Tensor, target: Tensor) -> Tuple[Tensor, Tensor]:
     """
     Pad the output or target with decoder's <pad> so that loss can be computed.
     """
@@ -133,8 +133,9 @@ class Trainer:
     tok_acc = TokenAccuracy(self._dataset.target_field.vocab.stoi['<pad>'])
     len_acc = LengthAccuracy(self._dataset.target_field.vocab.stoi['<pad>'])
     avg_loss = LossMetric(F.cross_entropy)
+    frst_wrd_acc = NthTokenAccuracy(n=1)
     
-    meter = Meter([seq_acc, tok_acc, len_acc, avg_loss])
+    meter = Meter([seq_acc, tok_acc, frst_wrd_acc, len_acc, avg_loss])
 
     for epoch in range(epochs):
 
@@ -266,6 +267,7 @@ class Trainer:
             target = batch.target.permute(1, 0)
             output, target = self._normalize_lengths(prediction, target)
 
+            # TODO: SHOULD WE USE normed ouputs instead of prediction ehre?
             meter(prediction, target)
 
             src_toks = self._dataset.id_to_token(source, 'source')
