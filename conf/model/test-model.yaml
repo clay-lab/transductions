@@ -1,19 +1,19 @@
 encoder:
-  unit: SRN
+  unit: LSTM
   type: sequence
   dropout: 0
-  num_layers: 1
+  num_layers: 3
   hidden_size: 100
   max_length: 0
   embedding_size: 256
   bidirectional: False
 
 decoder:
-  unit: SRN
+  unit: LSTM
   type: sequence
   dropout: 0
-  num_layers: 1
+  num_layers: 3
   max_length: 30
   hidden_size: 100
-  attention: Multiplicative
+  attention: null
   embedding_size: 256
