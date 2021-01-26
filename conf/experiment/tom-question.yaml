@@ -1,7 +1,7 @@
 defaults:
   - /dataset: tom-question
   - /hyperparameters: default
-  - /model: sequence-transformer
+  - /model: sequence-lstm-multiplicative
 
 name: tom-question
   

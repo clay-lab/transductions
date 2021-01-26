@@ -1,7 +1,7 @@
 defaults:
   - /dataset: negation
   - /hyperparameters: default
-  - /model: sequence-transformer
+  - /model: sequence-lstm-additive
 
 name: shaynas-negation
   

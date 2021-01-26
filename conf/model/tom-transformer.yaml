@@ -1,0 +1,20 @@
+encoder:
+  unit: Transformer
+  type: sequence
+  dropout: 0
+  num_layers: 3
+  hidden_size: 128
+  embedding_size: 128
+  num_heads: 4
+  
+decoder:
+  unit: Transformer
+  type: sequence
+  dropout: 0
+  num_layers: 3
+  max_length: 30
+  hidden_size: 128
+  embedding_size: 128
+  num_heads: 4
+  attention: null
+  
