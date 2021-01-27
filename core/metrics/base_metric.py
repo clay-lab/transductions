@@ -140,3 +140,111 @@ class LengthAccuracy(BaseMetric):
     total = matches.shape[0]
 
     return correct, total
+
+class LinearAError(BaseMetric):
+  """
+  Given a target of the form
+    Alice near Mary sees herself -> See ( Alice , Alice ) & near ( Alice , Mary )
+  Count the number of outputs which mix up the antecedent of 'herself', interpreting
+  the VP as 'Mary sees herself', resulting in
+    See ( Mary  , Mary  ) & near ( ............. )
+  """
+
+  def __init__(self, pad_token_id = None, and_token_id = None):
+    super().__init__()
+    self._pad = pad_token_id
+    self._and = and_token_id
+
+  def compute(self, prediction: Tensor, target: Tensor):
+
+    # total = # target sequences of the form "<sos> verb ( X , X ) & p ( X , Y )"
+    # correct = # predictions of the form "verb (Y, Y) ...."
+    prediction = prediction.argmax(1)
+
+    total = 0
+    correct = 0
+    for idx, b in enumerate(target):
+      if b.shape[0] > 7:
+        t = torch.logical_and(b[3] == b[5], b[7] == self._and).sum()
+        if t > 0:
+          # check if we're an error
+          if prediction[idx][3] == prediction[idx][7] and prediction[idx][3] == b[12]:
+            correct += 1
+            print(b)
+            print(prediction[idx])
+        total += 1
+    return correct, total
+
+class LinearBError(BaseMetric):
+  """
+  Given a target of the form
+    victor beside leo knows himself -> <sos> know ( victor , victor ) & beside ( victor , leo )	
+
+  Test if the output is of form:  
+    know ( victor , leo ) & beside ( .... )
+  """
+
+  def __init__(self, pad_token_id = None, and_token_id = None):
+    super().__init__()
+    self._pad = pad_token_id
+    self._and = and_token_id
+
+  def compute(self, prediction: Tensor, target: Tensor):
+
+    # total = # target sequences of the form "<sos> verb ( X , X ) & p ( X , Y )"
+    # correct = # predictions of the form "verb (Y, Y) ...."
+    prediction = prediction.argmax(1)
+
+    total = 0
+    correct = 0
+    for idx, b in enumerate(target):
+      if b.shape[0] > 7:
+        not_same = b != prediction[idx]
+        t = torch.logical_and(b[3] == b[5], b[7] == self._and)
+        t = torch.logical_and(t, not_same).sum()
+        if t > 0:
+          # check if we're an error
+          # print("Got a target match...")
+          if torch.logical_and(prediction[idx][5] == b[12], prediction[idx][3] != prediction[idx][5]):
+
+            correct += 1
+        total += 1
+
+    return correct, total
+
+# Linear C?
+  """
+  Given a target of the form
+    victor beside leo knows himself -> <sos> know ( victor , victor ) & beside ( victor , leo )	
+
+  Test if the output is of form:  
+    know ( leo , victor ) & beside ( .... )
+
+  i.e., reflexives are structural but subj-verb is linear
+  """
+
+class NegAccuracy(BaseMetric):
+  """
+  If target contains a NEG token, check if the prediction has a NEG token in
+  the same position.
+  """
+
+  def __init__(self, neg_token_id = 0):
+    super().__init__()
+    self._neg = neg_token_id
+  
+  def compute(self, prediction: Tensor, target: Tensor):
+    prediction = prediction.argmax(1)
+
+    tar_locs = target[:,] == self._neg
+    total = 0
+    correct = 0
+
+    for k in torch.nonzero(tar_locs):
+      correct += 1
+      seq, loc = k
+      
+      if prediction[seq][loc] == self._neg:
+        total += 1
+
+    return correct, total
