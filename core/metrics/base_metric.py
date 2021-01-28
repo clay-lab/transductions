@@ -242,16 +242,37 @@ class LinearCError(BaseMetric):
 
     return correct, total
 
-# Linear C?
+class HierarchicalAccuracy(BaseMetric):
   """
   Given a target of the form
     victor beside leo knows himself -> <sos> know ( victor , victor ) & beside ( victor , leo )	
 
   Test if the output is of form:  
-    know ( leo , victor ) & beside ( .... )
-
-  i.e., reflexives are structural but subj-verb is linear
+    know ( victor , victor ) & beside ( .... )
   """
+
+  def __init__(self, pad_token_id = None, and_token_id = None):
+    super().__init__()
+    self._pad = pad_token_id
+    self._and = and_token_id
+
+  def compute(self, prediction: Tensor, target: Tensor):
+
+    # total = # target sequences of the form "<sos> verb ( X , X ) & p ( X , Y )"
+    # correct = # predictions of the form "verb (X, Y) ...."
+    prediction = prediction.argmax(1)
+
+    total = 0
+    correct = 0
+    for idx, b in enumerate(target):
+      if b.shape[0] > 7:
+        t = torch.logical_and(b[3] == b[5], b[7] == self._and)
+        if t:
+          if torch.logical_and(prediction[idx][3] == b[3], prediction[idx][3] == prediction[idx][5]):
+            correct += 1
+          total += 1
+
+    return correct, total
 
 class NegAccuracy(BaseMetric):
   """

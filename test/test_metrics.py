@@ -232,6 +232,57 @@ class TestMetrics(unittest.TestCase):
     assert lin_c_err.total == 2.0
     assert lin_c_err.correct == 1.0
 
+  def test_hierarchical(self):
+    """
+    Given a target of the form
+      victor beside leo knows himself -> <sos> know ( victor , victor ) & beside ( victor , leo )	
+
+    Test if the output is of form:  
+      know ( leo , victor ) & beside ( .... )
+
+    i.e., reflexives are structural but subj-verb is linear
+
+    total = # target sequences of the form "<sos> verb ( X , X ) & p ( X , Y )"
+    correct = # predictions of the form "<sos> verb (Y, X) ...."
+    """
+
+        # TOKENS
+    AND = 0
+    SOS = 1
+    EOS = 2
+    PAD = 3
+
+    L_PAREN = 4
+    R_PAREN = 5
+    COMMA = 6
+
+    ALICE = 7
+    MARY = 8
+
+    SEE = 9
+    HEAR = 10
+
+    NEAR = 11
+
+    target = torch.tensor([
+      [SOS, SEE, L_PAREN, ALICE, COMMA, ALICE, R_PAREN, EOS, PAD, PAD, PAD, PAD, PAD, PAD, PAD],
+      [SOS, SEE, L_PAREN, ALICE, COMMA, ALICE, R_PAREN, AND, NEAR, L_PAREN, ALICE, COMMA, MARY, R_PAREN, EOS],
+      [SOS, SEE, L_PAREN, ALICE, COMMA, ALICE, R_PAREN, AND, NEAR, L_PAREN, ALICE, COMMA, MARY, R_PAREN, EOS]
+      ]
+    )
+    prediction = torch.tensor([
+      [SOS, SEE, L_PAREN, ALICE, COMMA, ALICE, R_PAREN, EOS, PAD, PAD, PAD, PAD, PAD, PAD, PAD], # Doesn't count
+      [SOS, SEE, L_PAREN, ALICE, COMMA, ALICE, R_PAREN, AND, NEAR, L_PAREN, ALICE, COMMA, MARY, R_PAREN, EOS], # Same as target
+      [SOS, SEE, L_PAREN, MARY, COMMA, ALICE, R_PAREN, AND, NEAR, L_PAREN, ALICE, COMMA, MARY, R_PAREN, EOS] # Linear C error
+      ]
+    )
+    prediction = F.one_hot(prediction).permute(0,2,1)
+
+    hier = HierarchicalAccuracy(pad_token_id=PAD, and_token_id=AND)
+    hier(prediction, target)
+
+    assert hier.total == 2.0
+    assert hier.correct == 1.0
 
 if __name__ == "__main__":
   unittest.main()
