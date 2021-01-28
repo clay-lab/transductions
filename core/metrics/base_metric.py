@@ -1,6 +1,10 @@
 from abc import abstractmethod
 from torch import Tensor
 import torch
+import sys
+
+import logging
+log = logging.getLogger(__name__)
 
 class BaseMetric:
   """
@@ -158,21 +162,18 @@ class LinearAError(BaseMetric):
   def compute(self, prediction: Tensor, target: Tensor):
 
     # total = # target sequences of the form "<sos> verb ( X , X ) & p ( X , Y )"
-    # correct = # predictions of the form "verb (Y, Y) ...."
+    # correct = # predictions of the form "<sos> verb (Y, Y) ...."
     prediction = prediction.argmax(1)
 
     total = 0
     correct = 0
     for idx, b in enumerate(target):
       if b.shape[0] > 7:
-        t = torch.logical_and(b[3] == b[5], b[7] == self._and).sum()
-        if t > 0:
-          # check if we're an error
-          if prediction[idx][3] == prediction[idx][7] and prediction[idx][3] == b[12]:
+        t = torch.logical_and(b[3] == b[5], b[7] == self._and)
+        if t:
+          if prediction[idx][3] == prediction[idx][5] and prediction[idx][3] == b[12]:
             correct += 1
-            print(b)
-            print(prediction[idx])
-        total += 1
+          total += 1
     return correct, total
 
 class LinearBError(BaseMetric):
@@ -192,23 +193,52 @@ class LinearBError(BaseMetric):
   def compute(self, prediction: Tensor, target: Tensor):
 
     # total = # target sequences of the form "<sos> verb ( X , X ) & p ( X , Y )"
-    # correct = # predictions of the form "verb (Y, Y) ...."
+    # correct = # predictions of the form "verb (X, Y) ...."
     prediction = prediction.argmax(1)
 
     total = 0
     correct = 0
     for idx, b in enumerate(target):
       if b.shape[0] > 7:
-        not_same = b != prediction[idx]
         t = torch.logical_and(b[3] == b[5], b[7] == self._and)
-        t = torch.logical_and(t, not_same).sum()
-        if t > 0:
-          # check if we're an error
-          # print("Got a target match...")
+        if t:
           if torch.logical_and(prediction[idx][5] == b[12], prediction[idx][3] != prediction[idx][5]):
-
             correct += 1
-        total += 1
+          total += 1
+
+    return correct, total
+
+class LinearCError(BaseMetric):
+  """
+  Given a target of the form
+    victor beside leo knows himself -> <sos> know ( victor , victor ) & beside ( victor , leo )	
+
+  Test if the output is of form:  
+    know ( leo , victor ) & beside ( .... )
+
+  i.e., reflexives are structural but subj-verb is linear
+  """
+
+  def __init__(self, pad_token_id = None, and_token_id = None):
+    super().__init__()
+    self._pad = pad_token_id
+    self._and = and_token_id
+
+  def compute(self, prediction: Tensor, target: Tensor):
+
+    # total = # target sequences of the form "<sos> verb ( X , X ) & p ( X , Y )"
+    # correct = # predictions of the form "verb (X, Y) ...."
+    prediction = prediction.argmax(1)
+
+    total = 0
+    correct = 0
+    for idx, b in enumerate(target):
+      if b.shape[0] > 7:
+        t = torch.logical_and(b[3] == b[5], b[7] == self._and)
+        if t:
+          if torch.logical_and(prediction[idx][3] == b[12], prediction[idx][3] != prediction[idx][5]):
+            correct += 1
+          total += 1
 
     return correct, total
 
@@ -247,5 +277,4 @@ class NegAccuracy(BaseMetric):
       if prediction[seq][loc] == self._neg:
         correct += 1
 
-    # print(f"{correct} / {total}")
     return correct, total
