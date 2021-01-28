@@ -241,10 +241,11 @@ class NegAccuracy(BaseMetric):
     correct = 0
 
     for k in torch.nonzero(tar_locs):
-      correct += 1
+      total += 1
       seq, loc = k
       
       if prediction[seq][loc] == self._neg:
-        total += 1
+        correct += 1
 
+    # print(f"{correct} / {total}")
     return correct, total
