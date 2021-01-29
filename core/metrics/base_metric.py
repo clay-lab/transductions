@@ -1,7 +1,7 @@
 from abc import abstractmethod
 from torch import Tensor
 import torch
-import sys
+from typing import List
 
 import logging
 log = logging.getLogger(__name__)
@@ -297,5 +297,44 @@ class NegAccuracy(BaseMetric):
       
       if prediction[seq][loc] == self._neg:
         correct += 1
+
+    return correct, total
+
+class FullSequenceModAccuracy(BaseMetric):
+  """
+  Calculates the accuracy of predictions modulo a set of equivalence classes
+  defined on the tokens. Allows for a more "forgiving" measure of accuracy. 
+  """
+
+  @staticmethod
+  def _merge_classes(lists):
+    result = []
+    for r in lists:
+      for i, rr in enumerate(result):
+        if r[0] == rr[0]:
+          result[i] += r[1:]
+          break
+      else:
+        result.append(r)
+    return [sorted(list(set(r))) for r in result]
+
+  def __init__(self, classes: List):
+    super().__init__()
+    self._classes = FullSequenceModAccuracy._merge_classes(classes)
+  
+  def compute(self, prediction: Tensor, target: Tensor):
+
+    correct, total = 0, 0
+
+    prediction = prediction.argmax(1)
+
+    for c in self._classes:
+      for toke in c[1:]:
+        prediction[prediction==toke] = c[0]
+        target[target==toke] = c[0]
+    
+    correct = (prediction == target).prod(axis=1)
+    total = correct.shape[0]
+    correct = correct.sum()
 
     return correct, total

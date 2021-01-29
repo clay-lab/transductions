@@ -246,7 +246,7 @@ class TestMetrics(unittest.TestCase):
     correct = # predictions of the form "<sos> verb (Y, X) ...."
     """
 
-        # TOKENS
+    # TOKENS
     AND = 0
     SOS = 1
     EOS = 2
@@ -283,8 +283,34 @@ class TestMetrics(unittest.TestCase):
 
     assert hier.total == 2.0
     assert hier.correct == 1.0
+  
+  def test_fullseqmodacc(self):
+    # TOKENS
+    SOS, EOS, PAD = 0, 1, 2
+    SEE, HEAR = 3, 4
+    ALICE, MARY = 5, 6
+
+    target = torch.tensor([
+      [SOS, ALICE, SEE, ALICE, EOS],
+      [SOS, ALICE, SEE, ALICE, EOS],
+      [SOS, ALICE, SEE, ALICE, EOS],
+      [SOS, ALICE, SEE, ALICE, EOS]
+    ])
+    prediction = torch.tensor([
+      [SOS, ALICE, SEE,  ALICE, EOS], # right
+      [SOS, MARY,  SEE,  ALICE, EOS], # wrong
+      [SOS, ALICE, HEAR, ALICE, EOS], # right if {SEE, HEAR}
+      [SOS, MARY,  HEAR, ALICE, EOS]  # wrong
+    ])
+    prediction = F.one_hot(prediction).permute(0,2,1)
+
+    acc = FullSequenceModAccuracy([[SEE, HEAR]])
+    acc(prediction, target)
+
+    assert acc.total == 4.0
+    assert acc.correct == 2.0
+
 
 if __name__ == "__main__":
   unittest.main()
-  # TM = TestMetrics()
-  # TM.test_linearB()
+  
