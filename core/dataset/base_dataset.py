@@ -3,8 +3,9 @@ import os
 import hydra
 import re
 import numpy as np
-from omegaconf import DictConfig, OmegaConf
+from omegaconf import DictConfig
 from typing import Dict
+import shutil
 import pickle
 from torchtext.data import Field, TabularDataset, BucketIterator
 
@@ -180,11 +181,15 @@ class TransductionDataset:
     if not os.path.exists(process_root_path):
       os.mkdir(process_root_path)
     
+
+    
     if not os.path.exists(self._processed_path):
       os.mkdir(self._processed_path)
       self._process_raw_data(cfg)
     else:
       if cfg.dataset.overwrite:
+        shutil.rmtree(self._processed_path)
+        os.mkdir(self._processed_path)
         self._process_raw_data(cfg)
 
     # Construct fields
