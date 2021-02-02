@@ -30,8 +30,8 @@ class TransductionDataset:
     elif self._trns_field == 'target':
       return self.target_field
     else:
-      log.error("`transform_field` must be either 'source' or 'target'; you supplied {}!".format(trns_field))
-      raise ValueError("Invalid `transform_field`: {}".format(trns_field))
+      log.error("`transform_field` must be either 'source' or 'target'; you supplied {}!".format(self.trns_field))
+      raise ValueError("Invalid `transform_field`: {}".format(self.trns_field))
 
   
   def _process_raw_data(self, cfg: DictConfig):
@@ -181,8 +181,6 @@ class TransductionDataset:
     if not os.path.exists(process_root_path):
       os.mkdir(process_root_path)
     
-
-    
     if not os.path.exists(self._processed_path):
       os.mkdir(self._processed_path)
       self._process_raw_data(cfg)
@@ -230,6 +228,12 @@ class TransductionDataset:
           if i > 0:
             message += ', '
           message += "{} ({} sequences)".format(s, len(getattr(self, attr)[s].dataset) + 1)
+        message += ']\n'
+        message += padding + 'fields: ['
+        for i, k in enumerate(self.datafields):
+          if i > 0:
+            message += ', '
+          message += f"{k[0]}"
         message += ']'
     message += "\n)"
     return message
