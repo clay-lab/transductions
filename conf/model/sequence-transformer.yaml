@@ -1,3 +1,5 @@
+name: Transformer
+
 encoder:
   unit: Transformer
   type: sequence

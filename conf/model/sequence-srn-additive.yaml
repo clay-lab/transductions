@@ -1,3 +1,5 @@
+name: SRN-Additive
+
 encoder:
   unit: SRN
   type: sequence

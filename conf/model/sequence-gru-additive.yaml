@@ -1,3 +1,5 @@
+name: GRU-Additive
+
 encoder:
   unit: GRU
   type: sequence

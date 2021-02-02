@@ -1,3 +1,5 @@
+name: Tom-Transformer
+
 encoder:
   unit: Transformer
   type: sequence

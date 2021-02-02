@@ -1,3 +1,5 @@
+name: LSTM-Additive
+
 encoder:
   unit: LSTM
   type: sequence

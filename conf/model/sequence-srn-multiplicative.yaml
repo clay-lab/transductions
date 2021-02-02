@@ -1,3 +1,5 @@
+name: SRN-Multiplicative
+
 encoder:
   unit: SRN
   type: sequence

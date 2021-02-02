@@ -2,4 +2,4 @@
 
 hydra:
   run:
-    dir: ./outputs/${experiment.name}/${experiment.model.encoder.unit}-${experiment.model.decoder.unit}-${experiment.model.decoder.attention}/${now:%Y-%m-%d_%H-%M-%S}
+    dir: ./outputs/${experiment.name}/${experiment.model.name}/${now:%Y-%m-%d_%H-%M-%S}
