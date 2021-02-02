@@ -145,7 +145,7 @@ tokens.
 
 The `splits` parameters (`train`, `test`, `val`) specify how the full dataset
 should be randomly split into different splits. Note that the float values 
-here must sum to `1.0`.
+here must sum to `100`.
 
 The `withholding` parameter specifies a list of strings which are used as 
 RegEx matches to withhold a particular entry from the in-distribution splits
