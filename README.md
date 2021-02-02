@@ -30,162 +30,126 @@ run `poetry shell && poetry install` to activate a virtual environment and insta
 
 ## Training
 
-To train a new model, run the following script:
-```bash
-python train.py
-```
-The `train.py` script is configured through the `train.yaml` file in the `conf`
-directory. This YAML file specifies three further configuration options: 
-`experiment/hyperparameters`, `experiment/model`, and `experiment/dataset`, 
-each of which point to more configuration files in their respective directories. 
-If `train.py` is run without any further options, it will load the default values 
-for these three config files.
+Models are trained via the `train.py` script, which is in turn configured using
+the `conf/train.yaml` file, shown below:
+```YAML
+defaults:
+  - experiment: ???
+  - hydra/output: custom
 
-Outputs from training runs are stored in the `outputs/` directory. If this 
-directory is not present, it will be created on first run. Outputs are, by
-default, grouped by `experiment.name`, model type, date, and time.
-An example `outputs/` directory from the model sepcified in the default
-configuration would look something like this:
+pretty_print: true
+```
+The `- experiment: ???` line means that an experiment must be specified on the
+command line. To try it out, run the following command:
+```bash
+python train.py experiment=test
+```
+This loads up the example experiment defined in `conf/experiment/test.yaml` and
+begins training a model. Every experiment configuration file must specify four
+things:
+ - A `name`, which is a unique identifier in the `outputs/` directory to group
+   all runs of the experiment together.
+ - A `dataset`, which is the name of a dataset configuration file in the `conf/dataset/`
+   directory.
+ - A `model`, which is the name of a model configuration file in the `conf/model/` 
+   directory.
+ - `hyperparameters`, which is the name of a hyperparameter configuration file in the `conf/hyperparameters/`
+   directory.
+
+This is the `test.yaml` file:
+```YAML
+defaults:
+  - /dataset: alice-1
+  - /hyperparameters: default
+  - /model: test-model
+
+name: test-exp
+```
+If you want to define your own experiments, make a new YAML file and place it in
+the `conf/experiment` directory. Transductions uses Hydra to manage these 
+configurations---if you're interested in how this works, check out their 
+[website](hydra.cc) for documentation and examples.
+
+Outputs from a training session (the model weights, a copy of the model and Hydra 
+configurations, etc.) are stored in the `outputs/` directory. If this directory
+doesn't exist, one will be created for you. Runs are organized in the following
+way, as an example:
 ```
 outputs/
-  experiment-1/
-    SRN-SRN-None/
-      2021-01-01_14-30-00/
+  experiment/
+    model/
+      YYYY-MM-DD_HH-MM-SS/
         .hydra/
         tensorboard/
         model.pt
+        source.pt
+        target.pt
         train.log
 ```
-The `model.pt` file contains the model weights.
-The `train.log` file records the output of `stdout` and `stderr` as logged
-during training. The `.hydra/` directory contains a copy of the configuration
-specified when training began. The `tensorboard` directory contains the
-tensorboard events created during training.
-
-### Overriding defaults
-The default values for each configuration option can be overwritten, 
-either through the creation of new YAML configuration files and/or
-through values provided through the command-line interface. The 
-default `train.yaml` looks like the following:
-```
-defaults:
-  - experiment/hyperparameters: default
-  - experiment/model: sequence-srn-inattentive
-  - experiment/dataset: alice-herself
-
-  - hydra/output: custom
-
-experiment:
-  name: experiment-1
-
-pretty_print: True
-```
-You can (and should) change `experiment.name` to be whatever you want.
-The three `experiment/...` parameters under the `defaults:` parameter
-are specifying config files in those directories to load. To run a
-training instance with a different configuraiton, create new 
-config files which match the schema of the provided ones and point
-`train.yaml` to look at those files instead. For example, we might
-add a new model configuration called `sequence-gru-inattentive.yaml`,
-which specifies the following model:
-```YAML
-# @package _group_
-encoder:
-  unit: GRU
-  type: sequence
-  dropout: 0
-  num_layers: 1
-  hidden_size: 256
-  max_length: 0
-  embedding_size: 256
-  bidirectional: False
-decoder:
-  unit: GRU
-  type: sequence
-  dropout: 0
-  num_layers: 1
-  max_length: 30
-  hidden_size: 256
-  attention: None
-  embedding_size: 256
-```
-We can then train with this model by changing `- experiment/model:` to be `inattentive-gru-sequence`:
-```
-defaults:
-  - experiment/hyperparameters: default
-  - experiment/model: inattentive-gru-sequence
-  - experiment/dataset: alice-herself
-
-  - hydra/output: custom
-
-experiment:
-  name: experiment-1
-
-pretty_print: True
-```
-
-Alternatively, we can train with this new model directly from the command-line by overwriting the default value:
-```bash
-python train.py experiment/model=inattentive-gru-sequence
-```
-
-## Defining an experiment
-
-An experiment consists of several parts, including:
-- **Dataset:** The dataset is the training, testing, and evaluation data given 
-    to the model and used to evaluate its performance. The dataset for a given
-    experiment is defined as an entry in `conf/experiment/dataset/`, and consists
-    of a raw input data source, which lives as a TSV file in
-    the `data/raw/` directory and a configuration file which specifies how the
-    raw data is turned into splits for training, testing, and evaluation, as well
-    as any withholding done to create a generalization set or separate tracking
-    splits to evaluate performance on a specific subset of the full data.
-- **Models:** Models for an experiment are defined by configuration files in the
-    `conf/experiment/model/` directory. These configuration files specify the hyperparameters
-    of the model, and allow an experiment to quickly and briefly specify the
-    types of models to be used.
-- **Hyperparameters:** Things like batch size, early stopping, learning rate,
-    and so on are defined by config files in the `conf/experiment/hyperparameters/` directory.
 
 ### Dataset Configuration
-
-A `dataset` has the following configuration schema:
+At a high level, the dataset configuration file specifies the relationship
+between an input file, containing the full dataset, and the various splits
+which are used in an experiment. By default, Transductions assumes that you
+want to generate these splits on the first use of the dataset. To see how this
+works, let's walk through the `alice-1.yaml` configuration file, which creates
+a dataset used in Frank & Petty, [“Sequence-to-Sequence Networks Learn the 
+Meaning of Reflexive Anaphora”](https://www.aclweb.org/anthology/2020.crac-1.16/) (2020):
 ```YAML
-# @package _group_
-name: experiment-1 
-input: grammar-1.tsv
-source_format: sequence
-target_format: sequence
-overwrite: false
+# alice-1.yaml
+#
+# Withholds reflexive sentences containing "Alice" (e.g., "Alice sees herself")
+# during training to explore lexical generalization.
+
+name: alice-1
+input: grammar-1.tsv # where is the full dataset
+source_format: sequence # 'sequence' or 'tree'
+target_format: sequence # 'sequence' or 'tree'
+overwrite: False # Always re-create splits from raw data?
+transform_field: source # 'source' or 'target', which should include transforms?
+
 splits:
   train: 80
   test: 10
   val: 10
-withholding:
-  - ^Alice \w+ herself.*
+
+# Defines the generalization set. All inputs which match the provided
+# regex will be withheld from the train/test/val splits.
+withholding: 
+  - '^Alice \w+ herself.*'
+
+# Defines named test sets. For each entry, a .pt file will be created 
+# containing all inputs which match the given regex.
 tracking:
-  alice: ^Alice.*
+  alice_subject: '^Alice.*'
+  alice_object: '^\w+ \w+ Alice.*'
+  alice_reflexive: '^Alice \w+ herself.*'
+  alice_subject_transitive: '^Alice \w+ \w+'
+  alice_subject_intransitive: '^Alice \w+\t'
+  alice_alice: 'Alice \w+ Alice'
+
+  herself: 'herself'
+  himself: 'himself'
 ```
 
-This defines the relationship between the input data (the file specified by the 
-`input` parameter) and the generated output data. Multiple experiments can use
-the same `input` file but may generate distinct outputs due to differences in 
-how the splits are generated, different withholding patterns, or different 
-tracking patterns. The `splits` parameter defines a dictionary of percentages
-which must add up to 100. The percentages specify how the *in-sample* data
-is broken into splits. You must provide values for `train`, `test`, and `val`.
-The `withholding` parameter specifies a list of regular expressions which
-define a generalization set. Input sequences which match any of these regexes
-are withheld from the in-sample data and are instead put into a separate split.
-In total, the generated `train.pt`, `test.pt`, `val.pt`, and `gen.pt` files
-are mutually disjoint and their union is simply the original `input` file.
+The `name:` parameter specifies a custom identifier used as a directory name
+in the `data/processed/` directory. The `input:` parameter is the name of 
+the source file containing the full dataset in the `data/raw/` directory.
+The `source_format` and `target_format` parameters specify what kind of data
+are used for the source and target of the dataset. For the time being, the only
+valid choice is `sequence`. The `overwrite` parameter specifies whether or not
+the dataset should be re-created every time you kick off a training run. This
+should probably be `False` unless you are tweaking the dataset. The `transform_field`
+specifies which field, `source` or `target`, should contain the transformation
+tokens.
 
-The `tracking` parameter also specifies various `.pt` files, but in a different
-way. This is a dictionary of the form `{name : regex}`, where `name` is the name
-of the generated file and `regex` is a regex which determines which sequences
-are included. Importantly, this has no effect on split generation and is merely
-used to allow for the logging of model performance on different subsets of the
-data during training.
+The `splits` parameters (`train`, `test`, `val`) specify how the full dataset
+should be randomly split into different splits. Note that the float values 
+here must sum to `1.0`.
+
+The `withholding` parameter specifies a list of strings which are used as 
+RegEx matches to withhold a particular entry from the in-distribution splits
+and instead place it in a `gen` split.
 
 ## Evaluation
 
