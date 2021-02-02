@@ -1,7 +1,7 @@
 defaults:
   - /dataset: alice-1
   - /hyperparameters: default
-  - /model: ???
+  - /model: test-model
 
 name: test-exp
   
