@@ -1,5 +1,7 @@
 import logging
+import random
 import torch
+import numpy as np
 import hydra
 import os
 import torch.nn as nn
@@ -17,7 +19,7 @@ from torchtext.vocab import Vocab
 from core.models.base_model import TransductionModel
 from core.models.model_io import ModelIO
 from core.dataset.base_dataset import TransductionDataset
-from core.metrics.base_metric import SequenceAccuracy, TokenAccuracy, LossMetric, LengthAccuracy, NthTokenAccuracy
+from core.metrics.base_metric import *
 from core.metrics.meter import Meter
 from core.early_stopping import EarlyStopping
 
@@ -41,6 +43,15 @@ class Trainer:
 
     self._device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     log.info("DEVICE: {}".format(self._device))
+
+    # Check if a random seed should be set
+    if 'seed' in self._cfg.experiment.hyperparameters.keys():
+      random_seed = int(self._cfg.experiment.hyperparameters.seed)
+      np.random.seed(random_seed)
+      random.seed(random_seed)
+      torch.manual_seed(random_seed)
+      torch.cuda.manual_seed(random_seed)
+      torch.backends.cudnn.deterministic = True
 
   def _normalize_lengths(self, output: Tensor, target: Tensor) -> Tuple[Tensor, Tensor]:
     """
@@ -133,9 +144,8 @@ class Trainer:
     tok_acc = TokenAccuracy(self._dataset.target_field.vocab.stoi['<pad>'])
     len_acc = LengthAccuracy(self._dataset.target_field.vocab.stoi['<pad>'])
     avg_loss = LossMetric(F.cross_entropy)
-    frst_wrd_acc = NthTokenAccuracy(n=1)
     
-    meter = Meter([seq_acc, tok_acc, frst_wrd_acc, len_acc, avg_loss])
+    meter = Meter([seq_acc, tok_acc, len_acc, avg_loss])
 
     for epoch in range(epochs):
 
@@ -246,8 +256,12 @@ class Trainer:
     self._load_checkpoint(eval_cfg.checkpoint_dir)
 
     # Create meter
-    token_acc = TokenAccuracy(self._dataset.target_field.vocab.stoi['<pad>'])
-    meter = Meter([token_acc])
+    seq_acc = SequenceAccuracy()
+    tok_acc = TokenAccuracy(self._dataset.target_field.vocab.stoi['<pad>'])
+    len_acc = LengthAccuracy(self._dataset.target_field.vocab.stoi['<pad>'])
+    avg_loss = LossMetric(F.cross_entropy)
+
+    meter = Meter([seq_acc, tok_acc, len_acc, avg_loss])
 
     log.info("Beginning evaluation")
     self._model.eval()
