@@ -3,3 +3,6 @@
 hydra:
   run:
     dir: ./outputs/${experiment.name}/${experiment.model.name}/${now:%Y-%m-%d_%H-%M-%S}
+  sweep:
+    dir: ${hydra.run.dir}
+    subdir: ${hydra.job.num}
