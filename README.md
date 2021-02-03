@@ -151,6 +151,24 @@ The `withholding` parameter specifies a list of strings which are used as
 RegEx matches to withhold a particular entry from the in-distribution splits
 and instead place it in a `gen` split.
 
+The `tracking` parameter defines a dictionary of RegExes which are used to
+create tracking splits. These are evaluated along side the `train`, `test`,
+`val`, and `gen` splits during training every epoch, but they don't affect 
+how data are split up or withheld. For each `key : value` combination specified
+here, a `key.pt` file will be created in the `data/processed/DATASET/` directory
+containing all lines from the input which match the `value` regex.
+
+
+### Creating Static Datasets
+Not every `gen` set or tracking set can be nicely defined by a regular expression.
+In this case, it's not possible to dynamically re-created the dataset from the
+original source file using Transductions. But, if you manually/externally
+separate out the `train/test/val/gen` splits, you can use these as-is without
+any of the dynamic processing. To do this, just create a directory in 
+`data/processed/` matching the name of your dataset, place the `train.pt`,
+`val.pt`, `test.pt`, and `gen.pt` splits there, and make sure that `overwrite:`
+is set to `False` in the dataset configuration YAML file.
+
 ## Evaluation
 
 There are two ways to evaluate model performance. The first is using `eval.py`, which will load 
