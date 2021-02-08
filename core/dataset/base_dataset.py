@@ -8,6 +8,7 @@ from typing import Dict
 import shutil
 import pickle
 from torchtext.data import Field, TabularDataset, BucketIterator
+from transformers import BertTokenizer
 
 log = logging.getLogger(__name__)
 
@@ -163,7 +164,7 @@ class TransductionDataset:
 
     return batch_strings
 
-  def __init__(self, cfg: DictConfig, device, fields: Dict = None):
+  def __init__(self, cfg: DictConfig, device, fields: Dict = None, BERT = False):
 
     log.info("Initializing dataset")
 
@@ -204,7 +205,10 @@ class TransductionDataset:
     else:
       log.info("Constructing fields from dataset.")
       if source_format == 'sequence' and target_format == 'sequence':
-        self.source_field = Field(lower=True, eos_token='<eos>', init_token='<sos>') 
+        tokenizer = BertTokenizer.from_pretrained('bert-base-uncased').encode if BERT else str.split
+        lower = False if BERT else True
+        self.source_field = Field(lower=lower, eos_token='<eos>', init_token='<sos>',
+                                    tokenize=tokenizer)
         self.target_field = Field(lower=True, eos_token='<eos>', init_token='<sos>') 
       else:
         raise NotImplementedError

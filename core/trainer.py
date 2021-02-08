@@ -66,7 +66,7 @@ class Trainer:
     elif diff > 0:
       # output is longer than target. Add <pad> index to end 
       # of target until length is equal
-      target = F.pad(input=target, pad=(0, diff), value=pad_tok)
+      target = F.pad(input=target, pad=(0, diff), value=pad_idx)
     else:
       # target is longer than output. Add one-hot tensor hot in
       # index == pad_idx to end until length is equal
@@ -89,12 +89,14 @@ class Trainer:
 
   def _load_dataset(self, cfg: DictConfig, from_paths: Dict = None):
 
+    BERT = cfg.model.encoder.unit == 'BERT'
+
     if from_paths is not None:
       src_field = pickle.load(open(from_paths['source'], 'rb'))
       tgt_field = pickle.load(open(from_paths['target'], 'rb'))
-      dataset = TransductionDataset(cfg, self._device, {'source': src_field, 'target': tgt_field})
+      dataset = TransductionDataset(cfg, self._device, {'source': src_field, 'target': tgt_field}, BERT=BERT)
     else:
-      dataset = TransductionDataset(cfg, self._device)
+      dataset = TransductionDataset(cfg, self._device, BERT=BERT)
     
     log.info(dataset)
     return dataset

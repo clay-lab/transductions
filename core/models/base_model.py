@@ -7,9 +7,11 @@ import logging
 from omegaconf import DictConfig
 from torchtext.vocab import Vocab
 from torchtext.data.batch import Batch
+from transformers.utils.dummy_pt_objects import BertModel
 
 # library imports
 from core.models.sequence_encoder import SequenceEncoder
+from core.models.bert_encoder import BERTEncoder
 from core.models.sequence_decoder import SequenceDecoder
 from core.models.model_io import ModelIO
 from core.dataset.base_dataset import TransductionDataset
@@ -38,7 +40,10 @@ class TransductionModel(torch.nn.Module):
     decoder_cfg = cfg.model.decoder
 
     if cfg.dataset.source_format == 'sequence':
-      self._encoder = SequenceEncoder(encoder_cfg, src_vocab)
+      if encoder_cfg.unit == 'BERT':
+        self._encoder = BERTEncoder(encoder_cfg, src_vocab)
+      else:
+        self._encoder = SequenceEncoder(encoder_cfg, src_vocab)
     else:
       raise NotImplementedError
     
