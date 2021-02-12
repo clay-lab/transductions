@@ -18,6 +18,9 @@ class BERTEncoder(nn.Module):
 
     super().__init__()
     self.module = BertModel.from_pretrained('bert-base-uncased')
+
+    for param in self.module.parameters():
+      param.requires_grad = False
   
   def forward(self, enc_input: ModelIO) -> ModelIO:
 
