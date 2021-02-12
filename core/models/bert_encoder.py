@@ -19,6 +19,7 @@ class BERTEncoder(nn.Module):
     super().__init__()
     self.module = BertModel.from_pretrained('bert-base-uncased')
 
+    # Freeze BERT layers to speed up training
     for param in self.module.parameters():
       param.requires_grad = False
   

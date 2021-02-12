@@ -286,12 +286,13 @@ class Trainer:
             # TODO: SHOULD WE USE normed ouputs instead of prediction ehre?
             meter(prediction, target)
 
-            src_toks = self._dataset.id_to_token(source, 'source')
+            # src_toks = self._dataset.id_to_token(source, 'source')
             pred_toks = self._dataset.id_to_token(prediction.argmax(1), 'target')
             tgt_toks = self._dataset.id_to_token(target, 'target')
 
-            for seq in range(len(src_toks)):
-              src_line = ' '.join(src_toks[seq])
+            for seq in range(len(tgt_toks)):
+              # src_line = ' '.join(src_toks[seq])
+              src_line = 'SRC'
               tgt_line = ' '.join(tgt_toks[seq])
               pred_line = ' '.join(pred_toks[seq])
 
