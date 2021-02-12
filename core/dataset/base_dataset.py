@@ -205,10 +205,13 @@ class TransductionDataset:
     else:
       log.info("Constructing fields from dataset.")
       if source_format == 'sequence' and target_format == 'sequence':
-        tokenizer = BertTokenizer.from_pretrained('bert-base-uncased').encode if BERT else str.split
+        tokenizer = BertTokenizer.from_pretrained('bert-base-uncased') if BERT else str.split
         lower = False if BERT else True
-        self.source_field = Field(lower=lower, eos_token='<eos>', init_token='<sos>',
-                                    tokenize=tokenizer)
+        pad = tokenizer.convert_tokens_to_ids(tokenizer.pad_token) if BERT else '<pad>'
+        sos = tokenizer.convert_tokens_to_ids(tokenizer.bos_token) if BERT else '<sos>'
+        eos = None if BERT else '<eos>'
+        self.source_field = Field(lower=lower, eos_token=eos, init_token=sos,
+                                    tokenize=tokenizer.encode, use_vocab=lower, pad_token=pad)
         self.target_field = Field(lower=True, eos_token='<eos>', init_token='<sos>') 
       else:
         raise NotImplementedError
