@@ -2,27 +2,56 @@
 # 
 # Provides BERTEncoder module.
 
-from typing import Dict
-import torch
 from torch import nn
 from omegaconf import DictConfig
 from torchtext.vocab import Vocab
-from transformers import BertTokenizer, BertModel
+from transformers import DistilBertModel, DistilBertConfig
+from transformers.models.distilbert.modeling_distilbert import Embeddings
 
 # Library imports
 from core.models.model_io import ModelIO
+from core.models.positional_encoding import PositionalEncoding
+
+class PositionalBertEmbeddings(Embeddings):
+
+  def __init__(self, config):
+    super().__init__(config)
+
+    self.pos_enc = PositionalEncoding(768)
+  
+  def forward(self, input_ids):
+      embeddings = super().forward(input_ids)
+      embeddings = self.pos_enc(embeddings)
+
+      return embeddings
+      
+
+  # def forward(self, input_ids=None, token_type_ids=None, position_ids=None, inputs_embeds=None):
+  #   embeddings = super().forward(input_ids=input_ids, token_type_ids=token_type_ids, position_ids=position_ids, inputs_embeds=inputs_embeds)
+
 
 class BERTEncoder(nn.Module):
 
   def __init__(self, cfg: DictConfig, vocab: Vocab):
 
     super().__init__()
-    self.module = BertModel.from_pretrained('bert-base-uncased')
 
-    # Freeze BERT layers to speed up training
-    for param in self.module.parameters():
-      param.requires_grad = False
-  
+    config = DistilBertConfig()
+    config.sinusoidal_pos_embds = True
+
+    self.module = DistilBertModel.from_pretrained('distilbert-base-uncased', config=config)
+
+    # Add in our own positional encodings
+    embedding_layer = PositionalBertEmbeddings(self.module.config)
+    self.module.embeddings = embedding_layer
+
+    # raise SystemExit
+
+    if cfg.should_freeze:
+      # Freeze BERT layers to speed up training
+      for param in self.module.parameters():
+        param.requires_grad = False
+
   def forward(self, enc_input: ModelIO) -> ModelIO:
 
     encoded = self.module(enc_input.source)

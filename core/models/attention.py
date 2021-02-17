@@ -9,12 +9,18 @@ from abc import abstractmethod, ABC
 
 from torch import Tensor
 from torchtext.vocab import Vocab
+from transformers import DistilBertTokenizer
 
 def create_mask(source: Tensor, vocab: Vocab) -> Tensor:
 
   source = source.T
   batch_size, max_len = source.shape
-  pad_index = vocab.stoi['<pad>']
+  if vocab is None:
+    # BERT Encoder, get the index from the tokenizer
+    tokenizer = DistilBertTokenizer.from_pretrained('distilbert-base-uncased')
+    pad_index = tokenizer.convert_tokens_to_ids('[PAD]')
+  else:
+    pad_index = vocab.stoi['<pad>']
 
   mask = source.mul(source.ne(pad_index)).type(torch.bool)
   return mask

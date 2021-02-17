@@ -1,4 +1,4 @@
-name: BERT
+name: BERT-4
 
 encoder:
   unit: BERT
@@ -8,10 +8,10 @@ decoder:
   unit: Transformer
   type: sequence
   dropout: 0
-  num_layers: 1
+  num_layers: 4
   max_length: 30
   hidden_size: 768
   embedding_size: 768
-  num_heads: 8
+  num_heads: 4
   attention: null
   

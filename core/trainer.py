@@ -92,7 +92,7 @@ class Trainer:
     BERT = cfg.model.encoder.unit == 'BERT'
 
     if from_paths is not None:
-      src_field = pickle.load(open(from_paths['source'], 'rb'))
+      src_field = pickle.load(open(from_paths['source'], 'rb')) if not BERT else None
       tgt_field = pickle.load(open(from_paths['target'], 'rb'))
       dataset = TransductionDataset(cfg, self._device, {'source': src_field, 'target': tgt_field}, BERT=BERT)
     else:
@@ -121,7 +121,8 @@ class Trainer:
 
     src_field = self._dataset.source_field
     tgt_field = self._dataset.target_field
-    self._model = self._load_model(self._cfg.experiment, src_field.vocab, tgt_field.vocab, model_path)
+    src_vocab = src_field.vocab if hasattr(src_field, 'vocab') else None
+    self._model = self._load_model(self._cfg.experiment, src_vocab, tgt_field.vocab, model_path)
 
   def train(self):
     
@@ -197,7 +198,7 @@ class Trainer:
             meter(output, target)
 
             # Compute average validation loss
-            val_loss += F.cross_entropy(output, target) / len(V)
+            val_loss += F.cross_entropy(output, target) / len(batch)
             V.set_postfix(val_loss='{:4.3f}'.format(val_loss.item()))
 
           meter.log(stage='val', step=epoch)

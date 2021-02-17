@@ -144,7 +144,7 @@ class SequenceDecoder(torch.nn.Module):
     # Attention
     if self.attention_type is not None:
       attention = torch.zeros(gen_len, batch_size, seq_len).to(avd)
-      src_mask = create_mask(dec_input.source, self._src_vocab) # BUG: THIS SHOULD BE THE ENC VOCAB
+      src_mask = create_mask(dec_input.source, self._src_vocab)
     else:
       src_mask = None
 
@@ -220,8 +220,9 @@ class SequenceDecoder(torch.nn.Module):
     elif hasattr(dec_inputs, 'enc_hidden'):
       h = dec_inputs.enc_hidden
     else:
-      log.error(f"I don't have any hidden state to use for the step from {dec_inputs}.")
-      raise SystemError
+      h = dec_inputs.enc_outputs[-1]
+      # log.error(f"I don't have any hidden state to use for the step from {dec_inputs}.")
+      # raise SystemError
 
     batch_size = h.shape[0]
 

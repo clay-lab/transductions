@@ -1,8 +1,8 @@
-name: BERT
+name: BERT-unfrozen
 
 encoder:
   unit: BERT
-  should_freeze: true
+  should_freeze: false
   
 decoder:
   unit: Transformer

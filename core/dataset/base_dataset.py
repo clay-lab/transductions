@@ -8,7 +8,7 @@ from typing import Dict
 import shutil
 import pickle
 from torchtext.data import Field, TabularDataset, BucketIterator
-from transformers import BertTokenizer
+from transformers import DistilBertTokenizer
 
 log = logging.getLogger(__name__)
 
@@ -168,7 +168,8 @@ class TransductionDataset:
 
     log.info("Initializing dataset")
 
-    data_path = os.path.join(hydra.utils.get_original_cwd(), 'data')
+    # data_path = os.path.join(hydra.utils.get_original_cwd(), 'data')
+    data_path = '/Users/jacksonpetty/Documents/Development/transductions/data'
     process_root_path = os.path.join(data_path, 'processed')
     self._processed_path = os.path.join(process_root_path, cfg.dataset.name)
     self._raw_path = os.path.join(data_path, 'raw', cfg.dataset.input)
@@ -200,18 +201,29 @@ class TransductionDataset:
       if source_format == 'sequence' and target_format == 'sequence':
         self.source_field = fields['source']
         self.target_field = fields['target']
+
+        if self.source_field is None:
+          tokenizer = DistilBertTokenizer.from_pretrained('distilbert-base-uncased') if BERT else str.split
+          lower = False if BERT else True
+          pad = tokenizer.convert_tokens_to_ids(tokenizer.pad_token) if BERT else '<pad>'
+          sos = tokenizer.convert_tokens_to_ids(tokenizer.bos_token) if BERT else '<sos>'
+          eos = None if BERT else '<eos>'
+          tok_fun = tokenizer.encode if BERT else tokenizer
+          self.source_field = Field(lower=lower, eos_token=eos, init_token=sos,
+                                      tokenize=tok_fun, use_vocab=lower, pad_token=pad)
       else:
         raise NotImplementedError
     else:
       log.info("Constructing fields from dataset.")
       if source_format == 'sequence' and target_format == 'sequence':
-        tokenizer = BertTokenizer.from_pretrained('bert-base-uncased') if BERT else str.split
+        tokenizer = DistilBertTokenizer.from_pretrained('distilbert-base-uncased') if BERT else str.split
         lower = False if BERT else True
         pad = tokenizer.convert_tokens_to_ids(tokenizer.pad_token) if BERT else '<pad>'
         sos = tokenizer.convert_tokens_to_ids(tokenizer.bos_token) if BERT else '<sos>'
         eos = None if BERT else '<eos>'
+        tok_fun = tokenizer.encode if BERT else tokenizer
         self.source_field = Field(lower=lower, eos_token=eos, init_token=sos,
-                                    tokenize=tokenizer.encode, use_vocab=lower, pad_token=pad)
+                                    tokenize=tok_fun, use_vocab=lower, pad_token=pad)
         self.target_field = Field(lower=True, eos_token='<eos>', init_token='<sos>') 
       else:
         raise NotImplementedError
@@ -220,9 +232,11 @@ class TransductionDataset:
     self._create_iterators(cfg)
 
     if fields is None:
-      self.source_field.build_vocab(*self._in_sample_data)
-      self.target_field.build_vocab(*self._in_sample_data)
-      pickle.dump(self.source_field, open('source.pt', 'wb'))		
+      if not BERT:
+        self.source_field.build_vocab(*self._in_sample_data)
+        pickle.dump(self.source_field, open('source.pt', 'wb'))	
+        
+      self.target_field.build_vocab(*self._in_sample_data)	
       pickle.dump(self.target_field, open('target.pt', 'wb'))
 
   def __repr__(self):

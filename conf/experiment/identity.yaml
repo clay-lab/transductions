@@ -1,0 +1,7 @@
+defaults:
+  - /dataset: iden
+  - /hyperparameters: long
+  - /model: bert
+
+name: identity
+  
