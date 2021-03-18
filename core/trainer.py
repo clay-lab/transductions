@@ -146,9 +146,10 @@ class Trainer:
     seq_acc = SequenceAccuracy()
     tok_acc = TokenAccuracy(self._dataset.target_field.vocab.stoi['<pad>'])
     len_acc = LengthAccuracy(self._dataset.target_field.vocab.stoi['<pad>'])
+    first_acc = NthTokenAccuracy(n=1)
     avg_loss = LossMetric(F.cross_entropy)
     
-    meter = Meter([seq_acc, tok_acc, len_acc, avg_loss])
+    meter = Meter([seq_acc, tok_acc, len_acc, first_acc, avg_loss])
 
     for epoch in range(epochs):
 
@@ -262,9 +263,10 @@ class Trainer:
     seq_acc = SequenceAccuracy()
     tok_acc = TokenAccuracy(self._dataset.target_field.vocab.stoi['<pad>'])
     len_acc = LengthAccuracy(self._dataset.target_field.vocab.stoi['<pad>'])
+    first_acc = NthTokenAccuracy(n=1)
     avg_loss = LossMetric(F.cross_entropy)
 
-    meter = Meter([seq_acc, tok_acc, len_acc, avg_loss])
+    meter = Meter([seq_acc, tok_acc, len_acc, first_acc, avg_loss])
 
     log.info("Beginning evaluation")
     self._model.eval()
@@ -282,7 +284,7 @@ class Trainer:
             source = batch.source.permute(1, 0)
             prediction = self._model(batch).permute(1, 2, 0)
             target = batch.target.permute(1, 0)
-            output, target = self._normalize_lengths(prediction, target)
+            prediction, target = self._normalize_lengths(prediction, target)
 
             # TODO: SHOULD WE USE normed ouputs instead of prediction ehre?
             meter(prediction, target)

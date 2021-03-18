@@ -45,14 +45,18 @@ class BERTEncoder(nn.Module):
     embedding_layer = PositionalBertEmbeddings(self.module.config)
     self.module.embeddings = embedding_layer
 
-    # raise SystemExit
-
     if cfg.should_freeze:
       # Freeze BERT layers to speed up training
       for param in self.module.parameters():
         param.requires_grad = False
+    
+    layer = nn.TransformerEncoderLayer(self._hidden_size, cfg.num_heads)
+    self.unit = nn.TransformerEncoder(layer, num_layers=self._num_layers)
 
   def forward(self, enc_input: ModelIO) -> ModelIO:
 
-    encoded = self.module(enc_input.source)
+    embedded = self.module(enc_input.source)
+    print(embedded)
+    raise SystemError
+    encoded = self.unit(embedded.last_hidden_state)
     return ModelIO({"enc_outputs" : encoded.last_hidden_state})

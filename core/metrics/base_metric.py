@@ -55,6 +55,7 @@ class SequenceAccuracy(BaseMetric):
 
   def compute(self, prediction: Tensor, target: Tensor):
     prediction = prediction.argmax(1)
+
     correct = (prediction == target).prod(axis=1)
     total = correct.shape[0]
     correct = correct.sum()

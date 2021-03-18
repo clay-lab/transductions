@@ -12,7 +12,7 @@ input: tom-question.tsv
 source_format: sequence
 target_format: sequence
 overwrite: False 
-transform_field: source
+transform_field: target
 
 splits:
   train: 80

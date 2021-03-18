@@ -168,8 +168,8 @@ class TransductionDataset:
 
     log.info("Initializing dataset")
 
-    # data_path = os.path.join(hydra.utils.get_original_cwd(), 'data')
-    data_path = '/Users/jacksonpetty/Documents/Development/transductions/data'
+    data_path = os.path.join(hydra.utils.get_original_cwd(), 'data')
+    # data_path = '/Users/jacksonpetty/Documents/Development/transductions/data'
     process_root_path = os.path.join(data_path, 'processed')
     self._processed_path = os.path.join(process_root_path, cfg.dataset.name)
     self._raw_path = os.path.join(data_path, 'raw', cfg.dataset.input)
