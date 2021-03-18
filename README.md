@@ -114,6 +114,74 @@ This file sets the following options:
 
 **A note on Early Stopping:** Currently, `transductions` implements early stopping for all models, and there isn't yet a good way to turn it off. However, if `patience >= epochs` in the hyperparameter configuration file, this essentially turns off early stopping since the model will always run for `epochs` number of epochs and then stop. It's a bit hacky, and I plan to introduce an actual configuration option for it in the future, but for now this will get the job done.
 
+### Model Configuration
+A model configuration specifies details of the model architecture for the encoder and the decoder. Here is an example configuration file which specifies a GRU-Encoder, GRU-Decoder model with no attention.
+````YAML
+# sequence-gru-inattentive.yaml
+
+name: GRU
+
+encoder:
+  unit: GRU
+  type: sequence
+  dropout: 0
+  num_layers: 1
+  embedding_size: 256
+  hidden_size: 256
+  
+decoder:
+  unit: GRU
+  type: sequence
+  attention: null
+  dropout: 0
+  num_layers: 1
+  max_length: 30
+  embedding_size: 256
+  hidden_size: 256
+````
+
+The `name` parameter defines a unique name for the model which will be used to identify and group runs of a particular experiment which have been trained using this architecture. For example, a run of `experiment-1` using the `sequence-gru-inattentive.yaml` model would be grouped under `outputs/experiment-1/GRU` since this is the specified `name` of this particular model.
+
+The encoder and decoder have separate configuration options within the file. For both,
+- `unit` specifies the type of (recurrent or transformer) unit used in the model. Available options are `GRU`, `SRN`, `LSTM`, or `Transformer`.
+- `type` specifies the format of the data to be read in (for the encoder) or produced (by the decoder). Right now, the only valid option is `sequence` (which implements the classic seq-to-seq architecture) but it is planned to also allow for tree/graph based inputs and outputs as well in the future.
+- `dropout`: The probability of dropout in the unit.
+- `num_layers`: How many layers the encoder or decoder should have for their units.
+- `embedding_size`: Size of the embedding dimension.
+- `hidden_size`: Size of the hidden layer.
+
+The decoder has two additional properties:
+- `attention`: What kind of attention to use. Valid options are `null`, `Additive`, `Multiplicative`, and `DotProduct`.
+- `max_length`: The maximum length of sequences that the decoder can produce. Used to prevent the decoder from accidentally producing unbounded sequences and never terminating.
+
+Note that for Transformer models, a slightly different configuration is needed since they implement their own form of requisite self-attention. Here is an example from the `sequence-transformer.yaml` config file:
+````YAML
+# sequence-transformer.yaml
+
+name: Transformer
+
+encoder:
+  unit: Transformer
+  type: sequence
+  dropout: 0
+  num_layers: 1
+  hidden_size: 256
+  embedding_size: 256
+  num_heads: 8
+  
+decoder:
+  unit: Transformer
+  type: sequence
+  dropout: 0
+  num_layers: 1
+  max_length: 30
+  hidden_size: 256
+  embedding_size: 256
+  num_heads: 8
+  attention: null
+````
+Note that the `attention` parameter in the decoder is not really used, and so is set to `null`, and both the encoder and decoder have an extra `num_heads` option which configures the number of heads on the multiheaded attention models.
+
 ### Dataset Configuration
 At a high level, the dataset configuration file specifies the relationship
 between an input file, containing the full dataset, and the various splits
