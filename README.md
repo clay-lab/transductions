@@ -87,6 +87,33 @@ outputs/
         train.log
 ```
 
+### Hyperparameter Configuration
+Hyperparameters are configured by options in the `conf/hyperparameters/` directory.
+The default configuration file `default.yaml` is somewhat arbitrary, but provides a
+useful example for creating customized configurations.
+```YAML
+# default.yaml
+
+epochs: 100
+batch_size: 32
+lr: 0.01
+tolerance: 0.001
+patience: 100
+tf_ratio: 0.5
+
+cuda: 0 # -1 means use CPU
+```
+This file sets the following options:
+- `epochs`: The maximum number of epochs for training. 
+- `batch_size`: The batch size used during training and evaluation.
+- `lr`: The learning rate used. Currently, `transductions` only supports using an SGD optimizer (from `torch.optim`) with a constant learning rate. Support is planned for alternative optimizers (Adam, AdamW) with adaptive learning rates.
+- `tolerance`: How much a model must decrease its validation loss by within `patience` number of epochs to avoid early stopping.
+- `patience`: How many epochs a model can run for during training without decreasing validation loss by `tolerance` before early stopping kicks in.
+- `tf_ratio` (between `0.0` and `1.0`): The teacher forcing ratio, used during training to determine whether or not a target is used during decoding versus the model's own prediction is used. Higher `tf_ratio` means that the trainer is more likely to use the target, rather than the model's own prediction.
+- `cuda`: The GPU Cuda device number to use, or else `-1` if the model should only run on CPU.
+
+**A note on Early Stopping:** Currently, `transductions` implements early stopping for all models, and there isn't yet a good way to turn it off. However, if `patience >= epochs` in the hyperparameter configuration file, this essentially turns off early stopping since the model will always run for `epochs` number of epochs and then stop. It's a bit hacky, and I plan to introduce an actual configuration option for it in the future, but for now this will get the job done.
+
 ### Dataset Configuration
 At a high level, the dataset configuration file specifies the relationship
 between an input file, containing the full dataset, and the various splits
