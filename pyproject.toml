@@ -6,8 +6,8 @@ authors = ["Jackson Petty <research@jacksonpetty.org>"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
-torch = "*"
-torchtext = "*"
+torch = "1.7.1"
+torchtext = "0.8.1"
 hydra-core = "^1.1.0.dev2"
 omegaconf = ">=2.1.0dev13"
 tensorboard = "*"
