@@ -3,7 +3,7 @@
 # Provides SequenceEncoder module.
 
 import torch
-from torch import nn
+from torch import nn, Tensor
 from omegaconf import DictConfig
 from torchtext.vocab import Vocab
 
@@ -15,32 +15,70 @@ class SequenceEncoder(torch.nn.Module):
 
   @property
   def vocab_size(self):
-    return len(self._vocabulary)
+    return len(self.vocab)
+  
+  @property
+  def num_layers(self) -> int:
+    return int(self.cfg.num_layers)
+  
+  @property
+  def hidden_size(self) -> int:
+    return int(self.cfg.hidden_size)
+  
+  @property
+  def embedding_size(self) -> int:
+    return int(self.cfg.embedding_size)
+
+  @property
+  def unit_type(self) -> str:
+    return str(self.cfg.unit).upper()
+  
+  @property
+  def dropout_p(self) -> float:
+    return float(self.cfg.dropout)
 
   def __init__(self, cfg: DictConfig, vocab: Vocab):
     
-    super(SequenceEncoder, self).__init__()
+    super().__init__()
 
-    self._num_layers = cfg.num_layers
-    self._hidden_size = cfg.hidden_size
-    self._embedding_size = cfg.embedding_size
-    self._unit_type = cfg.unit.upper()
-    self._dropout_p = cfg.dropout
+    self.cfg = cfg
+    self.vocab = vocab
+
+    # self._num_layers = cfg.num_layers
+    # self._hidden_size = cfg.hidden_size
+    # self._embedding_size = cfg.embedding_size
+    # self._unit_type = cfg.unit.upper()
+    # self._dropout_p = cfg.dropout
     
-    self._vocabulary = vocab
+    # self._vocabulary = vocab
 
-    embedding = torch.nn.Embedding(self.vocab_size, self._embedding_size)
+    embedding = torch.nn.Embedding(self.vocab_size, self.embedding_size)
 
-    if self._unit_type == 'SRN':
-      unit = nn.RNN(self._embedding_size, self._hidden_size, num_layers = self._num_layers, dropout = cfg.dropout)
-    elif self._unit_type == 'GRU':
-      unit = nn.GRU(self._embedding_size, self._hidden_size, num_layers = self._num_layers, dropout = cfg.dropout)
-    elif self._unit_type == 'LSTM':
-      unit = nn.LSTM(self._embedding_size, self._hidden_size, num_layers = self._num_layers, dropout = cfg.dropout)
-    elif self._unit_type == 'TRANSFORMER':
-      layer = nn.TransformerEncoderLayer(self._hidden_size, cfg.num_heads)
-      unit = nn.TransformerEncoder(layer, num_layers=self._num_layers)
-      pos_enc = PositionalEncoding(self._hidden_size, cfg.dropout)
+    if self.unit_type == 'SRN':
+      unit = nn.RNN(
+        self.embedding_size, 
+        self.hidden_size, 
+        num_layers = self.num_layers, 
+        dropout = self.dropout_p
+      )
+    elif self.unit_type == 'GRU':
+      unit = nn.GRU(
+        self.embedding_size, 
+        self.hidden_size, 
+        num_layers = self.num_layers, 
+        dropout = self.dropout_p
+      )
+    elif self.unit_type == 'LSTM':
+      unit = nn.LSTM(
+        self.embedding_size, 
+        self.hidden_size, 
+        num_layers = self.num_layers, 
+        dropout = self.dropout_p
+      )
+    elif self.unit_type == 'TRANSFORMER':
+      layer = nn.TransformerEncoderLayer(self.hidden_size, cfg.num_heads)
+      unit = nn.TransformerEncoder(layer, num_layers=self.num_layers)
+      pos_enc = PositionalEncoding(self.hidden_size, self.dropout_p)
       embedding = nn.Sequential(embedding, pos_enc)
     else:
       raise ValueError('Invalid recurrent unit type "{}".'.format(self._unit_type))
@@ -49,6 +87,9 @@ class SequenceEncoder(torch.nn.Module):
       embedding,
       unit
     )
+  
+  def tok_to_id(self, tokens: Tensor):
+    pass
   
   def forward(self, enc_input: ModelIO) -> ModelIO:
     """

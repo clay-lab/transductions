@@ -61,7 +61,7 @@ class Trainer:
     """
 
     diff = int(output.shape[-1] - target.shape[-1])
-    pad_idx = self._model._decoder._vocabulary.stoi['<pad>']
+    pad_idx = self._model._decoder.vocab.stoi['<pad>']
 
     if diff == 0:
       pass

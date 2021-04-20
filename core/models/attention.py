@@ -17,6 +17,9 @@ def create_mask(source: Tensor, vocab: Vocab) -> Tensor:
   mask is `False` whenever the source position is a <pad> token, and
   `True` everywhere else.
 
+    src: The man sees the boy <pad> <pad> <pad>
+    msk: T   T   T    T   T   F     F     F
+
   Used in attention computation to prevent attending to non-contentful 
   positions in a padded source (padded for considerations of batch length).
   """
