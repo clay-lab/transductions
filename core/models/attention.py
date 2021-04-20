@@ -12,6 +12,14 @@ from torchtext.vocab import Vocab
 from transformers import DistilBertTokenizer
 
 def create_mask(source: Tensor, vocab: Vocab) -> Tensor:
+  """
+  Constructs a binary boolean mask for a given source, such that the
+  mask is `False` whenever the source position is a <pad> token, and
+  `True` everywhere else.
+
+  Used in attention computation to prevent attending to non-contentful 
+  positions in a padded source (padded for considerations of batch length).
+  """
 
   source = source.T
   batch_size, max_len = source.shape
