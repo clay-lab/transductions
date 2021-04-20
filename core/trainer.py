@@ -14,14 +14,16 @@ from cmd import Cmd
 import pickle
 from torchtext.data import Batch
 from torchtext.vocab import Vocab
+import re
 
 # Library imports
 from core.models.base_model import TransductionModel
-from core.models.model_io import ModelIO
+# from core.models.model_io import ModelIO
 from core.dataset.base_dataset import TransductionDataset
 from core.metrics.base_metric import *
 from core.metrics.meter import Meter
 from core.early_stopping import EarlyStopping
+# from core.tools.trajectory import Trajectory
 
 log = logging.getLogger(__name__)
 
@@ -304,15 +306,30 @@ class Trainer:
         meter.log(stage=key, step=0)
         meter.reset()
 
+  def tpdr(self, tpdr_cfg: DictConfig):
+
+    # Load checkpoint data
+    self._load_checkpoint(tpdr_cfg.checkpoint_dir)
+
+    log.info("Beginning TPDR REPL")
+
+    repl = ModelArithmeticREPL(self._model, self._dataset)
+    repl.cmdloop()
+
   def repl(self, repl_cfg: DictConfig):
 
     # Load checkpoint data
     self._load_checkpoint(repl_cfg.checkpoint_dir)
 
+    # Create PCA Trajectory plotter
+    # trajectory = Trajectory()
+    # self._model.traj = trajectory
+
     log.info("Beginning REPL")
 
     repl = ModelREPL(self._model, self._dataset)
     repl.cmdloop()
+
 
 class ModelREPL(Cmd):
   """
@@ -354,7 +371,7 @@ class ModelREPL(Cmd):
 
     batch = self.batchify(args)
 
-    prediction = self._model(batch).permute(1, 2, 0).argmax(1)
+    prediction = self._model(batch, plot_trajectories=True).permute(1, 2, 0).argmax(1)
     prediction = self._dataset.id_to_token(prediction, 'target')[0]
     prediction = ' '.join(prediction)
 
@@ -365,6 +382,44 @@ class ModelREPL(Cmd):
     transformation = ' '.join(transformation)
 
     result = "{} → {} → {}".format(source, transformation, prediction)
+    log.info(result)
+
+  
+  def do_quit(self, args):
+    log.info("Exiting REPL.")
+    raise SystemExit
+
+class ModelArithmeticREPL(ModelREPL):
+  """
+  A REPL for doing expression math
+  """
+
+  prompt = 'λ '
+
+  def default(self, args):
+
+    expr_list = re.split("\[|\]", args)
+    expr_list = list(filter(None, [e.strip() for e in expr_list]))
+
+    transform = expr_list[0]
+    unbatched_expressions = expr_list[1:]
+
+    expressions = []
+
+    for e in unbatched_expressions:
+      if e in "+-":
+        expressions.append(e)
+      else:
+        batch = self.batchify(f"{transform} {e}")
+        expressions.append(batch)
+    
+    prediction = self._model.forward_expression(expressions).permute(1, 2, 0).argmax(1)
+    prediction = self._dataset.id_to_token(prediction, 'target')[0]
+    prediction = ' '.join(prediction)
+
+    source = ' '.join(args.split(' ')[1:])
+
+    result = "{} = {}".format(source, prediction)
     log.info(result)
   
   def do_quit(self, args):

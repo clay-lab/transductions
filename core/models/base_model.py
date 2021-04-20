@@ -55,7 +55,62 @@ class TransductionModel(torch.nn.Module):
     self._encoder.to(self.device)
     self._decoder.to(self.device)
   
-  def forward(self, batch: Batch, tf_ratio: float = 0.0):
+  def forward_expression(self, expressions):
+    """
+    ...
+    """
+
+    representations = []
+    sources = []
+
+    # Compute forward pass on each sub-expression
+    for term in expressions:
+      if isinstance(term, str):
+        representations.append(term)
+      else:
+        enc_input = ModelIO({"source" : term.source})
+        sources.append(term.source)
+        enc_output = self._encoder(enc_input)
+        representations.append(enc_output)
+
+    # Perform arithmetic operation on representations
+    buffer = {
+      "enc_hidden" : None,
+      "enc_outputs" : None
+    }
+    should_operate = False
+    for r in representations:
+      if isinstance(r, str):
+        should_operate = torch.add if r == "+" else torch.subtract
+      else:
+        if not should_operate:
+          for key in buffer:
+            try:
+              buffer[key] = getattr(r, key)
+            except:
+              buffer[key] = None
+        else:
+          for key in buffer:
+            try:
+              buffer[key] = should_operate(buffer[key], getattr(r, key))
+            except:
+              buffer[key] = None
+
+          should_operate = False
+    
+    dec_inputs = ModelIO({
+      "source" : sources[0],
+      "transform" : expressions[0].annotation
+    })
+
+    for key in buffer:
+      if buffer[key] is not None:
+        dec_inputs.set_attribute(key, buffer[key])
+
+    dec_output = self._decoder(dec_inputs, tf_ratio = 0.0)
+    return dec_output.dec_outputs
+  
+  def forward(self, batch: Batch, tf_ratio: float = 0.0, plot_trajectories=False):
     """
     Runs the forward pass.
 

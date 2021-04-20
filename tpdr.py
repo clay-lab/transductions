@@ -1,6 +1,6 @@
 # repl.py
 # 
-# Enter an interactive TPDR for the model.
+# Enter an interactive REPL for the model.
 
 import os
 import hydra
@@ -19,7 +19,7 @@ def main(cfg: DictConfig) -> None:
   chkpt_cfg = OmegaConf.load(chkpt_cfg_path)
   
   trainer = Trainer(chkpt_cfg)
-  trainer.repl(repl_cfg = cfg)
+  trainer.tpdr(tpdr_cfg = cfg)
 
 if __name__ == "__main__":
   main()
