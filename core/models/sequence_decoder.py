@@ -2,6 +2,7 @@
 # 
 # Provides SequenceDecoder module.
 
+from typing import List
 import torch
 from torch import nn
 import torch.nn.functional as F
@@ -10,7 +11,7 @@ import random
 import logging
 from omegaconf import DictConfig
 from torchtext.vocab import Vocab
-from abc import abstractmethod
+import numpy as np
 
 # Library imports
 from core.models.model_io import ModelIO
@@ -27,7 +28,12 @@ else:
 class SequenceDecoder(torch.nn.Module):
 
   @staticmethod
-  def newDecoder(src_vocab: Vocab, tgt_vocab: Vocab, dec_cfg: DictConfig, enc_cfg: DictConfig = None):
+  def newDecoder(
+    src_vocab: Vocab, 
+    tgt_vocab: Vocab, 
+    dec_cfg: DictConfig, 
+    enc_cfg: DictConfig = None
+  ):
 
     unit_type = dec_cfg.unit.upper()
 
@@ -79,6 +85,10 @@ class SequenceDecoder(torch.nn.Module):
     return float(self.cfg.dropout)
   
   @property
+  def max_length(self) -> int:
+    return int(self.cfg.max_length)
+  
+  @property
   def attention_type(self) -> str:
     if self.cfg.attention is not None:
       return str(self.cfg.attention).upper()
@@ -98,18 +108,6 @@ class SequenceDecoder(torch.nn.Module):
 
     self.cfg = dec_cfg
     self.vocab = tgt_vocab
-    # self._num_layers = dec_cfg.num_layers
-    # self._hidden_size = dec_cfg.hidden_size
-    # self._unit_type = dec_cfg.unit.upper()
-    # self._max_length = dec_cfg.max_length
-    # self._embedding_size = dec_cfg.embedding_size
-    # self._dropout_p = dec_cfg.dropout
-    # self._attention_type = dec_cfg.attention
-
-    # if self.attention_type:
-    #   self.unit_input_size = self._embedding_size + self._hidden_size
-    # else:
-    #   self.unit_input_size = self._embedding_size
     
     # self.vocab = tgt_vocab
     self._src_vocab = src_vocab
@@ -159,7 +157,7 @@ class SequenceDecoder(torch.nn.Module):
     if hasattr(dec_input, 'target'):
       gen_len = dec_input.target.shape[0]
     else:
-      gen_len = self._max_length
+      gen_len = self.max_length
   
     # Get input to decoder unit
     dec_step_input = self._get_step_inputs(dec_input)
@@ -274,6 +272,24 @@ class SequenceDecoder(torch.nn.Module):
       dec_step_input.set_attribute('enc_outputs', dec_inputs.enc_outputs)
 
     return dec_step_input
+  
+  def to_tokens(self, idx_tensor: Tensor, show_special=False):
+    outputs = np.empty(idx_tensor.detach().cpu().numpy().shape, dtype=object)
+
+    for idr, r in enumerate(idx_tensor):
+      for idc, _ in enumerate(r):
+        string = self.vocab.itos[idx_tensor[idr][idc]]
+        if string not in ['<sos>', '<eos>', '<pad>'] or show_special:
+          outputs[idr][idc] = self.vocab.itos[idx_tensor[idr][idc]]
+    
+    batch_strings = []
+    for r in outputs:
+      batch_strings.append(r[r != np.array(None)])
+
+    return batch_strings
+  
+  def to_ids(self, tokens: List):
+    return [self.vocab.stoi[t] for t in tokens]
 
 class LSTMSequenceDecoder(SequenceDecoder):
 
@@ -298,7 +314,7 @@ class LSTMSequenceDecoder(SequenceDecoder):
       step_input.set_attribute('c', dec_inputs.c)
     else:
       # We're @ timestep t=0, so create an initial 'c' of all zeros.
-      c = torch.zeros(self._num_layers, batch_size, self._hidden_size).to(avd)
+      c = torch.zeros(self.num_layers, batch_size, self.hidden_size).to(avd)
       step_input.set_attribute('c', c)
 
     return step_input
@@ -331,14 +347,13 @@ class LSTMSequenceDecoder(SequenceDecoder):
 class SRNSequenceDecoder(SequenceDecoder):
 
   def __init__(self, src_vocab: Vocab, tgt_vocab: Vocab, dec_cfg: DictConfig, enc_cfg: DictConfig):
-    super(SRNSequenceDecoder, self).__init__(src_vocab, tgt_vocab, dec_cfg, enc_cfg)
-    # print(self._num_layers)
+    super().__init__(src_vocab, tgt_vocab, dec_cfg, enc_cfg)
     self._unit = nn.RNN(self.unit_input_size, self.hidden_size, num_layers=self.num_layers, dropout=self.dropout_p)
 
 class GRUSequenceDecoder(SequenceDecoder):
 
   def __init__(self, src_vocab: Vocab, tgt_vocab: Vocab, dec_cfg: DictConfig, enc_cfg: DictConfig):
-    super(GRUSequenceDecoder, self).__init__(src_vocab, tgt_vocab, dec_cfg, enc_cfg)
+    super().__init__(src_vocab, tgt_vocab, dec_cfg, enc_cfg)
     self._unit = nn.GRU(self.unit_input_size, self.hidden_size, num_layers=self.num_layers, dropout=self.dropout_p)
 
 class TransformerSequenceDecoder(nn.Module):
@@ -354,29 +369,54 @@ class TransformerSequenceDecoder(nn.Module):
   @property
   def PAD_IDX(self):
     return self.vocab.stoi['<pad>']
+  
+  @property
+  def num_layers(self) -> int:
+    return int(self.cfg.num_layers)
+  
+  @property
+  def hidden_size(self) -> int:
+    return int(self.cfg.hidden_size)
+  
+  @property
+  def max_length(self) -> int:
+    return int(self.cfg.max_length)
+  
+  @property
+  def embedding_size(self) -> int:
+    return int(self.cfg.embedding_size)
+  
+  @property
+  def dropout_p(self) -> float:
+    return float(self.cfg.dropout)
+  
+  @property
+  def num_heads(self) -> int:
+    return int(self.cfg.num_heads)
+  
+  @property
+  def unit_type(self) -> str:
+    return str(self.cfg.unit).upper()
 
   def __init__(self, vocab: Vocab, cfg: DictConfig):
     
     super().__init__()
     
-    # Parameters
-    self._num_layers = cfg.num_layers
-    self._hidden_size = cfg.hidden_size
-    self._unit_type = cfg.unit.upper()
-    self._max_length = cfg.max_length
-    self._embedding_size = cfg.embedding_size
-    self._dropout_p = cfg.dropout
-    self._num_heads = cfg.num_heads
+    self.cfg = cfg
     self.vocab = vocab
 
     # Model layers
     self._embedding = nn.Sequential(
-      torch.nn.Embedding(self.vocab_size, self._hidden_size),
-      PositionalEncoding(self._hidden_size, self._dropout_p, self._max_length)
+      torch.nn.Embedding(self.vocab_size, self.hidden_size),
+      PositionalEncoding(self.hidden_size, self.dropout_p, self.max_length)
     )
-    layer = nn.TransformerDecoderLayer(d_model=self._hidden_size, nhead=self._num_heads, dropout=self._dropout_p)
-    self._unit = nn.TransformerDecoder(layer, num_layers=self._num_layers)
-    self._out = torch.nn.Linear(self._hidden_size, self.vocab_size)
+    layer = nn.TransformerDecoderLayer(
+      d_model=self.hidden_size, 
+      nhead=self.num_heads, 
+      dropout=self.dropout_p
+    )
+    self._unit = nn.TransformerDecoder(layer, num_layers=self.num_layers)
+    self._out = torch.nn.Linear(self.hidden_size, self.vocab_size)
     
   def _generate_square_subsequent_mask(self, sz: int) -> Tensor:
     """
@@ -402,7 +442,7 @@ class TransformerSequenceDecoder(nn.Module):
     if hasattr(dec_input, 'target'):
       gen_len = dec_input.target.shape[0]
     else:
-      gen_len = self._max_length
+      gen_len = self.max_length
 
     # tgt = inputs to the decoder, starting with TRANS token and appending
     #       dec_input.target[i] or predicted token
@@ -434,4 +474,22 @@ class TransformerSequenceDecoder(nn.Module):
         tgt = torch.cat((tgt, new_tgt.unsqueeze(0)), dim=0).to(avd)
 
     return ModelIO({"dec_outputs": out})
+  
+  def to_tokens(self, idx_tensor: Tensor, show_special=False):
+    outputs = np.empty(idx_tensor.detach().cpu().numpy().shape, dtype=object)
+
+    for idr, r in enumerate(idx_tensor):
+      for idc, _ in enumerate(r):
+        string = self.vocab.itos[idx_tensor[idr][idc]]
+        if string not in ['<sos>', '<eos>', '<pad>'] or show_special:
+          outputs[idr][idc] = self.vocab.itos[idx_tensor[idr][idc]]
+    
+    batch_strings = []
+    for r in outputs:
+      batch_strings.append(r[r != np.array(None)])
+
+    return batch_strings
+
+  def to_ids(self, tokens: List):
+    return [self.vocab.stoi[t] for t in tokens]
   

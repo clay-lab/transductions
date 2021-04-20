@@ -18,12 +18,10 @@ import re
 
 # Library imports
 from core.models.base_model import TransductionModel
-# from core.models.model_io import ModelIO
 from core.dataset.base_dataset import TransductionDataset
 from core.metrics.base_metric import *
 from core.metrics.meter import Meter
 from core.early_stopping import EarlyStopping
-# from core.tools.trajectory import Trajectory
 
 log = logging.getLogger(__name__)
 
@@ -201,7 +199,7 @@ class Trainer:
             meter(output, target)
 
             # Compute average validation loss
-            val_loss += F.cross_entropy(output, target) / len(batch)
+            val_loss = F.cross_entropy(output, target)
             V.set_postfix(val_loss='{:4.3f}'.format(val_loss.item()))
 
           meter.log(stage='val', step=epoch)
@@ -321,10 +319,6 @@ class Trainer:
     # Load checkpoint data
     self._load_checkpoint(repl_cfg.checkpoint_dir)
 
-    # Create PCA Trajectory plotter
-    # trajectory = Trajectory()
-    # self._model.traj = trajectory
-
     log.info("Beginning REPL")
 
     repl = ModelREPL(self._model, self._dataset)
@@ -354,7 +348,7 @@ class ModelREPL(Cmd):
     source = source.split(' ')
     source.append('<eos>')
     source.insert(0, '<sos>')
-    source = [[self._dataset.source_field.vocab.stoi[s]] for s in source]
+    source = [self._model._encoder.to_ids([s]) for s in source]
     source = torch.LongTensor(source)
 
     transf = ['<sos>', transf, '<eos>']
@@ -372,13 +366,13 @@ class ModelREPL(Cmd):
     batch = self.batchify(args)
 
     prediction = self._model(batch, plot_trajectories=True).permute(1, 2, 0).argmax(1)
-    prediction = self._dataset.id_to_token(prediction, 'target')[0]
+    prediction = self._model._decoder.to_tokens(prediction)[0]
     prediction = ' '.join(prediction)
 
-    source = self._dataset.id_to_token(batch.source.permute(1, 0), 'source')[0]
+    source = self._model._encoder.to_tokens(batch.source.permute(1, 0))[0]
     source = ' '.join(source)
 
-    transformation = self._dataset.id_to_token(batch.annotation.permute(1, 0), 'source')[0]
+    transformation = self._model._decoder.to_tokens(batch.annotation.permute(1, 0))[0]
     transformation = ' '.join(transformation)
 
     result = "{} → {} → {}".format(source, transformation, prediction)
@@ -414,7 +408,7 @@ class ModelArithmeticREPL(ModelREPL):
         expressions.append(batch)
     
     prediction = self._model.forward_expression(expressions).permute(1, 2, 0).argmax(1)
-    prediction = self._dataset.id_to_token(prediction, 'target')[0]
+    prediction = self._model._decoder.to_tokens(prediction)[0]
     prediction = ' '.join(prediction)
 
     source = ' '.join(args.split(' ')[1:])

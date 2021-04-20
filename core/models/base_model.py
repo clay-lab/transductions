@@ -40,10 +40,7 @@ class TransductionModel(torch.nn.Module):
     decoder_cfg = cfg.model.decoder
 
     if cfg.dataset.source_format == 'sequence':
-      if encoder_cfg.unit == 'BERT':
-        self._encoder = BERTEncoder(encoder_cfg, src_vocab)
-      else:
-        self._encoder = SequenceEncoder(encoder_cfg, src_vocab)
+      self._encoder = SequenceEncoder(encoder_cfg, src_vocab)
     else:
       raise NotImplementedError
     

@@ -3,54 +3,50 @@
 # Provides SequenceEncoder module.
 
 import torch
+import logging
+from typing import Any, List
 from torch import nn, Tensor
 from omegaconf import DictConfig
 from torchtext.vocab import Vocab
+import numpy as np
 
 # Library imports
 from core.models.model_io import ModelIO
+from core.models.bert_encoder import BERTEncoder
+from core.models.components import TransductionComponent
 from core.models.positional_encoding import PositionalEncoding
 
-class SequenceEncoder(torch.nn.Module):
+log = logging.getLogger(__name__)
+
+class SequenceEncoder(TransductionComponent):
+
+  def __new__(cls, cfg: DictConfig, vocab=None) -> Any:
+    """
+    This is an alternative to using a Factory paradigm. We always return 
+    some subtype of SequenceEncoder, depending on what kind of unit we want
+    to create. Currently, this is split between "BERT-like" encoders from
+    huggingface and our own custom implementations of recurrent / transformer
+    encoders.
+    """
+    unit_type = str(cfg.unit).upper()
+    
+    if unit_type == "BERT":
+      return BERTEncoder(cfg=cfg)
+    else:
+      return TransductionSequenceEncoder(cfg=cfg, vocab=vocab)
+
+
+class TransductionSequenceEncoder(TransductionComponent):
 
   @property
   def vocab_size(self):
     return len(self.vocab)
-  
-  @property
-  def num_layers(self) -> int:
-    return int(self.cfg.num_layers)
-  
-  @property
-  def hidden_size(self) -> int:
-    return int(self.cfg.hidden_size)
-  
-  @property
-  def embedding_size(self) -> int:
-    return int(self.cfg.embedding_size)
-
-  @property
-  def unit_type(self) -> str:
-    return str(self.cfg.unit).upper()
-  
-  @property
-  def dropout_p(self) -> float:
-    return float(self.cfg.dropout)
 
   def __init__(self, cfg: DictConfig, vocab: Vocab):
     
-    super().__init__()
+    super().__init__(cfg)
 
-    self.cfg = cfg
     self.vocab = vocab
-
-    # self._num_layers = cfg.num_layers
-    # self._hidden_size = cfg.hidden_size
-    # self._embedding_size = cfg.embedding_size
-    # self._unit_type = cfg.unit.upper()
-    # self._dropout_p = cfg.dropout
-    
-    # self._vocabulary = vocab
 
     embedding = torch.nn.Embedding(self.vocab_size, self.embedding_size)
 
@@ -88,8 +84,23 @@ class SequenceEncoder(torch.nn.Module):
       unit
     )
   
-  def tok_to_id(self, tokens: Tensor):
-    pass
+  def to_tokens(self, idx_tensor: Tensor, show_special=False):
+    outputs = np.empty(idx_tensor.detach().cpu().numpy().shape, dtype=object)
+
+    for idr, r in enumerate(idx_tensor):
+      for idc, _ in enumerate(r):
+        string = self.vocab.itos[idx_tensor[idr][idc]]
+        if string not in ['<sos>', '<eos>', '<pad>'] or show_special:
+          outputs[idr][idc] = self.vocab.itos[idx_tensor[idr][idc]]
+    
+    batch_strings = []
+    for r in outputs:
+      batch_strings.append(r[r != np.array(None)])
+
+    return batch_strings
+  
+  def to_ids(self, tokens: List):
+    return [self.vocab.stoi[t] for t in tokens]
   
   def forward(self, enc_input: ModelIO) -> ModelIO:
     """

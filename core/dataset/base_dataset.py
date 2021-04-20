@@ -138,38 +138,11 @@ class TransductionDataset:
         if split in ['train', 'test', 'val']:
           self._in_sample_data.append(dataset)
 
-  def id_to_token(self, idx_tensor, vocab_str: str, show_special = False):
-    """
-    Returns a tensor containing tokens from the specified vocabulary. 
-
-    Parameters:
-      - idx_tensor (torch.tensor of shape [batch, seq_len]): index tensor of    
-          inputs
-      - vocab_str (str): one of 'source', 'target'
-      - show_special (bool): include special tokens like <pad>, <sos>, <eos>
-    """
-
-    vocab = self.source_field.vocab if vocab_str == 'source' else self.target_field.vocab
-    outputs = np.empty(idx_tensor.detach().cpu().numpy().shape, dtype=object)
-
-    for idr, r in enumerate(idx_tensor):
-      for idc, _ in enumerate(r):
-        string = vocab.itos[idx_tensor[idr][idc]]
-        if string not in ['<sos>', '<eos>', '<pad>'] or show_special:
-          outputs[idr][idc] = vocab.itos[idx_tensor[idr][idc]]
-    
-    batch_strings = []
-    for r in outputs:
-      batch_strings.append(r[r != np.array(None)])
-
-    return batch_strings
-
   def __init__(self, cfg: DictConfig, device, fields: Dict = None, BERT = False):
 
     log.info("Initializing dataset")
 
     data_path = os.path.join(hydra.utils.get_original_cwd(), 'data')
-    # data_path = '/Users/jacksonpetty/Documents/Development/transductions/data'
     process_root_path = os.path.join(data_path, 'processed')
     self._processed_path = os.path.join(process_root_path, cfg.dataset.name)
     self._raw_path = os.path.join(data_path, 'raw', cfg.dataset.input)
