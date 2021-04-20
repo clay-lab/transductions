@@ -1,6 +1,6 @@
 defaults:
   - /dataset: alice-1
-  - /hyperparameters: default
+  - /hyperparameters: frank_petty_2020
   - /model: sequence-transformer
 
 name: experiment-1
