@@ -12,7 +12,7 @@ from transformers.utils.dummy_pt_objects import BertModel
 # library imports
 from core.models.sequence_encoder import SequenceEncoder
 from core.models.bert_encoder import BERTEncoder
-from core.models.sequence_decoder import SequenceDecoder
+from core.models.sequence_decoder import SequenceDecoder, BetterSequenceDecoder
 from core.models.model_io import ModelIO
 from core.dataset.base_dataset import TransductionDataset
 
@@ -45,6 +45,12 @@ class TransductionModel(torch.nn.Module):
       raise NotImplementedError
     
     if cfg.dataset.target_format == 'sequence':
+      # self._decoder = BetterSequenceDecoder(
+      #   src_vocab=src_vocab, 
+      #   tgt_vocab=tgt_vocab, 
+      #   dec_cfg=decoder_cfg, 
+      #   enc_cfg=encoder_cfg
+      # )
       self._decoder = SequenceDecoder.newDecoder(src_vocab, tgt_vocab, decoder_cfg, encoder_cfg)
     else:
       raise NotImplementedError

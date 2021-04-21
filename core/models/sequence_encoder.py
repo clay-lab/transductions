@@ -35,7 +35,6 @@ class SequenceEncoder(TransductionComponent):
     else:
       return TransductionSequenceEncoder(cfg=cfg, vocab=vocab)
 
-
 class TransductionSequenceEncoder(TransductionComponent):
 
   @property

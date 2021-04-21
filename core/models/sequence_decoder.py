@@ -2,7 +2,7 @@
 # 
 # Provides SequenceDecoder module.
 
-from typing import List
+from typing import Any, List
 import torch
 from torch import nn
 import torch.nn.functional as F
@@ -15,6 +15,7 @@ import numpy as np
 
 # Library imports
 from core.models.model_io import ModelIO
+from core.models.components import TransductionComponent
 from core.models.positional_encoding import PositionalEncoding
 from core.models.attention import create_mask, MultiplicativeAttention, AdditiveAttention, DotProductAttention
 
@@ -24,6 +25,125 @@ if torch.cuda.is_available():
     avd = torch.device('cuda')
 else:
     avd = torch.device('cpu')
+
+class BetterSequenceDecoder(TransductionComponent):
+
+  # BEGIN __new__ constructor
+
+  def __new__(
+    cls,
+    src_vocab: Vocab, 
+    tgt_vocab: Vocab, 
+    dec_cfg: DictConfig, 
+    enc_cfg: DictConfig = None
+  ) -> Any:
+    """
+    This is an alternative to using a Factory paradigm. We always return 
+    some subtype of SequenceDecoder, depending on what kind of unit we want
+    to create.
+    """
+    unit_type = str(dec_cfg.unit).upper()
+
+    if unit_type == 'SRN':
+      return SRNSequenceDecoder(src_vocab, tgt_vocab, dec_cfg, enc_cfg)
+    elif unit_type == 'GRU':
+      return GRUSequenceDecoder(src_vocab, tgt_vocab, dec_cfg, enc_cfg)
+    elif unit_type == 'LSTM':
+      return LSTMSequenceDecoder(src_vocab, tgt_vocab, dec_cfg, enc_cfg)
+    elif unit_type == 'TRANSFORMER':
+      return TransformerSequenceDecoder(tgt_vocab, dec_cfg)
+    else:
+      log.error(f"Unknown decoder type '{unit_type}'.")
+      raise NotImplementedError
+  
+  # END __new__ constructor
+
+  # BEGIN computed properties
+
+  @property
+  def vocab_size(self):
+    return len(self.vocab)
+  
+  @property
+  def PAD_IDX(self):
+    return self.vocab.stoi['<pad>']
+  
+  @property
+  def SOS_IDX(self):
+    return self.vocab.stoi['<sos>']
+  
+  @property
+  def EOS_IDX(self):
+    return self.vocab.stoi['<eos>']
+  
+  @property
+  def num_layers(self) -> int:
+    return int(self.cfg.num_layers)
+  
+  @property
+  def hidden_size(self) -> int:
+    return int(self.cfg.hidden_size)
+  
+  @property
+  def unit_type(self) -> str:
+    return str(self.cfg.unit).upper()
+  
+  @property
+  def embedding_size(self) -> int:
+    return int(self.cfg.embedding_size)
+  
+  @property
+  def dropout_p(self) -> float:
+    return float(self.cfg.dropout)
+  
+  @property
+  def max_length(self) -> int:
+    return int(self.cfg.max_length)
+  
+  @property
+  def attention_type(self) -> str:
+    if self.cfg.attention is not None:
+      return str(self.cfg.attention).upper()
+    else:
+      return None
+  
+  # END computed properties
+
+  def __init__(
+    self, 
+    src_vocab: Vocab, 
+    tgt_vocab: Vocab, 
+    dec_cfg: DictConfig, 
+    enc_cfg: DictConfig
+  ):
+    
+    super().__init__(dec_cfg)
+
+    self.cfg = dec_cfg
+    self.vocab = tgt_vocab
+    
+    # self.vocab = tgt_vocab
+    self._src_vocab = src_vocab
+
+    self._embedding = torch.nn.Embedding(self.vocab_size, self.embedding_size)
+
+    if self.num_layers == 1:
+      assert self.dropout_p == 0, "Dropout must be zero if num_layers = 1"
+    
+    self._unit = nn.Module()
+  
+    self._out = torch.nn.Linear(self.hidden_size, self.vocab_size)
+
+    # Attention
+    if self.attention_type is not None:
+      if self.attention_type == 'MULTIPLICATIVE':
+        self._attention = MultiplicativeAttention(self.hidden_size, enc_cfg.hidden_size)
+      elif self.attention_type == 'ADDITIVE':
+        self._attention = AdditiveAttention(self.hidden_size, enc_cfg.hidden_size)
+      elif self.attention_type == 'DOTPRODUCT':
+        self._attention = DotProductAttention()
+      else:
+        raise NotImplementedError
 
 class SequenceDecoder(torch.nn.Module):
 
