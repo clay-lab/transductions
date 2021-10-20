@@ -2,8 +2,8 @@
 # AND semantically-reflexive sentences like "Alice sees Alice" during training 
 # to explore lexical generalization.
 
-defaults:
-  - tracking: all-feminine-reflexive
+# defaults:
+  # - tracking: all-feminine-reflexive
 
 name: alice-2
 input: grammar-1.tsv # where is the full dataset
