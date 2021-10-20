@@ -16,6 +16,7 @@ source_format: sequence # 'sequence' or 'tree'
 target_format: sequence # 'sequence' or 'tree'
 overwrite: True # Always re-create splits from raw data?
 transform_field: source # 'source' or 'target', which should include transforms?
+offset: -1 # Offset from fully encoded for arithmetic
 
 splits:
   test: 100

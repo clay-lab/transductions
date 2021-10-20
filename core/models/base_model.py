@@ -2,19 +2,18 @@
 # 
 # Provides the base class for transduction models.
 
+from typing import List
 import torch
 import logging
 from omegaconf import DictConfig
+from torch.functional import Tensor
 from torchtext.vocab import Vocab
 from torchtext.data.batch import Batch
-from transformers.utils.dummy_pt_objects import BertModel
 
 # library imports
 from core.models.sequence_encoder import SequenceEncoder
-from core.models.bert_encoder import BERTEncoder
-from core.models.sequence_decoder import SequenceDecoder, BetterSequenceDecoder
+from core.models.sequence_decoder import SequenceDecoder
 from core.models.model_io import ModelIO
-from core.dataset.base_dataset import TransductionDataset
 
 log = logging.getLogger(__name__)
 
@@ -142,86 +141,169 @@ class TransductionModel(torch.nn.Module):
     dec_output = self._decoder(dec_inputs, tf_ratio = 0.0)
     return dec_output.dec_outputs
   
-  def forward_batch_expr(self, batch: Batch):
+  def forward_batch_expr(self, batch: Batch, offset=0):
     """
     Splits each entry in a batch into sub-expressions, encodes them, and
     performs arithmetic on the encodings.
+
+    batch: torchtext.data.Batch containing source, target, annotation
+    offset: # of steps after encoding when arithmetic should happen. Default 
+      value of 0 indicates that arithmetic happens between encoder and decoder.
+      Positive values mean reducing during decoding, negative values mean
+      reducing during encoding.
     """
 
-    # print("Mock Batch")
-    # mock_in = ModelIO({"source" : batch.source})
-    # mock_out = self._encoder(mock_in)
-    # print(mock_out)
+    def _split_and_pad_expressions(source: Tensor):
+      # Split and pad the source expressions in each entry
 
-    reduced_encodings = []
+      expressions = []
 
-    for exp in batch.source.permute(1,0):
+      for exp in source.permute(1,0):
 
-      # Split a single expression at the indices where there is an <unk>
-      # token, corresponding to one of the operators ("+", "-") which wasn't
-      # present in the training vocabulary.
-      operator_indices = ((exp==0).nonzero(as_tuple=True)[0])
-      sub_exps = list(torch.tensor_split(exp, operator_indices))
+        # Split each expression at the indices where there is an <unk>
+        # token, corresponding to one of the operators ("+", "-") which wasn't
+        # present in the training vocabulary.
+        operator_indices = ((exp==0).nonzero(as_tuple=True)[0])
+        sub_exps = list(torch.tensor_split(exp, operator_indices))
 
-      # We need to pad each sub-expression with an <sos> and <eos> token, if
-      # They don't already have one.
-      sos_tok = sub_exps[0][0]
-      eos_tok = sub_exps[-1][-1]
+        # We need to pad each sub-expression with an <sos> and <eos> token, if
+        # They don't already have one.
+        sos_tok = sub_exps[0][0]
+        eos_tok = sub_exps[-1][-1]
 
-      # The general format for sub-expressions here is:
-      #   0th: <sos> .....
-      #   1st--peultimate: <unk> .....
-      #   last: <unk> ..... <eos>
-      # So, we need to (a) append an <eos> token to the 0th sub-exp,
-      # (b) switch <unk> to <sos> and append an <eos> token to the first--through 
-      # penultimate sub-exps, and (c) switch <unk> to <sos> for the final sub-exp
+        # The general format for sub-expressions here is:
+        #   0th: <sos> .....
+        #   1st--peultimate: <unk> .....
+        #   last: <unk> ..... <eos>
+        # So, we need to (a) append an <eos> token to the 0th sub-exp,
+        # (b) switch <unk> to <sos> and append an <eos> token to the first--through 
+        # penultimate sub-exps, and (c) switch <unk> to <sos> for the final sub-exp
 
-      for i in range(len(sub_exps[0:-1])):
-        # Append <eos> to 0...penultimate
-        sub_exps[i] = torch.cat((sub_exps[i], torch.tensor([eos_tok])))
+        for i in range(len(sub_exps[0:-1])):
+          # Append <eos> to 0...penultimate
+          sub_exps[i] = torch.cat((sub_exps[i], torch.tensor([eos_tok])))
+        
+        for i in range(len(sub_exps[1:])):
+          # Change <unk> to <sos> in 1...last
+          sub_exps[i+1][0] = sos_tok
+        
+        expressions.append(sub_exps)
+        # print(sub_exps)
+
+      return expressions
+
+    def _encode_reduce_expressions(expressions: List[List[ModelIO]]):
+
+      reduced_encodings = []
       
-      for i in range(len(sub_exps[1:])):
-        # Change <unk> to <sos> in 1...last
-        sub_exps[i+1][0] = sos_tok
-      
-      encodings = []
-      for s in sub_exps:
-        enc_input = ModelIO({"source" : s.unsqueeze(0).permute(1,0)})
-        enc_output = self._encoder(enc_input)
-        encodings.append(enc_output)
-      
-      results = {}
-      for key in encodings[0].__dict__.keys():
-        if type(getattr(encodings[0], key)) is tuple:
-          a = getattr(encodings[0], key)[0] - getattr(encodings[1], key)[0] + getattr(encodings[2], key)[0]
-          b = getattr(encodings[0], key)[1] - getattr(encodings[1], key)[0] + getattr(encodings[2], key)[1]
-          results[key] = (a, b)
-        else:
-          results[key] = getattr(encodings[0], key) - getattr(encodings[1], key) + getattr(encodings[2], key)
-      
-      reduced_encodings.append(ModelIO(results))
+      for exp in expressions:
 
-    # Collapse array of ModelIO's into single ModelIO by stacking the enc_hidden
-    # and enc_output tensors
-    dec_input = ModelIO({
-      # "enc_outputs" : torch.hstack([r.enc_outputs for r in reduced_encodings]),
-      # "enc_hidden" : torch.hstack([r.enc_hidden for r in reduced_encodings]),
-      "source" : batch.source,
-      "transform" : batch.annotation
-    })
+        encodings = [self._encoder(term) for term in exp]
 
-    for key in reduced_encodings[0].__dict__.keys():
-      if type(getattr(reduced_encodings[0], key)) is tuple:
-        dec_input.set_attribute(
-          key, 
-          tuple(map(torch.hstack, zip(*[getattr(r, key) for r in reduced_encodings])))
-          # torch.hstack([getattr(r, key) for r in reduced_encodings])
+        # print("ENCODING")
+        # print(encodings)
+      
+        results = {}
+        for key in encodings[0].__dict__.keys():
+          if type(getattr(encodings[0], key)) is tuple:
+            a = getattr(encodings[0], key)[0] - getattr(encodings[1], key)[0] + getattr(encodings[2], key)[0]
+            b = getattr(encodings[0], key)[1] - getattr(encodings[1], key)[0] + getattr(encodings[2], key)[1]
+            results[key] = (a, b)
+          else:
+            results[key] = getattr(encodings[0], key) - getattr(encodings[1], key) + getattr(encodings[2], key)
+        
+        reduced_encodings.append(ModelIO(results))
+      
+      return reduced_encodings
+
+    expressions = _split_and_pad_expressions(batch.source)
+
+    if offset < 0:
+      # Reduce during encoding
+      
+      # Cut off all terms of each expression at [0:offset]
+      exps_to_comp = [[term[0:offset] for term in exp] for exp in expressions]
+      expressions_to_reduce = [[
+        ModelIO({"source" : term.unsqueeze(0).permute(1,0)}) for term in exp
+      ] for exp in exps_to_comp]
+
+      # Compute encodings of partial terms
+      partial_encodings = _encode_reduce_expressions(expressions_to_reduce)
+
+      # Proceed with the encoding of the first term in each expression
+      remaining_partial_terms = [exp[0][offset:] for exp in expressions]
+      remaining_partial_inputs = [ModelIO({
+        "source" : term.unsqueeze(1)
+      }) for term in remaining_partial_terms]
+
+      full_encodings = [self._encoder.forward_with_hidden(ins, hidden=enc.enc_hidden) for ins, enc in zip(remaining_partial_inputs, partial_encodings)]
+
+      buffers = []
+      for i in range(len(partial_encodings)):
+        buffer = {}
+        buffer['enc_hidden'] = full_encodings[i].enc_hidden
+        buffer['enc_outputs'] = torch.cat(
+          (partial_encodings[i].enc_outputs, full_encodings[i].enc_outputs)
         )
-      else:
-        dec_input.set_attribute(key, torch.hstack([getattr(r, key) for r in reduced_encodings]))
+        buffers.append(buffer)
+      
+      reduced_encodings = [ModelIO(b) for b in buffers]
 
-    dec_output = self._decoder(dec_input, tf_ratio = 0.0)
-    return dec_output.dec_outputs
+      dec_input = ModelIO({
+        "source" : torch.stack([e[0] for e in expressions]),
+        "transform" : batch.annotation
+      })
+
+      # Collapse array of ModelIO's into single ModelIO by stacking the enc_hidden
+      # and enc_output tensors
+      for key in reduced_encodings[0].__dict__.keys():
+        if type(getattr(reduced_encodings[0], key)) is tuple:
+          dec_input.set_attribute(
+            key, 
+            tuple(map(torch.hstack, zip(*[getattr(r, key) for r in reduced_encodings])))
+          )
+        else:
+          dec_input.set_attribute(key, torch.hstack([getattr(r, key) for r in reduced_encodings]))
+    
+      dec_output = self._decoder(dec_input, tf_ratio = 0.0)
+      return dec_output.dec_outputs
+
+    else:
+      # Since we don't reduce during encoding, we can fully encode each
+      # part of the expression independently.
+        
+      expressions_to_reduce = [[
+        ModelIO({"source" : term.unsqueeze(0).permute(1,0)}) for term in exp
+      ] for exp in expressions]
+
+      # Compute encodings of partial terms
+      reduced_encodings = _encode_reduce_expressions(expressions_to_reduce)
+
+      if offset == 0:
+        # Reduce expressions now
+
+        dec_input = ModelIO({
+          "source" : torch.stack([e[0] for e in expressions]),
+          "transform" : batch.annotation
+        })
+
+        # Collapse array of ModelIO's into single ModelIO by stacking the enc_hidden
+        # and enc_output tensors
+        for key in reduced_encodings[0].__dict__.keys():
+          if type(getattr(reduced_encodings[0], key)) is tuple:
+            dec_input.set_attribute(
+              key, 
+              tuple(map(torch.hstack, zip(*[getattr(r, key) for r in reduced_encodings])))
+            )
+          else:
+            dec_input.set_attribute(key, torch.hstack([getattr(r, key) for r in reduced_encodings]))
+      
+        dec_output = self._decoder(dec_input, tf_ratio = 0.0)
+        return dec_output.dec_outputs
+
+      else:
+        # Reduce during decoding
+        raise NotImplementedError
 
   def forward_expression(self, expressions):
     """
@@ -294,9 +376,6 @@ class TransductionModel(torch.nn.Module):
       "source" : batch.source, 
       "transform" : batch.annotation
     })
-
-    # print(enc_output)
-    # raise SystemExit
 
     if hasattr(batch, 'target'):
       enc_output.set_attribute("target", batch.target)

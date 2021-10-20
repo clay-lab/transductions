@@ -6,4 +6,4 @@ checkpoint_dir: ???
 
 hydra:
   run:
-    dir: ${checkpoint_dir}/eval_arith/${dataset.name}/${now:%Y-%m-%d_%H-%M-%S}
+    dir: ${checkpoint_dir}/eval_arith/${dataset.name}/offset=${dataset.offset}/${now:%Y-%m-%d_%H-%M-%S}

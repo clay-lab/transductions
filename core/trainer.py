@@ -346,7 +346,7 @@ class Trainer:
 
             # Perform arithmetic computation by reducing an input batch
             source = batch.source.permute(1, 0)
-            prediction = self._model.forward_batch_expr(batch).permute(1, 2, 0)
+            prediction = self._model.forward_batch_expr(batch, offset=eval_cfg.dataset.offset).permute(1, 2, 0)
             target = batch.target.permute(1, 0)
             prediction, target = self._normalize_lengths(prediction, target)
 
