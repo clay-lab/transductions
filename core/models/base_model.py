@@ -218,6 +218,11 @@ class TransductionModel(torch.nn.Module):
 
     expressions = _split_and_pad_expressions(batch.source)
 
+    dec_input = ModelIO({
+      "source" : torch.stack([e[0] for e in expressions]).permute(1, 0),
+      "transform" : batch.annotation
+    })
+
     if offset < 0:
       # Reduce during encoding
       
@@ -249,11 +254,6 @@ class TransductionModel(torch.nn.Module):
       
       reduced_encodings = [ModelIO(b) for b in buffers]
 
-      dec_input = ModelIO({
-        "source" : torch.stack([e[0] for e in expressions]),
-        "transform" : batch.annotation
-      })
-
       # Collapse array of ModelIO's into single ModelIO by stacking the enc_hidden
       # and enc_output tensors
       for key in reduced_encodings[0].__dict__.keys():
@@ -281,12 +281,7 @@ class TransductionModel(torch.nn.Module):
 
       if offset == 0:
         # Reduce expressions now
-
-        dec_input = ModelIO({
-          "source" : torch.stack([e[0] for e in expressions]),
-          "transform" : batch.annotation
-        })
-
+        
         # Collapse array of ModelIO's into single ModelIO by stacking the enc_hidden
         # and enc_output tensors
         for key in reduced_encodings[0].__dict__.keys():
