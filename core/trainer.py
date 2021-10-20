@@ -1,5 +1,6 @@
 import logging
 import random
+import omegaconf
 import torch
 import numpy as np
 import hydra
@@ -304,6 +305,70 @@ class Trainer:
         meter.log(stage=key, step=0)
         meter.reset()
 
+  def arith_eval(self, eval_cfg: DictConfig):
+
+    # Load checkpoint data
+    self._load_checkpoint(eval_cfg.checkpoint_dir)
+
+    # Create meter
+    seq_acc = SequenceAccuracy()
+    len_acc = LengthAccuracy(self._dataset.target_field.vocab.stoi['<pad>'])
+    object_acc = NthTokenAccuracy(n=5)
+
+    meter = Meter([seq_acc, len_acc, object_acc])
+
+    # Create evaluation dataset
+    with omegaconf.open_dict(eval_cfg):
+      eval_cfg.hyperparameters = self._cfg.experiment.hyperparameters
+      # eval_cfg.hyperparameters.batch_size=3
+
+    dataset = TransductionDataset(
+      eval_cfg, 
+      self._device,
+      fields={
+        'source' : self._dataset.source_field, 
+        'target' : self._dataset.target_field
+      }  
+    )
+
+    log.info("Beginning evaluation")
+    self._model.eval() 
+
+    for key in list(dataset.iterators.keys()):
+
+      log.info('Evaluating model on {} dataset'.format(key))
+
+      with open('{}.tsv'.format(key), 'a') as f:
+        f.write('source\ttarget\tprediction\n')
+
+        with tqdm(dataset.iterators[key]) as T:
+          for batch in T:
+
+            # Perform arithmetic computation by reducing an input batch
+            source = batch.source.permute(1, 0)
+            prediction = self._model.forward_batch_expr(batch).permute(1, 2, 0)
+            target = batch.target.permute(1, 0)
+            prediction, target = self._normalize_lengths(prediction, target)
+
+            # TODO: SHOULD WE USE normed ouputs instead of prediction ehre?
+            meter(prediction, target)
+
+            src_toks = self._model._encoder.to_tokens(source)
+            pred_toks = self._model._decoder.to_tokens(prediction.argmax(1))
+            tgt_toks = self._model._decoder.to_tokens(target)
+
+            # print(src_toks)
+
+            for seq in range(len(tgt_toks)):
+              src_line = ' '.join(src_toks[seq])
+              tgt_line = ' '.join(tgt_toks[seq])
+              pred_line = ' '.join(pred_toks[seq])
+
+              f.write('{}\t{}\t{}\n'.format(src_line, tgt_line, pred_line))
+      
+        meter.log(stage=key, step=0)
+        meter.reset()   
+
   def tpdr(self, tpdr_cfg: DictConfig):
 
     # Load checkpoint data
@@ -323,6 +388,28 @@ class Trainer:
 
     repl = ModelREPL(self._model, self._dataset)
     repl.cmdloop()
+  
+  def arith(self, repl_cfg: DictConfig):
+
+    # Load checkpoint data
+    self._load_checkpoint(repl_cfg.checkpoint_dir)
+
+    log.info("Beginning REPL")
+
+    repl = ModelArithmeticREPL(self._model, self._dataset)
+    repl.cmdloop()
+
+  def tpr(self, tpr_cfg: DictConfig):
+
+    """
+    Performs hidden-state arithmetic on expressions. Runs through a batched
+    dataset, performing expression math and grades them against metrics.
+    """
+
+    log.info("Beginning TPR evaluation")
+    self._model.eval()
+
+    
 
 
 class ModelREPL(Cmd):
@@ -392,8 +479,38 @@ class ModelArithmeticREPL(ModelREPL):
 
   def default(self, args):
 
-    expr_list = re.split("\[|\]", args)
-    expr_list = list(filter(None, [e.strip() for e in expr_list]))
+    # Extract transform from expressions
+    transform = args.split()[0]
+    expressions = args[len(transform):]
+
+    # Split expressions on + and - operators
+    expressions = re.split("(\+|\-)", expressions)
+    expressions = list(filter(None, [e.strip() for e in expressions]))
+
+    batched_expressions = []
+
+    for e in expressions:
+      if e in "+-":
+        batched_expressions.append(e)
+      else:
+        batch = self.batchify(f"{transform} {e}")
+        batched_expressions.append(batch)
+    
+    prediction = self._model.forward_expression(batched_expressions).permute(1, 2, 0).argmax(1)
+    prediction = self._model._decoder.to_tokens(prediction)[0]
+    prediction = ' '.join(prediction)
+
+    source = ' '.join(args.split(' ')[1:])
+
+    result = "{} = {}".format(source, prediction)
+    log.info(result)
+  
+  def do_eos(self, args):
+
+    expr_list = re.split("+|-", args)
+    expr_list = list(filter(None, [e.strip() for e in args]))
+
+    print(expr_list)
 
     transform = expr_list[0]
     unbatched_expressions = expr_list[1:]
@@ -407,7 +524,7 @@ class ModelArithmeticREPL(ModelREPL):
         batch = self.batchify(f"{transform} {e}")
         expressions.append(batch)
     
-    prediction = self._model.forward_expression(expressions).permute(1, 2, 0).argmax(1)
+    prediction = self._model.forward_expression_eos(expressions).permute(1, 2, 0).argmax(1)
     prediction = self._model._decoder.to_tokens(prediction)[0]
     prediction = ' '.join(prediction)
 

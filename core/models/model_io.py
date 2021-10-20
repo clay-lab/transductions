@@ -28,5 +28,8 @@ class ModelIO:
     padding = ""
     for attr in self.__dict__:
       padding = " "
-      msg += padding + "{}: {}\n".format(attr, getattr(self, attr).shape)
+      if type(getattr(self, attr)) is tuple:
+        msg += padding + f"{attr}: (" + ', '.join([str(x.shape) for x in getattr(self, attr)]) + ")\n"
+      else:
+        msg += padding + "{}: {}\n".format(attr, getattr(self, attr).shape)
     return msg

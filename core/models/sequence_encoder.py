@@ -101,6 +101,29 @@ class TransductionSequenceEncoder(TransductionComponent):
   def to_ids(self, tokens: List):
     return [self.vocab.stoi[t] for t in tokens]
   
+  def forward_with_hidden(self, enc_input: ModelIO, hidden: Tensor) -> ModelIO:
+    """
+    Performs encoding with a pre-defined hidden-vector input.
+    """
+
+    embedded = self.module[0](enc_input.source)
+    enc = self.module[1](embedded, hx=hidden)
+
+    output = ModelIO()
+    if isinstance(enc, tuple):
+      enc_outputs, enc_hidden = enc
+      output.set_attributes({
+        "enc_outputs" : enc_outputs,
+        "enc_hidden" : enc_hidden
+      })
+    else:
+      enc_outputs = enc
+      output.set_attributes({
+        "enc_outputs" : enc_outputs
+      })
+
+    return output
+
   def forward(self, enc_input: ModelIO) -> ModelIO:
     """
       Compute the forward pass.
