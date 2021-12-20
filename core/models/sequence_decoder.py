@@ -127,8 +127,8 @@ class BetterSequenceDecoder(TransductionComponent):
 
     self._embedding = torch.nn.Embedding(self.vocab_size, self.embedding_size)
 
-    if self.num_layers == 1:
-      assert self.dropout_p == 0, "Dropout must be zero if num_layers = 1"
+    # if self.num_layers == 1:
+    #   assert self.dropout_p == 0, "Dropout must be zero if num_layers = 1"
     
     self._unit = nn.Module()
   
@@ -234,8 +234,8 @@ class SequenceDecoder(torch.nn.Module):
 
     self._embedding = torch.nn.Embedding(self.vocab_size, self.embedding_size)
 
-    if self.num_layers == 1:
-      assert self.dropout_p == 0, "Dropout must be zero if num_layers = 1"
+    # if self.num_layers == 1:
+    #   assert self.dropout_p == 0, "Dropout must be zero if num_layers = 1"
     
     self._unit = nn.Module()
   

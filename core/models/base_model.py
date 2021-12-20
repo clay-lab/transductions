@@ -6,6 +6,7 @@ from typing import List
 import torch
 import logging
 from omegaconf import DictConfig
+from torch._C import dtype
 from torch.functional import Tensor
 from torchtext.vocab import Vocab
 from torchtext.data.batch import Batch
@@ -218,10 +219,15 @@ class TransductionModel(torch.nn.Module):
 
     expressions = _split_and_pad_expressions(batch.source)
 
+    # print(batch.source.permute(1,0))
+    # print(expressions)
+
     dec_input = ModelIO({
       "source" : torch.stack([e[0] for e in expressions]).permute(1, 0),
       "transform" : batch.annotation
     })
+
+    # print(dec_input)
 
     if offset < 0:
       # Reduce during encoding
@@ -281,7 +287,7 @@ class TransductionModel(torch.nn.Module):
 
       if offset == 0:
         # Reduce expressions now
-        
+
         # Collapse array of ModelIO's into single ModelIO by stacking the enc_hidden
         # and enc_output tensors
         for key in reduced_encodings[0].__dict__.keys():
@@ -376,5 +382,12 @@ class TransductionModel(torch.nn.Module):
       enc_output.set_attribute("target", batch.target)
 
     dec_output = self._decoder(enc_output, tf_ratio=tf_ratio)
+
+
+    # print("Enc input: ", enc_input)
+    # print("Enc output: ", enc_output)
+    # print("Dec output: ", dec_output)
+
+    # raise SystemExit
 
     return dec_output.dec_outputs

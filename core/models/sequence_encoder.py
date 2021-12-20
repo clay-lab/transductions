@@ -106,7 +106,11 @@ class TransductionSequenceEncoder(TransductionComponent):
     Performs encoding with a pre-defined hidden-vector input.
     """
 
+    # print(self.module[1])
+
     embedded = self.module[0](enc_input.source)
+    # print(embedded.type())
+    # print(hidden.type())
     enc = self.module[1](embedded, hx=hidden)
 
     output = ModelIO()

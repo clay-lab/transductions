@@ -1,6 +1,7 @@
 import logging
 import os
 import hydra
+from hydra.core.hydra_config import HydraConfig
 import re
 import numpy as np
 from omegaconf import DictConfig
@@ -142,7 +143,9 @@ class TransductionDataset:
 
     log.info("Initializing dataset")
 
-    data_path = os.path.join(hydra.utils.get_original_cwd(), 'data')
+    partial_path = hydra.utils.get_original_cwd() if HydraConfig.initialized() else os.getcwd()
+
+    data_path = os.path.join(partial_path, 'data')
     process_root_path = os.path.join(data_path, 'processed')
     self._processed_path = os.path.join(process_root_path, cfg.dataset.name)
     self._raw_path = os.path.join(data_path, 'raw', cfg.dataset.input)
