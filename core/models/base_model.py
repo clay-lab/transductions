@@ -2,18 +2,17 @@
 #
 # Provides the base class for transduction models.
 
-from typing import List
-import torch
 import logging
+from typing import List
+
+import torch
+from core.models.model_io import ModelIO
+from core.models.sequence_decoder import SequenceDecoder
+from core.models.sequence_encoder import SequenceEncoder
 from omegaconf import DictConfig
 from torch.functional import Tensor
-from torchtext.vocab import Vocab
 from torchtext.data.batch import Batch
-
-# library imports
-from core.models.sequence_encoder import SequenceEncoder
-from core.models.sequence_decoder import SequenceDecoder
-from core.models.model_io import ModelIO
+from torchtext.vocab import Vocab
 
 log = logging.getLogger(__name__)
 

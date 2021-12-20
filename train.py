@@ -3,7 +3,7 @@
 # Entry point for the transductions library.
 
 import hydra
-from omegaconf import OmegaConf, DictConfig
+from omegaconf import DictConfig, OmegaConf
 
 # Library imports
 from core.trainer import Trainer

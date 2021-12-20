@@ -1,9 +1,9 @@
+import logging
 from abc import abstractmethod
-from torch import Tensor
-import torch
 from typing import List
 
-import logging
+import torch
+from torch import Tensor
 
 log = logging.getLogger(__name__)
 

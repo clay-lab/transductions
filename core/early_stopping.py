@@ -3,6 +3,7 @@
 # Provides a way to stop training early if the model isn't making any headway.
 
 import logging
+
 from omegaconf import DictConfig
 
 log = logging.getLogger(__name__)

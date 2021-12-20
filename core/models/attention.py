@@ -2,11 +2,11 @@
 #
 # Defines attention modules.
 
+from abc import ABC, abstractmethod
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from abc import abstractmethod, ABC
-
 from torch import Tensor
 from torchtext.vocab import Vocab
 from transformers import DistilBertTokenizer

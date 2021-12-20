@@ -1,36 +1,36 @@
 import logging
+import os
+import pickle
 import random
+import re
+from cmd import Cmd
+from typing import Dict, List, Tuple
+
+import hydra
+import numpy as np
 import omegaconf
 import torch
-import numpy as np
-import hydra
-import os
 import torch.nn as nn
 import torch.nn.functional as F
-from torch import Tensor
-from tqdm import tqdm
 from omegaconf import DictConfig
-from typing import Dict, Tuple, List
-from cmd import Cmd
-import pickle
-from torchtext.data import Batch
+from torch import Tensor
 from torch.utils.data import DataLoader
+from torchtext.data import Batch
 from torchtext.vocab import Vocab
-import re
+from tqdm import tqdm
 
-# Library imports
-from core.models.base_model import TransductionModel
 from core.dataset.base_dataset import TransductionDataset
 from core.dataset.tpdn_dataset import TPDNDataset
+from core.early_stopping import EarlyStopping
 from core.metrics.base_metric import (
+    LengthAccuracy,
+    LossMetric,
+    NthTokenAccuracy,
     SequenceAccuracy,
     TokenAccuracy,
-    LengthAccuracy,
-    NthTokenAccuracy,
-    LossMetric,
 )
 from core.metrics.meter import Meter
-from core.early_stopping import EarlyStopping
+from core.models.base_model import TransductionModel
 from core.models.model_io import ModelIO
 from core.models.tpn_model import TensorProductEncoder
 

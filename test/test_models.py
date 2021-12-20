@@ -2,12 +2,13 @@
 #
 # Testing code related to instantiating models.
 
+import os
+import sys
 import unittest
+
 import torch
 from omegaconf import OmegaConf
 from torchtext.data import Field
-import sys
-import os
 
 # Library imports
 # Since we are outside the main tree (/core/...), we

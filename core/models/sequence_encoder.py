@@ -2,19 +2,18 @@
 #
 # Provides SequenceEncoder module.
 
-import torch
 import logging
 from typing import Any, List
-from torch import nn, Tensor
-from omegaconf import DictConfig
-from torchtext.vocab import Vocab
-import numpy as np
 
-# Library imports
-from core.models.model_io import ModelIO
+import numpy as np
+import torch
 from core.models.bert_encoder import BERTEncoder
 from core.models.components import TransductionComponent
+from core.models.model_io import ModelIO
 from core.models.positional_encoding import PositionalEncoding
+from omegaconf import DictConfig
+from torch import Tensor, nn
+from torchtext.vocab import Vocab
 
 log = logging.getLogger(__name__)
 
