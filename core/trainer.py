@@ -14,15 +14,19 @@ from typing import Dict, Tuple
 from cmd import Cmd
 import pickle
 from torchtext.data import Batch
+from torch.utils.data import DataLoader
 from torchtext.vocab import Vocab
 import re
 
 # Library imports
 from core.models.base_model import TransductionModel
 from core.dataset.base_dataset import TransductionDataset
+from core.dataset.tpdn_dataset import TPDNDataset
 from core.metrics.base_metric import *
 from core.metrics.meter import Meter
 from core.early_stopping import EarlyStopping
+from core.models.model_io import ModelIO
+from core.models.tpn_model import TensorProductEncoder
 
 log = logging.getLogger(__name__)
 
@@ -290,13 +294,12 @@ class Trainer:
             # TODO: SHOULD WE USE normed ouputs instead of prediction ehre?
             meter(prediction, target)
 
-            # src_toks = self._dataset.id_to_token(source, 'source')
-            pred_toks = self._dataset.id_to_token(prediction.argmax(1), 'target')
-            tgt_toks = self._dataset.id_to_token(target, 'target')
+            src_toks = self._model._encoder.to_tokens(source)
+            pred_toks = self._model._decoder.to_tokens(prediction.argmax(1))
+            tgt_toks = self._model._decoder.to_tokens(target)
 
             for seq in range(len(tgt_toks)):
-              # src_line = ' '.join(src_toks[seq])
-              src_line = 'SRC'
+              src_line = ' '.join(src_toks[seq])
               tgt_line = ' '.join(tgt_toks[seq])
               pred_line = ' '.join(pred_toks[seq])
 
@@ -369,15 +372,185 @@ class Trainer:
         meter.log(stage=key, step=0)
         meter.reset()   
 
-  def tpdr(self, tpdr_cfg: DictConfig):
+  def _load_tpdn_data(self, cfg: DictConfig):
+
+    self._get_encodings(
+      splits=cfg.splits, 
+      use_cached=cfg.use_cached,
+      role_scheme=cfg.role_scheme
+    )
+    iterators = {}
+    for split in cfg.splits:
+      iterators[split] = DataLoader(
+        TPDNDataset(f"{split}-{cfg.role_scheme}-enc.data"),
+        batch_size=cfg.batch_size,
+        shuffle=cfg.shuffle_data,
+        collate_fn=TPDNDataset.collate_fn
+      )
+    
+    return iterators
+  
+  def _roles_for_entry(self, source, role_scheme):
+
+    if role_scheme=="ltr":
+      return str([p for p in range(source.shape[0])])
+    elif role_scheme=="rtl":
+      return str(list(reversed([p for p in range(source.shape[0])])))
+    elif role_scheme=="bow":
+      return str([0 for _ in range(source.shape[0])])
+    elif role_scheme=="refsub":
+      # Reflexive tokens get treated as subjects
+      roles = [p for p in range(source.shape[0])]
+      ref_index = np.where(source==38, 1, 0)
+      for i,v in enumerate(ref_index):
+        if v == 1:
+          roles[i] = 1
+      return str(roles)
+    else:
+      raise NotImplementedError   
+
+  def _get_encodings(self, splits: List[str], use_cached=True, role_scheme="ltr"):
+
+    for split in splits:
+      fname = f"{split}-{role_scheme}-enc.data"
+      if os.path.isfile(fname) and use_cached:
+        log.info(f"Found {split} encodings at {fname}")
+        pass
+      else:
+        with open(fname, "w") as f:
+          log.info(f"Generating encodings for {split} set")
+          f.write("fillers\troles\tannotation\tencoding\ttarget\n")
+          with tqdm(self._dataset.iterators[split]) as T:
+            for batch in T:
+              enc = self._model._encoder(batch)
+              for k in range(batch.source.shape[1]):
+                source = batch.source[:,k].detach().numpy()
+                roles = self._roles_for_entry(source, role_scheme)
+                roles = roles.replace(",", "")[1:-1]
+                source = np.array2string(source, separator=' ')[1:-1].strip()
+                fillers = source.replace("\n", "")
+                encodings = enc.enc_outputs[:,k,:].flatten().detach().numpy()
+                encodings = np.array2string(encodings, separator=" ", threshold=np.inf)[1:-1].strip()
+                encodings = encodings.replace("\n", "")
+                annotation = batch.annotation[:,k].detach().numpy()
+                annotation = np.array2string(annotation, separator=' ')[1:-1].strip()
+                target = batch.target[:,k].detach().numpy()
+                target = np.array2string(target, separator=' ')[1:-1].strip()
+                f.write(f"{fillers}\t{roles}\t{annotation}\t{encodings}\t{target}\n")
+
+  def fit_tpdn(self, tpdn_cfg: DictConfig):
 
     # Load checkpoint data
-    self._load_checkpoint(tpdr_cfg.checkpoint_dir)
+    self._load_checkpoint(tpdn_cfg.checkpoint_dir)
+    log.info(f"Fitting TPDN to checkpoint at {tpdn_cfg.checkpoint_dir}")
 
-    log.info("Beginning TPDR REPL")
+    self._model.eval()
 
-    repl = ModelArithmeticREPL(self._model, self._dataset)
-    repl.cmdloop()
+    tpdn_iterators = self._load_tpdn_data(tpdn_cfg.data)
+    
+    if tpdn_cfg.model.num_fillers is None:
+      tpdn_cfg.model.num_fillers = self._model._encoder.vocab_size
+    tpdn = TensorProductEncoder(tpdn_cfg, self._device)
+    log.info(tpdn)
+
+    # Check if TPDN model exists
+    if not (os.path.isfile(f"tpdn-{tpdn_cfg.data.role_scheme}.pt") and tpdn_cfg.model.use_cached):
+  
+      # Train TPDN
+      optimizer = torch.optim.Adam(tpdn.parameters(), lr=tpdn_cfg.hyperparameters.lr)
+      criterion = nn.MSELoss()
+      epochs = tpdn_cfg.hyperparameters.epochs
+
+      log.info("Training TPDN model")
+      tpdn.train()
+      for epoch in range(epochs):
+
+        log.info("EPOCH %i / %i", epoch + 1, epochs)
+
+        with tqdm(tpdn_iterators['train']) as T:
+          for batch in T:
+            optimizer.zero_grad()
+
+            fillers, roles, _, encodings, _ = batch
+            target = torch.reshape(
+              encodings, 
+              (roles.shape[0], roles.shape[1], -1)
+            )[:,-1,:].unsqueeze(0)
+            input = ModelIO({"fillers" : fillers, "roles" : roles})
+            output = tpdn(input)
+
+            loss = criterion(output.bound_embeddings, target)
+            
+            loss.backward()
+            optimizer.step()
+
+            T.set_postfix(trn_loss='{:4.3f}'.format(loss.item()))
+      
+      torch.save(tpdn.state_dict(), f"tpdn-{tpdn_cfg.data.role_scheme}.pt")
+    
+    fpath = os.path.join(os.getcwd(), f"tpdn-{tpdn_cfg.data.role_scheme}.pt")
+    log.info(f"Reading TPDN model from {fpath}")
+    tpdn.load_state_dict(torch.load(fpath))
+
+    # Compute substitution accuracy
+    tpdn.eval()
+    disp_loss = nn.CrossEntropyLoss()
+
+    meter = Meter([
+      SequenceAccuracy(), 
+      TokenAccuracy(self._dataset.target_field.vocab.stoi['<pad>']), 
+      LengthAccuracy(self._dataset.target_field.vocab.stoi['<pad>']), 
+      NthTokenAccuracy(n=1), 
+      NthTokenAccuracy(n=3),
+      NthTokenAccuracy(n=5)
+    ])
+
+    log.info("Beginning evaluation")
+    self._model.eval()
+
+    for key in ['train', 'val', 'test', 'gen']:
+
+      log.info('Evaluating model on {} dataset'.format(key))
+      with open(f"{key}-{tpdn_cfg.data.role_scheme}-pred.data", "w") as f:
+
+        with tqdm(tpdn_iterators[key]) as T:
+          for batch in T:
+
+            fillers, roles, annotation, encodings, targets = batch
+            annotation = annotation.permute(1,0)
+            encodings = torch.reshape(
+              encodings, 
+              (roles.shape[0], roles.shape[1], -1)
+            )
+            input = ModelIO({"fillers" : fillers, "roles" : roles})
+
+            tpdn_encoding = tpdn(input)
+            tpdn_encoding.set_attributes({
+              "transform" : annotation
+            })
+            tpdn_encoding.set_attribute("enc_outputs", tpdn_encoding.bound_embeddings)
+
+            hybrid_outputs = self._model._decoder(tpdn_encoding, tf_ratio=0.0).dec_outputs
+            prediction = hybrid_outputs.permute(1, 2, 0)
+            prediction, target = self._normalize_lengths(prediction, targets)
+
+            src_toks = self._model._encoder.to_tokens(fillers)
+            pred_toks = self._model._decoder.to_tokens(prediction.argmax(1))
+            tgt_toks = self._model._decoder.to_tokens(target)
+
+            for seq in range(len(tgt_toks)):
+              src_line = ' '.join(src_toks[seq])
+              tgt_line = ' '.join(tgt_toks[seq])
+              pred_line = ' '.join(pred_toks[seq])
+
+              f.write('{}\t{}\t{}\n'.format(src_line, tgt_line, pred_line))
+
+            loss = disp_loss(prediction, target)
+            meter(prediction, target)
+            T.set_postfix(loss='{:4.3f}'.format(loss.item()))
+          
+        meter.log(stage=key, step=0)
+        meter.reset()
 
   def repl(self, repl_cfg: DictConfig):
 
@@ -399,17 +572,43 @@ class Trainer:
     repl = ModelArithmeticREPL(self._model, self._dataset)
     repl.cmdloop()
 
-  def tpr(self, tpr_cfg: DictConfig):
+  def get_trajectories(self, input: str):
 
-    """
-    Performs hidden-state arithmetic on expressions. Runs through a batched
-    dataset, performing expression math and grades them against metrics.
-    """
+    repl = ModelREPL(model=self._model, dataset=self._dataset)
+    batch = repl.batchify(input)
 
-    log.info("Beginning TPR evaluation")
-    self._model.eval()
+    enc_input = ModelIO({"source" : batch.source})
+    enc_output = self._model._encoder(enc_input)
 
-    
+    enc_output.set_attributes({
+      "source" : batch.source, 
+      "transform" : batch.annotation
+    })
+
+    if hasattr(batch, 'target'):
+      enc_output.set_attribute("target", batch.target)
+
+    dec_output = self._model._decoder(enc_output, tf_ratio=0.0)
+
+    return enc_output, dec_output
+  
+  def plot_trajectories(self, input: str):
+
+    repl = ModelREPL(model=self._model, dataset=self._dataset)
+    batch = repl.batchify(input)
+
+    enc_input = ModelIO({"source" : batch.source})
+    diffs = {}
+    space = np.array([np.linspace(-1.0, 1.0, num=5) for _ in range(250)])
+    for s in space:
+      h = torch.tensor(s, dtype=torch.float)
+      enc_output = self._model._encoder.forward_with_hidden(enc_input, hidden=h)
+      delta = ( enc_output.enc_hidden - h ) / 10.0
+      h_idx = tuple(h.flatten().detach().numpy())
+      # print(h_idx)
+      diffs[h_idx] = delta
+
+    return diffs
 
 
 class ModelREPL(Cmd):

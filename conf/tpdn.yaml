@@ -1,0 +1,30 @@
+checkpoint_dir: ???
+
+model:
+  use_cached: True
+  num_fillers: 
+  num_roles: 5
+  filler_dim: 20
+  role_dim: 20
+  final_layer_width: 256
+  embed_squeeze_dim: 
+  binder: tpr
+
+hyperparameters:
+  lr: 0.001
+  epochs: 200
+
+data:
+  use_cached: True
+  batch_size: 10
+  shuffle_data: True
+  role_scheme: ltr
+  splits:
+    - train
+    - val
+    - test
+    - gen
+
+hydra:
+  run:
+    dir: ${checkpoint_dir}/tpdn
