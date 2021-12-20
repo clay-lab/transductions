@@ -1,30 +1,30 @@
 # test_models.py
-# 
+#
 # Testing code related to instantiating models.
 
-import logging
 import unittest
 import torch
-from omegaconf import OmegaConf, DictConfig
+from omegaconf import OmegaConf
 from torchtext.data import Field
-import sys, os
+import sys
+import os
 
 # Library imports
-# Since we are outside the main tree (/core/...), we 
+# Since we are outside the main tree (/core/...), we
 # need to insert the root back into the syspath
 DIR = os.path.dirname(os.path.realpath(__file__))
 ROOT = os.path.join(DIR, "..")
 sys.path.append(ROOT)
 
-from core.models.base_model import TransductionModel
+from core.models.base_model import TransductionModel  # noqa: E402
+
 
 class TestModels(unittest.TestCase):
-
-  def test_sequence_srn_inattentive(self):
-    """
-    Tests instantiation of a simple SRN model without attention.
-    """
-    cfg_string = """
+    def test_sequence_srn_inattentive(self):
+        """
+        Tests instantiation of a simple SRN model without attention.
+        """
+        cfg_string = """
       model:
         encoder:
           unit: SRN
@@ -50,22 +50,22 @@ class TestModels(unittest.TestCase):
         transform_field: source
     """
 
-    cfg = OmegaConf.create(cfg_string)
+        cfg = OmegaConf.create(cfg_string)
 
-    # Construct fake vocabularies so the model
-    # won't complain
-    test_field = Field() 
-    test_field.build_vocab()
+        # Construct fake vocabularies so the model
+        # won't complain
+        test_field = Field()
+        test_field.build_vocab()
 
-    src_vocab = tgt_vocab = test_field.vocab
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    model = TransductionModel(cfg, src_vocab, tgt_vocab, device)
+        src_vocab = tgt_vocab = test_field.vocab
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        _ = TransductionModel(cfg, src_vocab, tgt_vocab, device)
 
-  def test_sequence_srn_multiplicative(self):
-    """
-    Tests instantiation of a simple SRN model without attention.
-    """
-    cfg_string = """
+    def test_sequence_srn_multiplicative(self):
+        """
+        Tests instantiation of a simple SRN model without attention.
+        """
+        cfg_string = """
       model:
         encoder:
           unit: SRN
@@ -91,22 +91,22 @@ class TestModels(unittest.TestCase):
         transform_field: source
     """
 
-    cfg = OmegaConf.create(cfg_string)
+        cfg = OmegaConf.create(cfg_string)
 
-    # Construct fake vocabularies so the model
-    # won't complain
-    test_field = Field() 
-    test_field.build_vocab()
+        # Construct fake vocabularies so the model
+        # won't complain
+        test_field = Field()
+        test_field.build_vocab()
 
-    src_vocab = tgt_vocab = test_field.vocab
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    model = TransductionModel(cfg, src_vocab, tgt_vocab, device)
+        src_vocab = tgt_vocab = test_field.vocab
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        _ = TransductionModel(cfg, src_vocab, tgt_vocab, device)
 
-  def test_sequence_srn_additive(self):
-    """
-    Tests instantiation of a simple SRN model without attention.
-    """
-    cfg_string = """
+    def test_sequence_srn_additive(self):
+        """
+        Tests instantiation of a simple SRN model without attention.
+        """
+        cfg_string = """
       model:
         encoder:
           unit: SRN
@@ -132,22 +132,22 @@ class TestModels(unittest.TestCase):
         transform_field: source
     """
 
-    cfg = OmegaConf.create(cfg_string)
+        cfg = OmegaConf.create(cfg_string)
 
-    # Construct fake vocabularies so the model
-    # won't complain
-    test_field = Field() 
-    test_field.build_vocab()
+        # Construct fake vocabularies so the model
+        # won't complain
+        test_field = Field()
+        test_field.build_vocab()
 
-    src_vocab = tgt_vocab = test_field.vocab
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    model = TransductionModel(cfg, src_vocab, tgt_vocab, device)
+        src_vocab = tgt_vocab = test_field.vocab
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        _ = TransductionModel(cfg, src_vocab, tgt_vocab, device)
 
-  def test_sequence_srn_dotproduct(self):
-    """
-    Tests instantiation of a simple SRN model without attention.
-    """
-    cfg_string = """
+    def test_sequence_srn_dotproduct(self):
+        """
+        Tests instantiation of a simple SRN model without attention.
+        """
+        cfg_string = """
       model:
         encoder:
           unit: SRN
@@ -173,16 +173,17 @@ class TestModels(unittest.TestCase):
         transform_field: source
     """
 
-    cfg = OmegaConf.create(cfg_string)
+        cfg = OmegaConf.create(cfg_string)
 
-    # Construct fake vocabularies so the model
-    # won't complain
-    test_field = Field() 
-    test_field.build_vocab()
+        # Construct fake vocabularies so the model
+        # won't complain
+        test_field = Field()
+        test_field.build_vocab()
 
-    src_vocab = tgt_vocab = test_field.vocab
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    model = TransductionModel(cfg, src_vocab, tgt_vocab, device)
+        src_vocab = tgt_vocab = test_field.vocab
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        _ = TransductionModel(cfg, src_vocab, tgt_vocab, device)
+
 
 if __name__ == "__main__":
-  unittest.main()
+    unittest.main()
