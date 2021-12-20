@@ -3,11 +3,7 @@
 # Provides a way to stop training early if the model isn't making any headway.
 
 import logging
-import torch
 from omegaconf import DictConfig
-
-# Library imports
-from core.models.base_model import TransductionModel
 
 log = logging.getLogger(__name__)
 
@@ -17,6 +13,7 @@ class EarlyStopping:
 
     self.patience = cfg.patience
     self.tolerance = cfg.tolerance
+    self.active = cfg.early_stopping
 
     # Counters
     self.counter = 0
@@ -25,6 +22,9 @@ class EarlyStopping:
     self.should_save = True
 
   def __call__(self, loss):
+
+    if not self.active:
+      return False, True
     
     score = loss
 

@@ -4,5 +4,6 @@ lr: 0.01
 tolerance: 0.001
 patience: 1000
 tf_ratio: 0.5
+early_stopping: True
 
 cuda: 0 # -1 means use CPU
