@@ -4,7 +4,7 @@ encoder:
   unit: GRU
   type: sequence
   bidirectional: False
-  dropout: 0
+  dropout: 0.2
   num_layers: 1
   embedding_size: 256
   hidden_size: 256
@@ -13,7 +13,7 @@ decoder:
   unit: GRU
   type: sequence
   attention: null
-  dropout: 0
+  dropout: 0.2
   num_layers: 1
   max_length: 30
   embedding_size: 256

@@ -1,21 +1,21 @@
-name: SRN
+name: tiny-SRN
 
 encoder:
   unit: SRN
   type: sequence
-  dropout: 0.2
+  dropout: 0
   num_layers: 1
-  hidden_size: 256
+  hidden_size: 3
   max_length: 0
-  embedding_size: 256
+  embedding_size: 3
   bidirectional: False
   
 decoder:
   unit: SRN
   type: sequence
-  dropout: 0.2
+  dropout: 0
   num_layers: 1
-  max_length: 30
-  hidden_size: 256
+  max_length: 7
+  hidden_size: 3
   attention: null
-  embedding_size: 256
+  embedding_size: 3

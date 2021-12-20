@@ -1,7 +1,7 @@
 # Settings from Frank & Petty (2020), "Sequence-to-Sequence Networks Learn the Meaning of Reflexive Anaphora"
 
 epochs: 1000
-batch_size: 5
+batch_size: 1
 lr: 0.01
 tolerance: 0.001
 patience: 1000

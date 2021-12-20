@@ -1,0 +1,7 @@
+defaults:
+  - /dataset: copy
+  - /hyperparameters: frank_petty_2020_long
+  - /model: tiny-srn
+
+name: copy-experiment
+  
