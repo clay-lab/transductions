@@ -1,14 +1,15 @@
 import logging
 import os
-import hydra
-from hydra.core.hydra_config import HydraConfig
-import re
-import numpy as np
-from omegaconf import DictConfig
-from typing import Dict
-import shutil
 import pickle
-from torchtext.data import Field, TabularDataset, BucketIterator
+import re
+import shutil
+from typing import Dict
+
+import hydra
+import numpy as np
+from hydra.core.hydra_config import HydraConfig
+from omegaconf import DictConfig
+from torchtext.data import BucketIterator, Field, TabularDataset
 from transformers import DistilBertTokenizer
 
 log = logging.getLogger(__name__)

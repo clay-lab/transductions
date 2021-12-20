@@ -3,8 +3,10 @@
 # Evaluate model on defined arithmetic expressions.
 
 import os
+
 import hydra
-from omegaconf import OmegaConf, DictConfig
+from omegaconf import DictConfig, OmegaConf
+
 from core.trainer import Trainer
 
 

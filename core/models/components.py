@@ -6,12 +6,11 @@
 import logging
 from abc import abstractmethod
 from typing import List
+
+from core.models.model_io import ModelIO
+from omegaconf import DictConfig
 from torch import Tensor
 from torch.nn import Module
-from omegaconf import DictConfig
-
-# Library imports
-from core.models.model_io import ModelIO
 
 log = logging.getLogger(__name__)
 

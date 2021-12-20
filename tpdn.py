@@ -3,8 +3,10 @@
 # Enter an interactive REPL for the model.
 
 import os
+
 import hydra
-from omegaconf import OmegaConf, DictConfig
+from omegaconf import DictConfig, OmegaConf
+
 from core.trainer import Trainer
 
 

@@ -1,11 +1,10 @@
-import os
 import logging
+import os
 from typing import List
+
+from core.metrics.base_metric import BaseMetric
 from torch import Tensor
 from torch.utils.tensorboard import SummaryWriter
-
-# Library imports
-from core.metrics.base_metric import BaseMetric
 
 log = logging.getLogger(__name__)
 

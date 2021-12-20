@@ -2,27 +2,25 @@
 #
 # Provides SequenceDecoder module.
 
-from typing import Any, List
-import torch
-from torch import nn
-import torch.nn.functional as F
-from torch import Tensor
-import random
 import logging
-from omegaconf import DictConfig
-from torchtext.vocab import Vocab
-import numpy as np
+import random
+from typing import Any, List
 
-# Library imports
-from core.models.model_io import ModelIO
-from core.models.components import TransductionComponent
-from core.models.positional_encoding import PositionalEncoding
+import numpy as np
+import torch
+import torch.nn.functional as F
 from core.models.attention import (
-    create_mask,
-    MultiplicativeAttention,
     AdditiveAttention,
     DotProductAttention,
+    MultiplicativeAttention,
+    create_mask,
 )
+from core.models.components import TransductionComponent
+from core.models.model_io import ModelIO
+from core.models.positional_encoding import PositionalEncoding
+from omegaconf import DictConfig
+from torch import Tensor, nn
+from torchtext.vocab import Vocab
 
 log = logging.getLogger(__name__)
 

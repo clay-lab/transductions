@@ -1,9 +1,8 @@
 import torch
 import torch.nn as nn
-from omegaconf import DictConfig
-
-from core.models.model_io import ModelIO
 from core.models.binding_operations import BindingLayer
+from core.models.model_io import ModelIO
+from omegaconf import DictConfig
 
 
 class TensorProductEncoder(nn.Module):

@@ -3,6 +3,7 @@
 # Defines an interface which represents inputs and outputs of a coder.
 
 from typing import Dict
+
 from torch import Tensor
 
 

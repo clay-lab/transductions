@@ -2,11 +2,12 @@
 #
 # Unit tests for metrics.
 
+import os
+import sys
 import unittest
+
 import torch
 from torch.nn import functional as F
-import sys
-import os
 
 # Library imports
 # Since we are outside the main tree (/core/...), we
@@ -16,12 +17,12 @@ ROOT = os.path.join(DIR, "..")
 sys.path.append(ROOT)
 
 from core.metrics.base_metric import (  # noqa: E402
-    NegAccuracy,
+    FullSequenceModAccuracy,
+    HierarchicalAccuracy,
     LinearAError,
     LinearBError,
     LinearCError,
-    HierarchicalAccuracy,
-    FullSequenceModAccuracy,
+    NegAccuracy,
 )
 
 

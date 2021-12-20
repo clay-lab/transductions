@@ -3,15 +3,14 @@
 # Provides BERTEncoder module.
 
 from typing import List
-from torch import nn, Tensor
-from omegaconf import DictConfig
-from transformers import DistilBertModel, DistilBertConfig, DistilBertTokenizer
-from transformers.models.distilbert.modeling_distilbert import Embeddings
 
-# Library imports
-from core.models.model_io import ModelIO
 from core.models.components import TransductionComponent
+from core.models.model_io import ModelIO
 from core.models.positional_encoding import PositionalEncoding
+from omegaconf import DictConfig
+from torch import Tensor, nn
+from transformers import DistilBertConfig, DistilBertModel, DistilBertTokenizer
+from transformers.models.distilbert.modeling_distilbert import Embeddings
 
 
 class PositionalBertEmbeddings(Embeddings):
