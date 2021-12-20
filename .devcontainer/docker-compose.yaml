@@ -1,0 +1,17 @@
+version: "3.9"
+services:
+  workspace:
+    build: .
+    environment:
+      - COMPOSE_DOCKER_CLI_BUILD=1
+      - DOCKER_BUILDKIT=1
+    platform: linux/arm64/v8
+    image: transduction
+    entrypoint: /bin/sh
+    stdin_open: true 
+    tty: true
+    volumes:
+      - type: bind
+        source: ..
+        target: /home/user/transductions
+    

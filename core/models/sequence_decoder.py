@@ -1,5 +1,5 @@
 # sequence_decoder.py
-# 
+#
 # Provides SequenceDecoder module.
 
 from typing import Any, List
@@ -17,599 +17,655 @@ import numpy as np
 from core.models.model_io import ModelIO
 from core.models.components import TransductionComponent
 from core.models.positional_encoding import PositionalEncoding
-from core.models.attention import create_mask, MultiplicativeAttention, AdditiveAttention, DotProductAttention
+from core.models.attention import (
+    create_mask,
+    MultiplicativeAttention,
+    AdditiveAttention,
+    DotProductAttention,
+)
 
 log = logging.getLogger(__name__)
 
 if torch.cuda.is_available():
-    avd = torch.device('cuda')
+    avd = torch.device("cuda")
 else:
-    avd = torch.device('cpu')
+    avd = torch.device("cpu")
+
 
 class BetterSequenceDecoder(TransductionComponent):
 
-  # BEGIN __new__ constructor
+    # BEGIN __new__ constructor
 
-  def __new__(
-    cls,
-    src_vocab: Vocab, 
-    tgt_vocab: Vocab, 
-    dec_cfg: DictConfig, 
-    enc_cfg: DictConfig = None
-  ) -> Any:
-    """
-    This is an alternative to using a Factory paradigm. We always return 
-    some subtype of SequenceDecoder, depending on what kind of unit we want
-    to create.
-    """
-    unit_type = str(dec_cfg.unit).upper()
+    def __new__(
+        cls,
+        src_vocab: Vocab,
+        tgt_vocab: Vocab,
+        dec_cfg: DictConfig,
+        enc_cfg: DictConfig = None,
+    ) -> Any:
+        """
+        This is an alternative to using a Factory paradigm. We always return
+        some subtype of SequenceDecoder, depending on what kind of unit we want
+        to create.
+        """
+        unit_type = str(dec_cfg.unit).upper()
 
-    if unit_type == 'SRN':
-      return SRNSequenceDecoder(src_vocab, tgt_vocab, dec_cfg, enc_cfg)
-    elif unit_type == 'GRU':
-      return GRUSequenceDecoder(src_vocab, tgt_vocab, dec_cfg, enc_cfg)
-    elif unit_type == 'LSTM':
-      return LSTMSequenceDecoder(src_vocab, tgt_vocab, dec_cfg, enc_cfg)
-    elif unit_type == 'TRANSFORMER':
-      return TransformerSequenceDecoder(tgt_vocab, dec_cfg)
-    else:
-      log.error(f"Unknown decoder type '{unit_type}'.")
-      raise NotImplementedError
-  
-  # END __new__ constructor
+        if unit_type == "SRN":
+            return SRNSequenceDecoder(src_vocab, tgt_vocab, dec_cfg, enc_cfg)
+        elif unit_type == "GRU":
+            return GRUSequenceDecoder(src_vocab, tgt_vocab, dec_cfg, enc_cfg)
+        elif unit_type == "LSTM":
+            return LSTMSequenceDecoder(src_vocab, tgt_vocab, dec_cfg, enc_cfg)
+        elif unit_type == "TRANSFORMER":
+            return TransformerSequenceDecoder(tgt_vocab, dec_cfg)
+        else:
+            log.error(f"Unknown decoder type '{unit_type}'.")
+            raise NotImplementedError
 
-  # BEGIN computed properties
+    # END __new__ constructor
 
-  @property
-  def vocab_size(self):
-    return len(self.vocab)
-  
-  @property
-  def PAD_IDX(self):
-    return self.vocab.stoi['<pad>']
-  
-  @property
-  def SOS_IDX(self):
-    return self.vocab.stoi['<sos>']
-  
-  @property
-  def EOS_IDX(self):
-    return self.vocab.stoi['<eos>']
-  
-  @property
-  def num_layers(self) -> int:
-    return int(self.cfg.num_layers)
-  
-  @property
-  def hidden_size(self) -> int:
-    return int(self.cfg.hidden_size)
-  
-  @property
-  def unit_type(self) -> str:
-    return str(self.cfg.unit).upper()
-  
-  @property
-  def embedding_size(self) -> int:
-    return int(self.cfg.embedding_size)
-  
-  @property
-  def dropout_p(self) -> float:
-    return float(self.cfg.dropout)
-  
-  @property
-  def max_length(self) -> int:
-    return int(self.cfg.max_length)
-  
-  @property
-  def attention_type(self) -> str:
-    if self.cfg.attention is not None:
-      return str(self.cfg.attention).upper()
-    else:
-      return None
-  
-  # END computed properties
+    # BEGIN computed properties
 
-  def __init__(
-    self, 
-    src_vocab: Vocab, 
-    tgt_vocab: Vocab, 
-    dec_cfg: DictConfig, 
-    enc_cfg: DictConfig
-  ):
-    
-    super().__init__(dec_cfg)
+    @property
+    def vocab_size(self):
+        return len(self.vocab)
 
-    self.cfg = dec_cfg
-    self.vocab = tgt_vocab
-    
-    # self.vocab = tgt_vocab
-    self._src_vocab = src_vocab
+    @property
+    def PAD_IDX(self):
+        return self.vocab.stoi["<pad>"]
 
-    self._embedding = torch.nn.Embedding(self.vocab_size, self.embedding_size)
+    @property
+    def SOS_IDX(self):
+        return self.vocab.stoi["<sos>"]
 
-    # if self.num_layers == 1:
-    #   assert self.dropout_p == 0, "Dropout must be zero if num_layers = 1"
-    
-    self._unit = nn.Module()
-  
-    self._out = torch.nn.Linear(self.hidden_size, self.vocab_size)
+    @property
+    def EOS_IDX(self):
+        return self.vocab.stoi["<eos>"]
 
-    # Attention
-    if self.attention_type is not None:
-      if self.attention_type == 'MULTIPLICATIVE':
-        self._attention = MultiplicativeAttention(self.hidden_size, enc_cfg.hidden_size)
-      elif self.attention_type == 'ADDITIVE':
-        self._attention = AdditiveAttention(self.hidden_size, enc_cfg.hidden_size)
-      elif self.attention_type == 'DOTPRODUCT':
-        self._attention = DotProductAttention()
-      else:
-        raise NotImplementedError
+    @property
+    def num_layers(self) -> int:
+        return int(self.cfg.num_layers)
+
+    @property
+    def hidden_size(self) -> int:
+        return int(self.cfg.hidden_size)
+
+    @property
+    def unit_type(self) -> str:
+        return str(self.cfg.unit).upper()
+
+    @property
+    def embedding_size(self) -> int:
+        return int(self.cfg.embedding_size)
+
+    @property
+    def dropout_p(self) -> float:
+        return float(self.cfg.dropout)
+
+    @property
+    def max_length(self) -> int:
+        return int(self.cfg.max_length)
+
+    @property
+    def attention_type(self) -> str:
+        if self.cfg.attention is not None:
+            return str(self.cfg.attention).upper()
+        else:
+            return None
+
+    # END computed properties
+
+    def __init__(
+        self,
+        src_vocab: Vocab,
+        tgt_vocab: Vocab,
+        dec_cfg: DictConfig,
+        enc_cfg: DictConfig,
+    ):
+
+        super().__init__(dec_cfg)
+
+        self.cfg = dec_cfg
+        self.vocab = tgt_vocab
+
+        # self.vocab = tgt_vocab
+        self._src_vocab = src_vocab
+
+        self._embedding = torch.nn.Embedding(self.vocab_size, self.embedding_size)
+
+        # if self.num_layers == 1:
+        #   assert self.dropout_p == 0, "Dropout must be zero if num_layers = 1"
+
+        self._unit = nn.Module()
+
+        self._out = torch.nn.Linear(self.hidden_size, self.vocab_size)
+
+        # Attention
+        if self.attention_type is not None:
+            if self.attention_type == "MULTIPLICATIVE":
+                self._attention = MultiplicativeAttention(
+                    self.hidden_size, enc_cfg.hidden_size
+                )
+            elif self.attention_type == "ADDITIVE":
+                self._attention = AdditiveAttention(
+                    self.hidden_size, enc_cfg.hidden_size
+                )
+            elif self.attention_type == "DOTPRODUCT":
+                self._attention = DotProductAttention()
+            else:
+                raise NotImplementedError
+
 
 class SequenceDecoder(torch.nn.Module):
+    @staticmethod
+    def newDecoder(
+        src_vocab: Vocab,
+        tgt_vocab: Vocab,
+        dec_cfg: DictConfig,
+        enc_cfg: DictConfig = None,
+    ):
 
-  @staticmethod
-  def newDecoder(
-    src_vocab: Vocab, 
-    tgt_vocab: Vocab, 
-    dec_cfg: DictConfig, 
-    enc_cfg: DictConfig = None
-  ):
+        unit_type = dec_cfg.unit.upper()
 
-    unit_type = dec_cfg.unit.upper()
+        if unit_type == "SRN":
+            return SRNSequenceDecoder(src_vocab, tgt_vocab, dec_cfg, enc_cfg)
+        elif unit_type == "GRU":
+            return GRUSequenceDecoder(src_vocab, tgt_vocab, dec_cfg, enc_cfg)
+        elif unit_type == "LSTM":
+            return LSTMSequenceDecoder(src_vocab, tgt_vocab, dec_cfg, enc_cfg)
+        elif unit_type == "TRANSFORMER":
+            return TransformerSequenceDecoder(tgt_vocab, dec_cfg)
+        else:
+            log.error(f"Unknown decoder type '{unit_type}'.")
 
-    if unit_type == 'SRN':
-      return SRNSequenceDecoder(src_vocab, tgt_vocab, dec_cfg, enc_cfg)
-    elif unit_type == 'GRU':
-      return GRUSequenceDecoder(src_vocab, tgt_vocab, dec_cfg, enc_cfg)
-    elif unit_type == 'LSTM':
-      return LSTMSequenceDecoder(src_vocab, tgt_vocab, dec_cfg, enc_cfg)
-    elif unit_type == 'TRANSFORMER':
-      return TransformerSequenceDecoder(tgt_vocab, dec_cfg)
-    else:
-      log.error(f"Unknown decoder type '{unit_type}'.")
+    @property
+    def vocab_size(self):
+        return len(self.vocab)
 
-  @property
-  def vocab_size(self):
-    return len(self.vocab)
-  
-  @property
-  def PAD_IDX(self):
-    return self.vocab.stoi['<pad>']
-  
-  @property
-  def SOS_IDX(self):
-    return self.vocab.stoi['<sos>']
-  
-  @property
-  def EOS_IDX(self):
-    return self.vocab.stoi['<eos>']
-  
-  @property
-  def num_layers(self) -> int:
-    return int(self.cfg.num_layers)
-  
-  @property
-  def hidden_size(self) -> int:
-    return int(self.cfg.hidden_size)
-  
-  @property
-  def unit_type(self) -> str:
-    return str(self.cfg.unit).upper()
-  
-  @property
-  def embedding_size(self) -> int:
-    return int(self.cfg.embedding_size)
-  
-  @property
-  def dropout_p(self) -> float:
-    return float(self.cfg.dropout)
-  
-  @property
-  def max_length(self) -> int:
-    return int(self.cfg.max_length)
-  
-  @property
-  def attention_type(self) -> str:
-    if self.cfg.attention is not None:
-      return str(self.cfg.attention).upper()
-    else:
-      return None
-  
-  @property
-  def unit_input_size(self) -> int:
-    if self.attention_type:
-      return self.embedding_size + self.hidden_size
-    else:
-      return self.embedding_size
+    @property
+    def PAD_IDX(self):
+        return self.vocab.stoi["<pad>"]
 
-  def __init__(self, src_vocab: Vocab, tgt_vocab: Vocab, dec_cfg: DictConfig, enc_cfg: DictConfig):
-    
-    super(SequenceDecoder, self).__init__()
+    @property
+    def SOS_IDX(self):
+        return self.vocab.stoi["<sos>"]
 
-    self.cfg = dec_cfg
-    self.vocab = tgt_vocab
-    
-    # self.vocab = tgt_vocab
-    self._src_vocab = src_vocab
+    @property
+    def EOS_IDX(self):
+        return self.vocab.stoi["<eos>"]
 
-    self._embedding = torch.nn.Embedding(self.vocab_size, self.embedding_size)
+    @property
+    def num_layers(self) -> int:
+        return int(self.cfg.num_layers)
 
-    # if self.num_layers == 1:
-    #   assert self.dropout_p == 0, "Dropout must be zero if num_layers = 1"
-    
-    self._unit = nn.Module()
-  
-    self._out = torch.nn.Linear(self.hidden_size, self.vocab_size)
+    @property
+    def hidden_size(self) -> int:
+        return int(self.cfg.hidden_size)
 
-    # Attention
-    if self.attention_type is not None:
-      if self.attention_type == 'MULTIPLICATIVE':
-        self._attention = MultiplicativeAttention(self.hidden_size, enc_cfg.hidden_size)
-      elif self.attention_type == 'ADDITIVE':
-        self._attention = AdditiveAttention(self.hidden_size, enc_cfg.hidden_size)
-      elif self.attention_type == 'DOTPRODUCT':
-        self._attention = DotProductAttention()
-      else:
-        raise NotImplementedError
+    @property
+    def unit_type(self) -> str:
+        return str(self.cfg.unit).upper()
 
-  def forward(self, dec_input: ModelIO, tf_ratio: float) -> ModelIO:
-    """
-    Computes the forward pass of the decoder.
+    @property
+    def embedding_size(self) -> int:
+        return int(self.cfg.embedding_size)
 
-    Paramters:
-      - dec_input: wrapper object for the various inputs to the decoder. This
-          allows for variadic parameters to account for various units' different
-          input requirements (i.e., LSTMs require a `cell`)
-      - tf_ratio (float in range [0.0, 1.0]): chance that teacher_forcing is
-          used for a given batch. If tf_ratio is not `None`, a `target` must
-          be present in `dec_input`.
-    """
+    @property
+    def dropout_p(self) -> float:
+        return float(self.cfg.dropout)
 
-    seq_len, batch_size, _ = dec_input.enc_outputs.shape
+    @property
+    def max_length(self) -> int:
+        return int(self.cfg.max_length)
 
-    teacher_forcing = random.random() < tf_ratio
-    if teacher_forcing and not hasattr(dec_input, 'target'):
-      log.error("You must provide a 'target' to use teacher forcing.")
-      raise SystemError
+    @property
+    def attention_type(self) -> str:
+        if self.cfg.attention is not None:
+            return str(self.cfg.attention).upper()
+        else:
+            return None
 
-    # Okay so we still need this, but should we be padding
-    # the outputs or something when not using teacher forcing?
-    if hasattr(dec_input, 'target'):
-      gen_len = dec_input.target.shape[0]
-    else:
-      gen_len = self.max_length
-  
-    # Get input to decoder unit
-    dec_step_input = self._get_step_inputs(dec_input)
+    @property
+    def unit_input_size(self) -> int:
+        if self.attention_type:
+            return self.embedding_size + self.hidden_size
+        else:
+            return self.embedding_size
 
-    # Skeletons for the decoder outputs
-    has_finished = torch.zeros(batch_size, dtype=torch.bool).to(avd)
-    dec_outputs = torch.zeros(gen_len, batch_size, self.vocab_size).to(avd)
-    dec_outputs[:,:,self.PAD_IDX] = 1.0
-    dec_hiddens = torch.zeros(gen_len, batch_size, self.hidden_size).to(avd)
-    
-    # Attention
-    if self.attention_type is not None:
-      attention = torch.zeros(gen_len, batch_size, seq_len).to(avd)
-      src_mask = create_mask(dec_input.source, self._src_vocab)
-    else:
-      src_mask = None
+    def __init__(
+        self,
+        src_vocab: Vocab,
+        tgt_vocab: Vocab,
+        dec_cfg: DictConfig,
+        enc_cfg: DictConfig,
+    ):
 
-    for i in range(gen_len):
+        super(SequenceDecoder, self).__init__()
 
-      # Get forward_step pass
-      step_result = self.forward_step(dec_step_input, src_mask)
-      step_prediction = step_result.y.argmax(dim=1)
+        self.cfg = dec_cfg
+        self.vocab = tgt_vocab
 
-      # Update results
-      dec_outputs[i] = step_result.y
-      dec_hiddens[i] = step_result.h[-1]
-      if self.attention_type is not None:
-        attention[i] = step_result.attn
+        # self.vocab = tgt_vocab
+        self._src_vocab = src_vocab
 
-      # Check if we're done
-      has_finished[step_prediction == self.EOS_IDX] = True
-      if all(has_finished): 
-        break
-      else:
-        # Otherwise, iterate x, h and repeat
-        x = dec_input.target[i] if teacher_forcing else step_prediction
+        self._embedding = torch.nn.Embedding(self.vocab_size, self.embedding_size)
 
-        # A little hacky, but we want to use every value from the step result
-        # For the next step EXCEPT x, which should come from either the target
-        # or the step_prediction.
-        step_result.set_attribute('x', x)
-        step_result.set_attribute('enc_outputs', dec_input.enc_outputs)
-        dec_step_input = self._get_step_inputs(step_result)
+        # if self.num_layers == 1:
+        #   assert self.dropout_p == 0, "Dropout must be zero if num_layers = 1"
 
-    output = ModelIO({
-      "dec_outputs" : dec_outputs,
-      "dec_hiddens" : dec_hiddens
-    })
+        self._unit = nn.Module()
 
-    if self.attention_type is not None:
-      output.set_attribute("attention", attention)
+        self._out = torch.nn.Linear(self.hidden_size, self.vocab_size)
 
-    return output
-  
-  def compute_attention(self, unit_input: Tensor, enc_outputs: Tensor, h: Tensor, src_mask: Tensor) -> Tensor:
+        # Attention
+        if self.attention_type is not None:
+            if self.attention_type == "MULTIPLICATIVE":
+                self._attention = MultiplicativeAttention(
+                    self.hidden_size, enc_cfg.hidden_size
+                )
+            elif self.attention_type == "ADDITIVE":
+                self._attention = AdditiveAttention(
+                    self.hidden_size, enc_cfg.hidden_size
+                )
+            elif self.attention_type == "DOTPRODUCT":
+                self._attention = DotProductAttention()
+            else:
+                raise NotImplementedError
 
-    attn = self._attention(enc_outputs, h[-1], src_mask).unsqueeze(1)
-    enc_out = enc_outputs.permute(1,0,2)
-    weighted_enc_out = torch.bmm(attn, enc_out).permute(1,0,2)
-    return torch.cat((unit_input, weighted_enc_out), dim=2), attn.squeeze(1)
+    def forward(self, dec_input: ModelIO, tf_ratio: float) -> ModelIO:
+        """
+        Computes the forward pass of the decoder.
 
-  def forward_step(self, step_input: ModelIO, src_mask: Tensor = None) -> ModelIO:
+        Paramters:
+          - dec_input: wrapper object for the various inputs to the decoder. This
+              allows for variadic parameters to account for various units' different
+              input requirements (i.e., LSTMs require a `cell`)
+          - tf_ratio (float in range [0.0, 1.0]): chance that teacher_forcing is
+              used for a given batch. If tf_ratio is not `None`, a `target` must
+              be present in `dec_input`.
+        """
 
-    h = step_input.h
-    h = h.unsqueeze(0) if len(h.shape) == 2 else h
-    unit_input = F.relu(self._embedding(step_input.x))
-    unit_input = unit_input.unsqueeze(0) if len(unit_input.shape) == 2 else unit_input
-    if src_mask is not None:
-      unit_input, attn = self.compute_attention(unit_input, step_input.enc_outputs, h, src_mask)
+        seq_len, batch_size, _ = dec_input.enc_outputs.shape
 
-    # print("unit_input", unit_input.shape)
-    # print("attn", attn.shape)
+        teacher_forcing = random.random() < tf_ratio
+        if teacher_forcing and not hasattr(dec_input, "target"):
+            log.error("You must provide a 'target' to use teacher forcing.")
+            raise SystemError
 
-    _, state = self._unit(unit_input, h)
-    y = self._out(state[-1])
+        # Okay so we still need this, but should we be padding
+        # the outputs or something when not using teacher forcing?
+        if hasattr(dec_input, "target"):
+            gen_len = dec_input.target.shape[0]
+        else:
+            gen_len = self.max_length
 
-    step_result = ModelIO({ "y" : y, "h" : state })
-    if src_mask is not None:
-      step_result.set_attribute("attn", attn)
+        # Get input to decoder unit
+        dec_step_input = self._get_step_inputs(dec_input)
 
-    return step_result
+        # Skeletons for the decoder outputs
+        has_finished = torch.zeros(batch_size, dtype=torch.bool).to(avd)
+        dec_outputs = torch.zeros(gen_len, batch_size, self.vocab_size).to(avd)
+        dec_outputs[:, :, self.PAD_IDX] = 1.0
+        dec_hiddens = torch.zeros(gen_len, batch_size, self.hidden_size).to(avd)
 
-  def _get_step_inputs(self, dec_inputs: ModelIO) -> ModelIO:
+        # Attention
+        if self.attention_type is not None:
+            attention = torch.zeros(gen_len, batch_size, seq_len).to(avd)
+            src_mask = create_mask(dec_input.source, self._src_vocab)
+        else:
+            src_mask = None
 
-    if hasattr(dec_inputs, 'h'):
-      h = dec_inputs.h
-    elif hasattr(dec_inputs, 'enc_hidden'):
-      h = dec_inputs.enc_hidden
-    else:
-      h = dec_inputs.enc_outputs[-1]
-      # log.error(f"I don't have any hidden state to use for the step from {dec_inputs}.")
-      # raise SystemError
+        for i in range(gen_len):
 
-    batch_size = h.shape[0]
+            # Get forward_step pass
+            step_result = self.forward_step(dec_step_input, src_mask)
+            step_prediction = step_result.y.argmax(dim=1)
 
-    if hasattr(dec_inputs, 'x'):
-      # Not the first step. Use outputs from previous step instead
-      x = dec_inputs.x
-    elif hasattr(dec_inputs, 'transform'):
-      # Use the transformation token from the input
-      x = dec_inputs.transform[1:-1] # strip <sos> and <eos> tokens
-    else:
-      log.error(f"I don't have any input to use for the step from {dec_inputs}.")
-      raise SystemError
+            # Update results
+            dec_outputs[i] = step_result.y
+            dec_hiddens[i] = step_result.h[-1]
+            if self.attention_type is not None:
+                attention[i] = step_result.attn
 
-    dec_step_input = ModelIO({
-      "x": x,
-      "h": h
-    })
+            # Check if we're done
+            has_finished[step_prediction == self.EOS_IDX] = True
+            if all(has_finished):
+                break
+            else:
+                # Otherwise, iterate x, h and repeat
+                x = dec_input.target[i] if teacher_forcing else step_prediction
 
-    if hasattr(dec_inputs, 'enc_outputs'):
-      dec_step_input.set_attribute('enc_outputs', dec_inputs.enc_outputs)
+                # A little hacky, but we want to use every value from the step result
+                # For the next step EXCEPT x, which should come from either the target
+                # or the step_prediction.
+                step_result.set_attribute("x", x)
+                step_result.set_attribute("enc_outputs", dec_input.enc_outputs)
+                dec_step_input = self._get_step_inputs(step_result)
 
-    return dec_step_input
-  
-  def to_tokens(self, idx_tensor: Tensor, show_special=False):
-    outputs = np.empty(idx_tensor.detach().cpu().numpy().shape, dtype=object)
+        output = ModelIO({"dec_outputs": dec_outputs, "dec_hiddens": dec_hiddens})
 
-    for idr, r in enumerate(idx_tensor):
-      for idc, _ in enumerate(r):
-        string = self.vocab.itos[idx_tensor[idr][idc]]
-        if string not in ['<sos>', '<eos>', '<pad>'] or show_special:
-          outputs[idr][idc] = self.vocab.itos[idx_tensor[idr][idc]]
-    
-    batch_strings = []
-    for r in outputs:
-      batch_strings.append(r[r != np.array(None)])
+        if self.attention_type is not None:
+            output.set_attribute("attention", attention)
 
-    return batch_strings
-  
-  def to_ids(self, tokens: List):
-    return [self.vocab.stoi[t] for t in tokens]
+        return output
+
+    def compute_attention(
+        self, unit_input: Tensor, enc_outputs: Tensor, h: Tensor, src_mask: Tensor
+    ) -> Tensor:
+
+        attn = self._attention(enc_outputs, h[-1], src_mask).unsqueeze(1)
+        enc_out = enc_outputs.permute(1, 0, 2)
+        weighted_enc_out = torch.bmm(attn, enc_out).permute(1, 0, 2)
+        return torch.cat((unit_input, weighted_enc_out), dim=2), attn.squeeze(1)
+
+    def forward_step(self, step_input: ModelIO, src_mask: Tensor = None) -> ModelIO:
+
+        h = step_input.h
+        h = h.unsqueeze(0) if len(h.shape) == 2 else h
+        unit_input = F.relu(self._embedding(step_input.x))
+        unit_input = (
+            unit_input.unsqueeze(0) if len(unit_input.shape) == 2 else unit_input
+        )
+        if src_mask is not None:
+            unit_input, attn = self.compute_attention(
+                unit_input, step_input.enc_outputs, h, src_mask
+            )
+
+        # print("unit_input", unit_input.shape)
+        # print("attn", attn.shape)
+
+        _, state = self._unit(unit_input, h)
+        y = self._out(state[-1])
+
+        step_result = ModelIO({"y": y, "h": state})
+        if src_mask is not None:
+            step_result.set_attribute("attn", attn)
+
+        return step_result
+
+    def _get_step_inputs(self, dec_inputs: ModelIO) -> ModelIO:
+
+        if hasattr(dec_inputs, "h"):
+            h = dec_inputs.h
+        elif hasattr(dec_inputs, "enc_hidden"):
+            h = dec_inputs.enc_hidden
+        else:
+            h = dec_inputs.enc_outputs[-1]
+
+        if hasattr(dec_inputs, "x"):
+            # Not the first step. Use outputs from previous step instead
+            x = dec_inputs.x
+        elif hasattr(dec_inputs, "transform"):
+            # Use the transformation token from the input
+            x = dec_inputs.transform[1:-1]  # strip <sos> and <eos> tokens
+        else:
+            log.error(f"I don't have any input to use for the step from {dec_inputs}.")
+            raise SystemError
+
+        dec_step_input = ModelIO({"x": x, "h": h})
+
+        if hasattr(dec_inputs, "enc_outputs"):
+            dec_step_input.set_attribute("enc_outputs", dec_inputs.enc_outputs)
+
+        return dec_step_input
+
+    def to_tokens(self, idx_tensor: Tensor, show_special=False):
+        outputs = np.empty(idx_tensor.detach().cpu().numpy().shape, dtype=object)
+
+        for idr, r in enumerate(idx_tensor):
+            for idc, _ in enumerate(r):
+                string = self.vocab.itos[idx_tensor[idr][idc]]
+                if string not in ["<sos>", "<eos>", "<pad>"] or show_special:
+                    outputs[idr][idc] = self.vocab.itos[idx_tensor[idr][idc]]
+
+        batch_strings = []
+        for r in outputs:
+            batch_strings.append(r[r != np.array(None)])
+
+        return batch_strings
+
+    def to_ids(self, tokens: List):
+        return [self.vocab.stoi[t] for t in tokens]
+
 
 class LSTMSequenceDecoder(SequenceDecoder):
+    def __init__(
+        self,
+        src_vocab: Vocab,
+        tgt_vocab: Vocab,
+        dec_cfg: DictConfig,
+        enc_cfg: DictConfig,
+    ):
+        super(LSTMSequenceDecoder, self).__init__(
+            src_vocab, tgt_vocab, dec_cfg, enc_cfg
+        )
 
-  def __init__(self, src_vocab: Vocab, tgt_vocab: Vocab, dec_cfg: DictConfig, enc_cfg: DictConfig):
-    super(LSTMSequenceDecoder, self).__init__(src_vocab, tgt_vocab, dec_cfg, enc_cfg)
+        self._unit = nn.LSTM(
+            self.unit_input_size,
+            self.hidden_size,
+            num_layers=self.num_layers,
+            dropout=self.dropout_p,
+        )
 
-    self._unit = nn.LSTM(self.unit_input_size, self.hidden_size, num_layers=self.num_layers, dropout=self.dropout_p)
+    def _get_step_inputs(self, dec_inputs: ModelIO) -> ModelIO:
 
-  def _get_step_inputs(self, dec_inputs: ModelIO) -> ModelIO:
+        # TODO: This is hacky....make the logic nicer here.
+        if hasattr(dec_inputs, "enc_hidden") and isinstance(
+            dec_inputs.enc_hidden, tuple
+        ):
+            dec_inputs.c = dec_inputs.enc_hidden[1]
+            dec_inputs.enc_hidden = dec_inputs.enc_hidden[0]
 
-    # TODO: This is hacky....make the logic nicer here.
-    if hasattr(dec_inputs, 'enc_hidden') and isinstance(dec_inputs.enc_hidden, tuple):
-      dec_inputs.c = dec_inputs.enc_hidden[1]
-      dec_inputs.enc_hidden = dec_inputs.enc_hidden[0]
+        # Get default implementation
+        step_input = super()._get_step_inputs(dec_inputs)
+        batch_size = step_input.h.shape[0]
 
-    # Get default implementation
-    step_input = super()._get_step_inputs(dec_inputs)
-    batch_size = step_input.h.shape[0]
+        if hasattr(dec_inputs, "c"):
+            # We're @ timestep t>0, and the decoder has already produced a 'c'
+            step_input.set_attribute("c", dec_inputs.c)
+        else:
+            # We're @ timestep t=0, so create an initial 'c' of all zeros.
+            c = torch.zeros(self.num_layers, batch_size, self.hidden_size).to(avd)
+            step_input.set_attribute("c", c)
 
-    if hasattr(dec_inputs, 'c'):
-      # We're @ timestep t>0, and the decoder has already produced a 'c'
-      step_input.set_attribute('c', dec_inputs.c)
-    else:
-      # We're @ timestep t=0, so create an initial 'c' of all zeros.
-      c = torch.zeros(self.num_layers, batch_size, self.hidden_size).to(avd)
-      step_input.set_attribute('c', c)
+        return step_input
 
-    return step_input
+    def forward_step(self, step_input: ModelIO, src_mask: Tensor = None) -> ModelIO:
 
-  def forward_step(self, step_input: ModelIO, src_mask: Tensor = None) -> ModelIO:
+        unit_input = F.relu(self._embedding(step_input.x))
+        h, c = step_input.h, step_input.c
 
-    unit_input = F.relu(self._embedding(step_input.x))
-    h, c = step_input.h, step_input.c
+        if len(unit_input.shape) == 2:
+            unit_input = unit_input.unsqueeze(0)
 
-    if len(unit_input.shape) == 2:
-      unit_input = unit_input.unsqueeze(0)
-    
-    if len(h.shape) == 2:
-      h = h.unsqueeze(0)
-    
-    hidden = (h, c)
+        if len(h.shape) == 2:
+            h = h.unsqueeze(0)
 
-    if src_mask is not None:
-      unit_input, attn = self.compute_attention(unit_input, step_input.enc_outputs, h, src_mask)
+        hidden = (h, c)
 
-    _, state = self._unit(unit_input, hidden)
-    y = self._out(state[0][-1])
+        if src_mask is not None:
+            unit_input, attn = self.compute_attention(
+                unit_input, step_input.enc_outputs, h, src_mask
+            )
 
-    step_result = ModelIO({ "y" : y, "h" : state[0], "c" : state[1] })
-    if src_mask is not None:
-      step_result.set_attribute("attn", attn)
+        _, state = self._unit(unit_input, hidden)
+        y = self._out(state[0][-1])
 
-    return step_result
-    
+        step_result = ModelIO({"y": y, "h": state[0], "c": state[1]})
+        if src_mask is not None:
+            step_result.set_attribute("attn", attn)
+
+        return step_result
+
+
 class SRNSequenceDecoder(SequenceDecoder):
+    def __init__(
+        self,
+        src_vocab: Vocab,
+        tgt_vocab: Vocab,
+        dec_cfg: DictConfig,
+        enc_cfg: DictConfig,
+    ):
+        super().__init__(src_vocab, tgt_vocab, dec_cfg, enc_cfg)
+        self._unit = nn.RNN(
+            self.unit_input_size,
+            self.hidden_size,
+            num_layers=self.num_layers,
+            dropout=self.dropout_p,
+        )
 
-  def __init__(self, src_vocab: Vocab, tgt_vocab: Vocab, dec_cfg: DictConfig, enc_cfg: DictConfig):
-    super().__init__(src_vocab, tgt_vocab, dec_cfg, enc_cfg)
-    self._unit = nn.RNN(self.unit_input_size, self.hidden_size, num_layers=self.num_layers, dropout=self.dropout_p)
 
 class GRUSequenceDecoder(SequenceDecoder):
+    def __init__(
+        self,
+        src_vocab: Vocab,
+        tgt_vocab: Vocab,
+        dec_cfg: DictConfig,
+        enc_cfg: DictConfig,
+    ):
+        super().__init__(src_vocab, tgt_vocab, dec_cfg, enc_cfg)
+        self._unit = nn.GRU(
+            self.unit_input_size,
+            self.hidden_size,
+            num_layers=self.num_layers,
+            dropout=self.dropout_p,
+        )
 
-  def __init__(self, src_vocab: Vocab, tgt_vocab: Vocab, dec_cfg: DictConfig, enc_cfg: DictConfig):
-    super().__init__(src_vocab, tgt_vocab, dec_cfg, enc_cfg)
-    self._unit = nn.GRU(self.unit_input_size, self.hidden_size, num_layers=self.num_layers, dropout=self.dropout_p)
 
 class TransformerSequenceDecoder(nn.Module):
+    @property
+    def vocab_size(self):
+        return len(self.vocab)
 
-  @property
-  def vocab_size(self):
-    return len(self.vocab)
-  
-  @property
-  def EOS_IDX(self):
-    return self.vocab.stoi['<eos>']
-  
-  @property
-  def PAD_IDX(self):
-    return self.vocab.stoi['<pad>']
-  
-  @property
-  def num_layers(self) -> int:
-    return int(self.cfg.num_layers)
-  
-  @property
-  def hidden_size(self) -> int:
-    return int(self.cfg.hidden_size)
-  
-  @property
-  def max_length(self) -> int:
-    return int(self.cfg.max_length)
-  
-  @property
-  def embedding_size(self) -> int:
-    return int(self.cfg.embedding_size)
-  
-  @property
-  def dropout_p(self) -> float:
-    return float(self.cfg.dropout)
-  
-  @property
-  def num_heads(self) -> int:
-    return int(self.cfg.num_heads)
-  
-  @property
-  def unit_type(self) -> str:
-    return str(self.cfg.unit).upper()
+    @property
+    def EOS_IDX(self):
+        return self.vocab.stoi["<eos>"]
 
-  def __init__(self, vocab: Vocab, cfg: DictConfig):
-    
-    super().__init__()
-    
-    self.cfg = cfg
-    self.vocab = vocab
+    @property
+    def PAD_IDX(self):
+        return self.vocab.stoi["<pad>"]
 
-    # Model layers
-    self._embedding = nn.Sequential(
-      torch.nn.Embedding(self.vocab_size, self.hidden_size),
-      PositionalEncoding(self.hidden_size, self.dropout_p, self.max_length)
-    )
-    layer = nn.TransformerDecoderLayer(
-      d_model=self.hidden_size, 
-      nhead=self.num_heads, 
-      dropout=self.dropout_p
-    )
-    self._unit = nn.TransformerDecoder(layer, num_layers=self.num_layers)
-    self._out = torch.nn.Linear(self.hidden_size, self.vocab_size)
-    
-  def _generate_square_subsequent_mask(self, sz: int) -> Tensor:
-    """
-    Taken from PyTorch's implementation:
-    https://pytorch.org/docs/stable/_modules/torch/nn/modules/transformer.html#Transformer.generate_square_subsequent_mask
-    """
-    mask = (torch.triu(torch.ones(sz, sz)) == 1).transpose(0, 1)
-    mask = mask.float().masked_fill(mask == 0, float('-inf')).masked_fill(mask == 1, float(0.0))
-    return mask
-  
-  def forward(self, dec_input: ModelIO, tf_ratio: float) -> ModelIO:
-    """
-    Try and keep the same signature as SequenceDecoder.
-    """
+    @property
+    def num_layers(self) -> int:
+        return int(self.cfg.num_layers)
 
-    seq_len, batch_size, _ = dec_input.enc_outputs.shape
+    @property
+    def hidden_size(self) -> int:
+        return int(self.cfg.hidden_size)
 
-    teacher_forcing = random.random() < tf_ratio
-    if teacher_forcing and not hasattr(dec_input, 'target'):
-      log.error("You must provide a 'target' to use teacher forcing.")
-      raise SystemError
+    @property
+    def max_length(self) -> int:
+        return int(self.cfg.max_length)
 
-    if hasattr(dec_input, 'target'):
-      gen_len = dec_input.target.shape[0]
-    else:
-      gen_len = self.max_length
+    @property
+    def embedding_size(self) -> int:
+        return int(self.cfg.embedding_size)
 
-    # tgt = inputs to the decoder, starting with TRANS token and appending
-    #       dec_input.target[i] or predicted token
-    # mem = encoder outputs, used for multi-headed attention
-    tgt = dec_input.transform[1:-1] # strip <sos> and <eos> tokens
-    mem = dec_input.enc_outputs
+    @property
+    def dropout_p(self) -> float:
+        return float(self.cfg.dropout)
 
-    has_finished = torch.zeros(batch_size, dtype=torch.bool).to(avd)
+    @property
+    def num_heads(self) -> int:
+        return int(self.cfg.num_heads)
 
-    for i in range(gen_len):
+    @property
+    def unit_type(self) -> str:
+        return str(self.cfg.unit).upper()
 
-      # Re-embed every time since we need positional encoding to take into
-      # account the new tokens in context of the old ones.
-      tgt_emb = self._embedding(tgt)
+    def __init__(self, vocab: Vocab, cfg: DictConfig):
 
-      # Ensures that once a model outputs token <t> @ position i, it will
-      # always output <t> @ i even for further timesteps
-      tgt_mask = self._generate_square_subsequent_mask(tgt.shape[0]).to(avd)
-      
-      # Calculate the next predicted token from output
-      out = self._out(self._unit(tgt=tgt_emb, memory=mem, tgt_mask=tgt_mask))
-      predicted = out[-1].argmax(dim=1)
-      
-      has_finished[predicted == self.EOS_IDX] = True
-      if all(has_finished): 
-        break
-      else:
-        new_tgt = dec_input.target[i] if teacher_forcing else predicted
-        tgt = torch.cat((tgt, new_tgt.unsqueeze(0)), dim=0).to(avd)
+        super().__init__()
 
-    return ModelIO({"dec_outputs": out})
-  
-  def to_tokens(self, idx_tensor: Tensor, show_special=False):
-    outputs = np.empty(idx_tensor.detach().cpu().numpy().shape, dtype=object)
+        self.cfg = cfg
+        self.vocab = vocab
 
-    for idr, r in enumerate(idx_tensor):
-      for idc, _ in enumerate(r):
-        string = self.vocab.itos[idx_tensor[idr][idc]]
-        if string not in ['<sos>', '<eos>', '<pad>'] or show_special:
-          outputs[idr][idc] = self.vocab.itos[idx_tensor[idr][idc]]
-    
-    batch_strings = []
-    for r in outputs:
-      batch_strings.append(r[r != np.array(None)])
+        # Model layers
+        self._embedding = nn.Sequential(
+            torch.nn.Embedding(self.vocab_size, self.hidden_size),
+            PositionalEncoding(self.hidden_size, self.dropout_p, self.max_length),
+        )
+        layer = nn.TransformerDecoderLayer(
+            d_model=self.hidden_size, nhead=self.num_heads, dropout=self.dropout_p
+        )
+        self._unit = nn.TransformerDecoder(layer, num_layers=self.num_layers)
+        self._out = torch.nn.Linear(self.hidden_size, self.vocab_size)
 
-    return batch_strings
+    def _generate_square_subsequent_mask(self, sz: int) -> Tensor:
+        """
+        Taken from PyTorch's implementation:
+        https://pytorch.org/docs/stable/_modules/torch/nn/modules/transformer.html#Transformer.generate_square_subsequent_mask
+        """
+        mask = (torch.triu(torch.ones(sz, sz)) == 1).transpose(0, 1)
+        mask = (
+            mask.float()
+            .masked_fill(mask == 0, float("-inf"))
+            .masked_fill(mask == 1, float(0.0))
+        )
+        return mask
 
-  def to_ids(self, tokens: List):
-    return [self.vocab.stoi[t] for t in tokens]
-  
+    def forward(self, dec_input: ModelIO, tf_ratio: float) -> ModelIO:
+        """
+        Try and keep the same signature as SequenceDecoder.
+        """
+
+        seq_len, batch_size, _ = dec_input.enc_outputs.shape
+
+        teacher_forcing = random.random() < tf_ratio
+        if teacher_forcing and not hasattr(dec_input, "target"):
+            log.error("You must provide a 'target' to use teacher forcing.")
+            raise SystemError
+
+        if hasattr(dec_input, "target"):
+            gen_len = dec_input.target.shape[0]
+        else:
+            gen_len = self.max_length
+
+        # tgt = inputs to the decoder, starting with TRANS token and appending
+        #       dec_input.target[i] or predicted token
+        # mem = encoder outputs, used for multi-headed attention
+        tgt = dec_input.transform[1:-1]  # strip <sos> and <eos> tokens
+        mem = dec_input.enc_outputs
+
+        has_finished = torch.zeros(batch_size, dtype=torch.bool).to(avd)
+
+        for i in range(gen_len):
+
+            # Re-embed every time since we need positional encoding to take into
+            # account the new tokens in context of the old ones.
+            tgt_emb = self._embedding(tgt)
+
+            # Ensures that once a model outputs token <t> @ position i, it will
+            # always output <t> @ i even for further timesteps
+            tgt_mask = self._generate_square_subsequent_mask(tgt.shape[0]).to(avd)
+
+            # Calculate the next predicted token from output
+            out = self._out(self._unit(tgt=tgt_emb, memory=mem, tgt_mask=tgt_mask))
+            predicted = out[-1].argmax(dim=1)
+
+            has_finished[predicted == self.EOS_IDX] = True
+            if all(has_finished):
+                break
+            else:
+                new_tgt = dec_input.target[i] if teacher_forcing else predicted
+                tgt = torch.cat((tgt, new_tgt.unsqueeze(0)), dim=0).to(avd)
+
+        return ModelIO({"dec_outputs": out})
+
+    def to_tokens(self, idx_tensor: Tensor, show_special=False):
+        outputs = np.empty(idx_tensor.detach().cpu().numpy().shape, dtype=object)
+
+        for idr, r in enumerate(idx_tensor):
+            for idc, _ in enumerate(r):
+                string = self.vocab.itos[idx_tensor[idr][idc]]
+                if string not in ["<sos>", "<eos>", "<pad>"] or show_special:
+                    outputs[idr][idc] = self.vocab.itos[idx_tensor[idr][idc]]
+
+        batch_strings = []
+        for r in outputs:
+            batch_strings.append(r[r != np.array(None)])
+
+        return batch_strings
+
+    def to_ids(self, tokens: List):
+        return [self.vocab.stoi[t] for t in tokens]

@@ -4,7 +4,7 @@
 # import torch
 # from omegaconf import DictConfig
 # from matplotlib import pyplot as plt
-# import torch 
+# import torch
 # from sklearn.decomposition import PCA
 
 # # Library imports
@@ -27,7 +27,7 @@
 #       plt.arrow(dim1[i], dim2[i], dim1[i+1] - dim1[1], dim2[i+1] - dim2[i], head_width=head_width, length_includes_head=True)
 #     for i, word in enumerate(sequence):
 #       plt.text(dim1[i]+0.03, dim2[i]+0.03, word, fontsize=9)
-    
+
 #     plt.xlabel(f"Principal Component {dim1_idx+1}")
 #     plt.xlabel(f"Principal Component {dim2_idx+1}")
 #     plt.show()
