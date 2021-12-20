@@ -1,14 +1,28 @@
-# See here for image contents: https://github.com/microsoft/vscode-dev-containers/tree/v0.209.6/containers/python-3-miniconda/.devcontainer/base.Dockerfile
+FROM arm64v8/ubuntu:focal
 
-FROM mcr.microsoft.com/vscode/devcontainers/miniconda:0-3
+# Update base system
+RUN apt-get update
+RUN apt-get install -y wget bash-completion git && rm -rf /var/lib/apt/lists/*
 
-# Copy environment.yml (if found) to a temp location so we update the environment. Also
-# copy "noop.txt" so the COPY instruction does not fail if no environment.yml exists.
+ENV CONDA_DIR="/usr/local/bin/miniconda3"
+ENV PATH="$CONDA_DIR/bin:$PATH"
+
+RUN wget \
+      https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-aarch64.sh \
+      -O ~/miniconda.sh \
+    && chmod +x ~/miniconda.sh \
+    && bash ~/miniconda.sh -b -p $CONDA_DIR \
+    && rm -f ~/miniconda.sh
+
 COPY environment.yaml requirements.txt /tmp/conda-tmp/
-RUN if [ -f "/tmp/conda-tmp/environment.yaml" ]; then umask 0002 && /opt/conda/bin/conda env update -n base -f /tmp/conda-tmp/environment.yaml; fi \
+RUN umask 0002 \ 
+    && conda env update -n base -f /tmp/conda-tmp/environment.yaml \
     && rm -rf /tmp/conda-tmp
 
+# Add non-root user
 RUN useradd -rm -d /home/user -s /bin/bash -g root -G sudo -u 1001 user
 USER user
+WORKDIR /home/user
+
 RUN mkdir /home/user/transductions
 WORKDIR /home/user/transductions 

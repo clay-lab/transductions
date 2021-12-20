@@ -6,8 +6,8 @@ services:
       - COMPOSE_DOCKER_CLI_BUILD=1
       - DOCKER_BUILDKIT=1
     platform: linux/arm64/v8
-    image: transduction
-    entrypoint: /bin/sh
+    image: transductions
+    entrypoint: /bin/bash
     stdin_open: true 
     tty: true
     volumes:

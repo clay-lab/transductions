@@ -1,2 +1,2 @@
 hydra-core==1.1.1
-pre-commit
+pre-commit==2.16.0
