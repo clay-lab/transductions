@@ -2,6 +2,7 @@ name: transd
 
 channels:
   - pytorch
+  - conda-forge
 
 dependencies:
   - python=3.8
@@ -15,5 +16,9 @@ dependencies:
   - transformers=4.14.1
   - ipympl=0.7.0
   - pandas=1.3.4
+  - conda-lock=0.13.2
   - pip:
     - -r requirements.txt
+
+platforms:
+ - linux-arm64

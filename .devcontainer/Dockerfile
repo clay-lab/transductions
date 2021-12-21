@@ -1,8 +1,7 @@
 FROM arm64v8/ubuntu:focal
 
-# Update base system
 RUN apt-get update
-RUN apt-get install -y wget bash-completion git && rm -rf /var/lib/apt/lists/*
+RUN apt-get install -y wget git && rm -rf /var/lib/apt/lists/*
 
 ENV CONDA_DIR="/usr/local/bin/miniconda3"
 ENV PATH="$CONDA_DIR/bin:$PATH"
