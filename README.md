@@ -1,38 +1,46 @@
 # Transductions
 
-A Pytorch/Torchtext framework for building and testing Sequence-to-Sequence
-models and experiments. Transductions relies heavily on 
-[Hydra](https://github.com/facebookresearch/hydra) for configuration,
-allowing you to specify model architectures, datasets, and experiments using
-YAML files for easy modularity and reproducibility. Out of the box, Transductions
-supports the [Tensorboard](https://tensorboard.dev) logging framework to make
-recording model performance easy.
-
-Transductions currently supports the following model architectures:
-- **Encoders**
-  * SRN
-  * GRU
-  * LSTM
-  * Transformer
-- **Decoders**
-  * SRN
-  * GRU
-  * LSTM
-  * Transformer
-
-Recurrent currently support `null`, `Additive`, `Multiplicative`, and `DotProduct` attention;
-Transformers of course implement multi-head attention.
+Transductions is a PyTorch framework for building and experimenting with Sequence-to-Sequence neural networks. It is developed by the CLAY Lab at Yale University for use in computational linguistics research (See [Frank & Petty (2020)](https://arxiv.org/abs/2011.00682) and [Petty & Frank (2021)](https://arxiv.org/abs/2109.12036), among others, for examples of the kind of research conducted using Transductions).
 
 ## Installation
 
-Transductions uses `conda` to manage dependencies and ensure framework portability. To install the framework, run
-```bash
-conda env create -f env.yaml
+1. Ensure that [Docker](https://docker.com) is installed
+2. Clone the repository and build the image from the project root directory via 
 ```
-from within the `transductions/` directory. When installation has finished, activate the conda environment by running
-```bash
-conda activate transd
+docker-compose -f .devcontainer/docker-compose.yaml build
 ```
+3. Create and run a container via 
+```
+docker compose -f .devcontainer/docker-compose.yaml run --rm workspace
+```
+
+Alternatively, Transductions provides a `devcontainer.json` configuration for use with VSCode and its Remote Containers extension. To use, simply open the project root directory in VSCode and follow the instructions to build and open the project in a container.
+
+Regardless of how you load the container, docker will mount the project directory to the container for persistent storage of experiment data, including model weights, and training logs.
+
+### A Note on Architecture
+I primarily do development on an M1 Mac. Since the models used in this repository are relatively small, I train and evaluate most models locally. The default configuration for the Docker image uses an Arm64 base image for compatibility and performance when running Docker on an Apple Silicon Mac. If you want to use a different base image, or else want CUDA support enabled, you'll need to make two small modifications to the Docker configuration files:
+ 1. Change the base image in `.devcontainer/Dockerfile` to pull from a non-Arm64 version of the `ubuntu/focal` image.
+ 2. Change the `platform` configuration in `.devcontainer/docker-compose.yaml`.
+
+If you absolutely do not want to use Docker, you can simply create a local conda environment using the provided dependency files. To do so, ensure that conda is installed locally and then run the following command.
+```bash
+conda env create -f .devcontainer/environment.yaml
+```
+
+## Usage
+
+There are several entrypoints to the Transductions framework. The main entrypoints are:
+ - `train.py`: Trains for a particular experimental setup. Produces one or more checkpoint directories which store model weights, as well as tracking performance metrics on the training, validation, and various test datasets.
+ - `eval.py`: Performs an evaluation pass for a particular trained checkpoint, calculating performance metrics and generating example output data for inspection.
+ - `repl.py`: Loads a trained model into an interactive Read-Evaluation-Print Loop (REPL) where you can "talk" to the model by typing in inputs and seeing how the model responds.
+
+Additionally, there are some more niche tools which may be of use:
+ - `tpdn.py`: Trains Tensor-Product Decomposition Networks to mimic the encodings of a particular trained model given a fixed hypothesis about how that model is encoding input data. See [McCoy et al. (2018)](https://openreview.net/forum?id=BJx0sjC5FX) for more on TPDN models and their use in evaluating recurrent network operations.
+ - `arith.py`: REPL interface for performing arithmetic on encoded vectors during model inference, allowing you to arbitrarily modify hidden state vectors between encoding and decoding. 
+ - `arith-eval.py`: Similar to `arith.py`, but automatically computes hidden-state arithmetic on a given dataset instead of using a REPL interface.
+
+ Each entrypoint application has a corresponding configuration YAML file in `conf/` which defines the interface to the application. Transductions uses [Hydra](https://hydra.cc) to handle application configuration and experiment processing. Further on, you can define your own experiment configuration files, or you can simple use the command-line interface provided by Hydra for each application to specify run-time parameters.
 
 ## Training
 
