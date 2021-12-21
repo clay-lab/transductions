@@ -9,6 +9,7 @@ from typing import Dict, List, Tuple
 import hydra
 import numpy as np
 import omegaconf
+import pandas as pd
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -409,7 +410,7 @@ class Trainer:
         iterators = {}
         for split in cfg.splits:
             iterators[split] = DataLoader(
-                TPDNDataset(f"{split}-{cfg.role_scheme}-enc.data"),
+                TPDNDataset(f"{split}-{cfg.role_scheme}-enc.pkl"),
                 batch_size=cfg.batch_size,
                 shuffle=cfg.shuffle_data,
                 collate_fn=TPDNDataset.collate_fn,
@@ -417,65 +418,135 @@ class Trainer:
 
         return iterators
 
-    def _roles_for_entry(self, source, role_scheme):
+    def _roles_for_entry(self, source: np.ndarray, role_scheme: str):
+
+        fillers = source
+        for tok in [
+            self._dataset.source_field.vocab.stoi["<sos>"],
+            self._dataset.source_field.vocab.stoi["<eos>"],
+            self._dataset.source_field.vocab.stoi["<pad>"],
+            self._dataset.source_field.vocab.stoi["<unk>"],
+        ]:
+            fillers = fillers[fillers != tok]
 
         if role_scheme == "ltr":
-            return str([p for p in range(source.shape[0])])
+            roles = np.array([p for p in range(fillers.shape[0])])
         elif role_scheme == "rtl":
-            return str(list(reversed([p for p in range(source.shape[0])])))
+            roles = np.array(reversed([p for p in range(fillers.shape[0])]))
         elif role_scheme == "bow":
-            return str([0 for _ in range(source.shape[0])])
+            roles = np.array([0 for _ in range(fillers.shape[0])])
         elif role_scheme == "refsub":
             # Reflexive tokens get treated as subjects
-            roles = [p for p in range(source.shape[0])]
-            ref_index = np.where(source == 38, 1, 0)
+            roles = [p for p in range(fillers.shape[0])]
+            ref_index = np.where(fillers == 38, 1, 0)
             for i, v in enumerate(ref_index):
                 if v == 1:
                     roles[i] = 1
-            return str(roles)
+            roles = np.array(roles)
+        elif role_scheme == "s-v-or":
+            roles = np.array([p for p in range(fillers.shape[0])])
+        elif role_scheme == "svot":
+            roles = np.array([p for p in range(fillers.shape[0])] + [3])
+        else:
+            raise ValueError
+
+        return roles
+
+    def _fillers_for_entry(self, source: np.ndarray, role_scheme: str):
+
+        if role_scheme == "ltr" or role_scheme == "rtl":
+            fillers = source
+            for tok in [
+                self._dataset.source_field.vocab.stoi["<sos>"],
+                self._dataset.source_field.vocab.stoi["<eos>"],
+                self._dataset.source_field.vocab.stoi["<pad>"],
+                self._dataset.source_field.vocab.stoi["<unk>"],
+            ]:
+                fillers = fillers[fillers != tok]
+
+        elif role_scheme == "s-v-or":
+            fillers = source
+            for tok in [
+                self._dataset.source_field.vocab.stoi["<sos>"],
+                self._dataset.source_field.vocab.stoi["<eos>"],
+                self._dataset.source_field.vocab.stoi["<pad>"],
+                self._dataset.source_field.vocab.stoi["<unk>"],
+            ]:
+                fillers = fillers[fillers != tok]
+
+            ref_toks = [
+                self._dataset.source_field.vocab.stoi["himself"],
+                self._dataset.source_field.vocab.stoi["herself"],
+            ]
+            fillers[fillers == ref_toks] = ref_toks[0]
+
+        elif role_scheme == "bow":
+            fillers = source
+            for tok in [
+                self._dataset.source_field.vocab.stoi["<sos>"],
+                self._dataset.source_field.vocab.stoi["<eos>"],
+                self._dataset.source_field.vocab.stoi["<pad>"],
+                self._dataset.source_field.vocab.stoi["<unk>"],
+            ]:
+                fillers = fillers[fillers != tok]
+        elif role_scheme == "svot":
+            fillers = source
+            for tok in [
+                self._dataset.source_field.vocab.stoi["<sos>"],
+                self._dataset.source_field.vocab.stoi["<eos>"],
+                self._dataset.source_field.vocab.stoi["<pad>"],
+                self._dataset.source_field.vocab.stoi["<unk>"],
+            ]:
+                fillers = fillers[fillers != tok]
+
+            ref_toks = [
+                self._dataset.source_field.vocab.stoi["himself"],
+                self._dataset.source_field.vocab.stoi["herself"],
+            ]
+            if np.isin(ref_toks, fillers).any():
+                clause_type = 1
+            else:
+                clause_type = 2
+            fillers = np.append(fillers, [clause_type])
+
         else:
             raise NotImplementedError
+
+        return fillers
 
     def _get_encodings(self, splits: List[str], use_cached=True, role_scheme="ltr"):
 
         for split in splits:
-            fname = f"{split}-{role_scheme}-enc.data"
+            fname = f"{split}-{role_scheme}-enc.pkl"
             if os.path.isfile(fname) and use_cached:
                 log.info(f"Found {split} encodings at {fname}")
                 pass
             else:
-                with open(fname, "w") as f:
-                    log.info(f"Generating encodings for {split} set")
-                    f.write("fillers\troles\tannotation\tencoding\ttarget\n")
-                    with tqdm(self._dataset.iterators[split]) as T:
-                        for batch in T:
-                            enc = self._model._encoder(batch)
-                            for k in range(batch.source.shape[1]):
-                                source = batch.source[:, k].detach().numpy()
-                                roles = self._roles_for_entry(source, role_scheme)
-                                roles = roles.replace(",", "")[1:-1]
-                                source = np.array2string(source, separator=" ")[
-                                    1:-1
-                                ].strip()
-                                fillers = source.replace("\n", "")
-                                encodings = (
-                                    enc.enc_outputs[:, k, :].flatten().detach().numpy()
-                                )
-                                encodings = np.array2string(
-                                    encodings, separator=" ", threshold=np.inf
-                                )[1:-1].strip()
-                                encodings = encodings.replace("\n", "")
-                                annotation = batch.annotation[:, k].detach().numpy()
-                                annotation = np.array2string(annotation, separator=" ")[
-                                    1:-1
-                                ].strip()
-                                target = batch.target[:, k].detach().numpy()
-                                target = np.array2string(target, separator=" ")[
-                                    1:-1
-                                ].strip()
-                                f.write(
-                                    f"{fillers}\t{roles}\t{annotation}\t{encodings}\t{target}\n"
-                                )
+                log.info(f"Generating encodings for {split} set")
+                df = pd.DataFrame(
+                    columns=["fillers", "roles", "annotation", "encoding", "target"]
+                )
+                with tqdm(self._dataset.iterators[split]) as T:
+                    for batch in T:
+                        enc = self._model._encoder(batch)
+                        for k in range(batch.source.shape[1]):
+                            source = batch.source[:, k].detach().numpy()
+                            roles = self._roles_for_entry(source, role_scheme)
+                            fillers = self._fillers_for_entry(source, role_scheme)
+                            encodings = enc.enc_outputs[:, k, :].detach().numpy()
+                            annotation = batch.annotation[:, k].detach().numpy()
+                            target = batch.target[:, k].detach().numpy()
+                            df = df.append(
+                                {
+                                    "roles": roles,
+                                    "fillers": fillers,
+                                    "annotation": annotation,
+                                    "encoding": encodings,
+                                    "target": target,
+                                },
+                                ignore_index=True,
+                            )
+                df.to_pickle(fname)
 
     def fit_tpdn(self, tpdn_cfg: DictConfig):
 
@@ -516,9 +587,8 @@ class Trainer:
                         optimizer.zero_grad()
 
                         fillers, roles, _, encodings, _ = batch
-                        target = torch.reshape(
-                            encodings, (roles.shape[0], roles.shape[1], -1)
-                        )[:, -1, :].unsqueeze(0)
+
+                        target = encodings[:, -1, :].unsqueeze(0)
                         input = ModelIO({"fillers": fillers, "roles": roles})
                         output = tpdn(input)
 
@@ -561,11 +631,11 @@ class Trainer:
                 with tqdm(tpdn_iterators[key]) as T:
                     for batch in T:
 
-                        fillers, roles, annotation, encodings, targets = batch
+                        fillers, roles, annotation, _, targets = batch
                         annotation = annotation.permute(1, 0)
-                        encodings = torch.reshape(
-                            encodings, (roles.shape[0], roles.shape[1], -1)
-                        )
+                        # encodings = torch.reshape(
+                        #     encodings, (roles.shape[0], roles.shape[1], -1)
+                        # )
                         input = ModelIO({"fillers": fillers, "roles": roles})
 
                         tpdn_encoding = tpdn(input)
@@ -661,7 +731,6 @@ class Trainer:
             enc_output = self._model._encoder.forward_with_hidden(enc_input, hidden=h)
             delta = (enc_output.enc_hidden - h) / 10.0
             h_idx = tuple(h.flatten().detach().numpy())
-            # print(h_idx)
             diffs[h_idx] = delta
 
         return diffs

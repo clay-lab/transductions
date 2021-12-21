@@ -29,24 +29,9 @@ class TPDNDataset(Dataset):
 
         return (f_stack, r_stack, a_stack, e_stack, t_stack)
 
-    def __init__(self, datafile):
+    def __init__(self, datafile: str):
         super(TPDNDataset, self).__init__()
-        self.data = pd.read_csv(datafile, sep="\t")
-        self.data["fillers"] = self.data["fillers"].map(
-            lambda a: np.fromstring(a, sep=" ", dtype=int)
-        )
-        self.data["roles"] = self.data["roles"].map(
-            lambda a: np.fromstring(a, sep=" ", dtype=int)
-        )
-        self.data["annotation"] = self.data["annotation"].map(
-            lambda a: np.fromstring(a, sep=" ", dtype=int)
-        )
-        self.data["encoding"] = self.data["encoding"].map(
-            lambda a: np.fromstring(a, sep=" ", dtype=np.float32)
-        )
-        self.data["target"] = self.data["target"].map(
-            lambda a: np.fromstring(a, sep=" ", dtype=int)
-        )
+        self.data = pd.read_pickle(datafile)
 
     def __len__(self):
         return len(self.data)
