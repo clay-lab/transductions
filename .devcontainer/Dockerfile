@@ -19,7 +19,6 @@ RUN umask 0002 \
     && conda env update -n base -f /tmp/conda-tmp/environment.yaml \
     && rm -rf /tmp/conda-tmp
 
-# Add non-root user
 RUN useradd -rm -d /home/user -s /bin/bash -g root -G sudo -u 1001 user
 USER user
 WORKDIR /home/user
