@@ -169,12 +169,14 @@ class Trainer:
 
         early_stoping = EarlyStopping(self._cfg.experiment.hyperparameters)
 
+        pad_idx = self._model._decoder.vocab.stoi["<pad>"]
+
         # Metrics
-        seq_acc = SequenceAccuracy()
-        tok_acc = TokenAccuracy(self._dataset.target_field.vocab.stoi["<pad>"])
-        len_acc = LengthAccuracy(self._dataset.target_field.vocab.stoi["<pad>"])
+        seq_acc = SequenceAccuracy(pad_idx)
+        tok_acc = TokenAccuracy(pad_idx)
+        len_acc = LengthAccuracy(pad_idx)
         first_acc = NthTokenAccuracy(n=1)
-        avg_loss = LossMetric(F.cross_entropy)
+        avg_loss = LossMetric(lambda p, t: F.cross_entropy(p, t, ignore_index=pad_idx))
 
         meter = Meter([seq_acc, tok_acc, len_acc, first_acc, avg_loss])
 
@@ -226,7 +228,7 @@ class Trainer:
                         meter(output, target)
 
                         # Compute average validation loss
-                        val_loss = F.cross_entropy(output, target)
+                        val_loss = F.cross_entropy(output, target, ignore_index=pad_idx)
                         V.set_postfix(val_loss="{:4.3f}".format(val_loss.item()))
 
                     meter.log(stage="val", step=epoch)
@@ -288,12 +290,14 @@ class Trainer:
         # Load checkpoint data
         self._load_checkpoint(eval_cfg.checkpoint_dir)
 
+        pad_idx = self._dataset.target_field.vocab.stoi["<pad>"]
+
         # Create meter
-        seq_acc = SequenceAccuracy()
-        tok_acc = TokenAccuracy(self._dataset.target_field.vocab.stoi["<pad>"])
-        len_acc = LengthAccuracy(self._dataset.target_field.vocab.stoi["<pad>"])
+        seq_acc = SequenceAccuracy(pad_idx)
+        tok_acc = TokenAccuracy(pad_idx)
+        len_acc = LengthAccuracy(pad_idx)
         first_acc = NthTokenAccuracy(n=1)
-        avg_loss = LossMetric(F.cross_entropy)
+        avg_loss = LossMetric(lambda p, t: F.cross_entropy(p, t, ignore_index=pad_idx))
 
         meter = Meter([seq_acc, tok_acc, len_acc, first_acc, avg_loss])
 
@@ -339,9 +343,11 @@ class Trainer:
         # Load checkpoint data
         self._load_checkpoint(eval_cfg.checkpoint_dir)
 
+        pad_idx = self._dataset.target_field.vocab.stoi["<pad>"]
+
         # Create meter
-        seq_acc = SequenceAccuracy()
-        len_acc = LengthAccuracy(self._dataset.target_field.vocab.stoi["<pad>"])
+        seq_acc = SequenceAccuracy(pad_idx)
+        len_acc = LengthAccuracy(pad_idx)
         object_acc = NthTokenAccuracy(n=5)
 
         meter = Meter([seq_acc, len_acc, object_acc])
@@ -609,11 +615,12 @@ class Trainer:
         tpdn.eval()
         disp_loss = nn.CrossEntropyLoss()
 
+        pad_idx = self._dataset.target_field.vocab.stoi["<pad>"]
         meter = Meter(
             [
-                SequenceAccuracy(),
-                TokenAccuracy(self._dataset.target_field.vocab.stoi["<pad>"]),
-                LengthAccuracy(self._dataset.target_field.vocab.stoi["<pad>"]),
+                SequenceAccuracy(pad_idx),
+                TokenAccuracy(pad_idx),
+                LengthAccuracy(pad_idx),
                 NthTokenAccuracy(n=1),
                 NthTokenAccuracy(n=3),
                 NthTokenAccuracy(n=5),
