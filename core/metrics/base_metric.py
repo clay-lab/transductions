@@ -56,13 +56,18 @@ class SequenceAccuracy(BaseMetric):
     correct, the sequence scores 1.0; otherwise, it scores 0.0.
     """
 
+    def __init__(self, pad_token_id=None):
+        super().__init__()
+        self._pad = pad_token_id
+
     def compute(self, prediction: Tensor, target: Tensor):
         prediction = prediction.argmax(1)
-
-        correct = (prediction == target).prod(axis=1)
-        total = correct.shape[0]
-        correct = correct.sum()
-
+        correct_tokens = prediction == target
+        if self._pad is not None:
+            correct_tokens.logical_or_(target == self._pad)
+        correct_sequences = torch.all(correct_tokens, dim=1)
+        correct = correct_sequences.sum()
+        total = target.size(0)
         return correct, total
 
 
@@ -91,7 +96,6 @@ class NthTokenAccuracy(BaseMetric):
         correct = prediction[:, self.n] == target[:, self.n]
         total = correct.shape[0]
         correct = correct.sum()
-
         return correct, total
 
 
